@@ -4,6 +4,7 @@ import { IMAGE_ASSETS } from './assets';
 import GameMapParser from './map-parser';
 import GamePlatform from './platform';
 import GameSkybox from './skybox';
+import GameSkytube from './skytube';
 
 const MAP_OFFSET_Y = -10;
 
@@ -16,6 +17,7 @@ export default class GameMap {
     this.generatePlatformBodies();
     this.addSkybox();
     this.addCylinder();
+    this.addSkytube();
     this.addFloor();
   }
 
@@ -43,11 +45,15 @@ export default class GameMap {
               currTile,
             );
             platformWidth = 0;
-            // return;
           }
         }
       }
     }
+  }
+
+  addSkytube() {
+    this.skytube = new GameSkytube();
+    this.group.add(this.skytube.mesh);
   }
 
   addSkybox() {
@@ -56,27 +62,27 @@ export default class GameMap {
     this.group.add(this.skybox.mesh);
     // const emissiveTex = new THREE.TextureLoader().load('https://s3-us-west-2.amazonaws.com/s.cdpn.io/204379/macro_hull_emissive.jpg');
     const tex = new THREE.TextureLoader().load(IMAGE_ASSETS.UniverseAmbient);
-    const geo = new THREE.CylinderGeometry(90, 90, height, 16, 1, true);
+    const geo = new THREE.CylinderGeometry(100, 100, height, 16, 1, true);
     const mat = new THREE.MeshStandardMaterial({
       map: tex,
       // emissiveMap: emissiveTex,
-      emissive: 0xff00ff,
-      emissiveIntensity: 0.8,
+      //emissive: 0xff00ff,
+      //emissiveIntensity: 0.8,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.6,
       side: THREE.BackSide,
     });
     const mesh = new THREE.Mesh(geo, mat);
     this.skyCylinder = mesh;
-    this.group.add(mesh);
+     this.group.add(mesh);
   }
 
   addFloor() {
     const geo = new THREE.CircleGeometry(100, 10);
     const mat = new THREE.MeshStandardMaterial({
       envMap: this.skybox.textureCube,
-      color: 0x3E4C5E,
-      metalness: 0.2,
+      color: 0x313E50,
+      metalness: 0.4,
       roughness: 1,
     });
     const mesh = new THREE.Mesh(geo, mat);
@@ -89,7 +95,7 @@ export default class GameMap {
     const tex = new THREE.TextureLoader().load(url);
     tex.wrapS = THREE.MirroredRepeatWrapping;
     tex.wrapT = THREE.MirroredRepeatWrapping;
-    tex.repeat.set(6, 12);
+    tex.repeat.set(8, 16);
     return tex;
   }
 
@@ -108,18 +114,20 @@ export default class GameMap {
       map: texBase,
       emissiveMap: texEmissive,
       normalMap: texNormal,
+      normalScale: new THREE.Vector2(0.2, 0.2),
       displacementMap: texHeight,
-      displacementScale: 0.25,
+      displacementScale: 0.2,
       roughnessMap: texRough,
       emissiveIntensity: 1,
       emissive: 0x00ffff,
       wireframe: false,
-      metalness: 0.5,
+      metalness: 0,
       roughness: 1,
     });
     this.cylinder = new THREE.Mesh(geo, mat);
     this.cylinder.receiveShadow = true;
     this.cylinder.position.y = height * 0.4;
+    this.cylinder.rotation.y = Math.PI / 2;
     this.group.add(this.cylinder);
   }
 
@@ -134,6 +142,7 @@ export default class GameMap {
 
   update(delta) {
     const { platforms } = this;
+    this.skytube.update(delta);
     this.skyCylinder.rotation.y += delta * 0.06;
     for (let i = 0; i < platforms.length; i++) {
       const platform = platforms[i];

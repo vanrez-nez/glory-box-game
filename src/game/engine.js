@@ -31,16 +31,16 @@ export default class Engine {
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(1, 1);
     this.renderer.shadowMap.enabled = true;
-    this.renderer.gammaInput = true;
-    this.renderer.gammaOutput = true;
+    this.renderer.gammaInput = false;
+    this.renderer.gammaOutput = false;
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.FogExp2(0x000000, 0.02);
+    this.scene.fog = new THREE.FogExp2(0x000000, 0.015);
     this.camera = new THREE.PerspectiveCamera(70, 1, 1, 1000);
     this.camera.position.z = 95;
   }
 
   initLights() {
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+    const ambientLight = new THREE.AmbientLight(0xff00ff, 0.55);
     this.scene.add(ambientLight);
   }
 

@@ -45,6 +45,7 @@ export default class GamePlayer {
     const geo = new THREE.BoxBufferGeometry(1.5, 1.5, 1.5);
     const mat = new THREE.MeshStandardMaterial({
       color: 0xffffff,
+      emissive: 0xffffff,
       transparent: true,
       flatShading: true,
       fog: false,
@@ -55,7 +56,7 @@ export default class GamePlayer {
   }
 
   initLights() {
-    this.light = new THREE.PointLight(0xffffff, 5, 20);
+    this.light = new THREE.PointLight(0xffffff, 7, 20);
     this.light.castShadow = true;
     this.light.shadow.mapSize = new THREE.Vector2(128, 128);
     this.light.power = 2.45 * Math.PI * 4;

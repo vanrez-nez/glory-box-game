@@ -1,10 +1,10 @@
 export const CONFIG = {
-  EnableTools: true,
-  EnableStats: true,
+  EnableTools: false,
+  EnableStats: false,
   EnableOrbitControls: false,
   EnableAxes: false,
   DebugCollisions: false,
-  UsePostProcessing: false,
+  UsePostProcessing: true,
 };
 
 export const GAME = {
