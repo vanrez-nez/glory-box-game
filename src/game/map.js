@@ -1,10 +1,11 @@
 
 import { MAP, DIRECTIONS, GAME } from './const';
 import { IMAGE_ASSETS } from './assets';
+import { GetTextureRepeat } from './utils';
 import GameMapParser from './map-parser';
 import GamePlatform from './platform';
-import GameSkybox from './skybox';
 import GameSkytube from './skytube';
+import GameSkybox from './skybox';
 
 const MAP_OFFSET_Y = -10;
 
@@ -53,59 +54,40 @@ export default class GameMap {
 
   addSkytube() {
     this.skytube = new GameSkytube();
-    this.group.add(this.skytube.mesh);
+    this.group.add(this.skytube.group);
   }
 
   addSkybox() {
-    const height = 550;
     this.skybox = new GameSkybox();
-    this.group.add(this.skybox.mesh);
-    // const emissiveTex = new THREE.TextureLoader().load('https://s3-us-west-2.amazonaws.com/s.cdpn.io/204379/macro_hull_emissive.jpg');
-    const tex = new THREE.TextureLoader().load(IMAGE_ASSETS.UniverseAmbient);
-    const geo = new THREE.CylinderGeometry(100, 100, height, 16, 1, true);
-    const mat = new THREE.MeshStandardMaterial({
-      map: tex,
-      // emissiveMap: emissiveTex,
-      //emissive: 0xff00ff,
-      //emissiveIntensity: 0.8,
-      transparent: true,
-      opacity: 0.6,
-      side: THREE.BackSide,
-    });
-    const mesh = new THREE.Mesh(geo, mat);
-    this.skyCylinder = mesh;
-     this.group.add(mesh);
   }
 
   addFloor() {
-    const geo = new THREE.CircleGeometry(100, 10);
+    const texBase = GetTextureRepeat(IMAGE_ASSETS.ImpFloorBase, 40, 40);
+    const texNormal = GetTextureRepeat(IMAGE_ASSETS.ImpFloorNormal, 40, 40);
+    const texRough = GetTextureRepeat(IMAGE_ASSETS.ImpFloorRoughness, 40, 40);
+    const geo = new THREE.CircleGeometry(80, 30);
     const mat = new THREE.MeshStandardMaterial({
       envMap: this.skybox.textureCube,
-      color: 0x313E50,
-      metalness: 0.4,
-      roughness: 1,
+      envMapIntensity: 0.1,
+      map: texBase,
+      normalMap: texNormal,
+      roughnessMap: texRough,
+      color: 0xffffff,
+      metalness: 0,
+      roughness: 0.5,
     });
     const mesh = new THREE.Mesh(geo, mat);
+    this.floor = mesh;
     mesh.rotation.x = -Math.PI / 2;
     mesh.position.y = GAME.BoundsBottom;
     this.group.add(mesh);
   }
 
-  getTexture(url) {
-    const tex = new THREE.TextureLoader().load(url);
-    tex.wrapS = THREE.MirroredRepeatWrapping;
-    tex.wrapT = THREE.MirroredRepeatWrapping;
-    tex.repeat.set(8, 16);
-    return tex;
-  }
-
   addCylinder() {
     const height = 550;
-    const texBase = this.getTexture(IMAGE_ASSETS.HullBase);
-    const texEmissive = this.getTexture(IMAGE_ASSETS.HullEmmisive);
-    const texNormal = this.getTexture(IMAGE_ASSETS.HullNormal);
-    const texRough = this.getTexture(IMAGE_ASSETS.HullRoughness);
-    const texHeight = this.getTexture(IMAGE_ASSETS.HullHeight);
+    const texBase = GetTextureRepeat(IMAGE_ASSETS.HullBase, 5, 10);
+    const texEmissive = GetTextureRepeat(IMAGE_ASSETS.HullEmissive, 5, 10);
+    const texNormal = GetTextureRepeat(IMAGE_ASSETS.HullNormal, 5, 10);
     const geo = new THREE.CylinderGeometry(GAME.CilynderRadius, GAME.CilynderRadius,
       height, 64, 1, true);
     const mat = new THREE.MeshStandardMaterial({
@@ -114,20 +96,17 @@ export default class GameMap {
       map: texBase,
       emissiveMap: texEmissive,
       normalMap: texNormal,
-      normalScale: new THREE.Vector2(0.2, 0.2),
-      displacementMap: texHeight,
-      displacementScale: 0.2,
-      roughnessMap: texRough,
-      emissiveIntensity: 1,
+      normalScale: new THREE.Vector2(0.3, 0.3),
+      emissiveIntensity: 0.7,
       emissive: 0x00ffff,
       wireframe: false,
-      metalness: 0,
-      roughness: 1,
+      metalness: 0.6,
+      roughness: 0.6,
     });
     this.cylinder = new THREE.Mesh(geo, mat);
     this.cylinder.receiveShadow = true;
     this.cylinder.position.y = height * 0.4;
-    this.cylinder.rotation.y = Math.PI / 2;
+    this.cylinder.rotation.y = Math.PI / 8;
     this.group.add(this.cylinder);
   }
 
@@ -140,10 +119,10 @@ export default class GameMap {
     platforms.push(platform);
   }
 
-  update(delta) {
+  update(delta, player) {
     const { platforms } = this;
     this.skytube.update(delta);
-    this.skyCylinder.rotation.y += delta * 0.06;
+    this.skytube.group.position.y = player.mesh.position.y;
     for (let i = 0; i < platforms.length; i++) {
       const platform = platforms[i];
       platform.update(delta);

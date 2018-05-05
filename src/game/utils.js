@@ -5,6 +5,14 @@ export function Clamp(val, min, max) {
   return Math.min(Math.max(val, min), max);
 }
 
+export function GetTextureRepeat(url, repeatX, repeatY) {
+  const tex = new THREE.TextureLoader().load(url);
+  tex.wrapS = THREE.MirroredRepeatWrapping;
+  tex.wrapT = THREE.MirroredRepeatWrapping;
+  tex.repeat.set(repeatX, repeatY);
+  return tex;
+}
+
 export function TranslateTo3d(position, toX, toY, radius = 35) {
   position.x = radius * Math.sin(toX / radius + TWO_PI);
   position.y = toY;

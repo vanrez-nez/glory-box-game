@@ -1,8 +1,9 @@
 
 import { PHYSICS, MAP, EVENTS, GAME } from './const';
+import { IMAGE_ASSETS } from './assets';
+import { TranslateTo3d, GetTextureRepeat } from './utils';
 import GamePhysicsBody from './physics-body';
 import GameSkybox from './skybox';
-import { TranslateTo3d } from './utils';
 
 const DEFAULT = {
   x: 0,
@@ -12,6 +13,27 @@ const DEFAULT = {
 };
 
 const SKYBOX = new GameSkybox();
+
+export const LightMatStatic = new THREE.MeshLambertMaterial({
+  color: 0xff00ff,
+  emissive: 0xffffff,
+  emissiveIntensity: 1,
+});
+
+export const LightMatMoving = new THREE.MeshLambertMaterial({
+  color: 0xff00ff,
+  emissive: 0xffffff,
+  emissiveIntensity: 1,
+});
+
+export const GenericMat = new THREE.MeshStandardMaterial({
+  envMap: SKYBOX.textureCube,
+  envMapIntensity: 0.2,
+  metalness: 0.5,
+  roughness: 0.7,
+  flatShading: true,
+  color: 0xffffff,
+});
 
 export default class GamePlatform {
   constructor(opts) {
@@ -32,22 +54,28 @@ export default class GamePlatform {
 
   getMesh() {
     const { opts } = this;
-    const geo = new THREE.BoxBufferGeometry(opts.width, 1, GAME.PlatformZSize);
-    const mat = new THREE.MeshStandardMaterial({
-      color: opts.type === MAP.StaticPlatform ? 0x313E50 : 0x00ff00,
-      transparent: true,
-      envMap: SKYBOX.textureCube,
-      metalness: 0.4,
-      roughness: 0.5,
-      flatShading: true,
-      emissive: 0xff00ff,
-      emissiveIntensity: 0,
-      wireframe: false,
-    });
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.castShadow = true;
-    // mesh.receiveShadow = true;
-    return mesh;
+    const g = new THREE.Object3D();
+    const texBase = GetTextureRepeat(IMAGE_ASSETS.ImpFloorBase, opts.width * 0.15, 0.5);
+    const texRough = GetTextureRepeat(IMAGE_ASSETS.ImpFloorRoughness, opts.width * 0.15, 0.5);
+    const texNormal = GetTextureRepeat(IMAGE_ASSETS.ImpFloorNormal, opts.width * 0.15, 0.5);
+    const matSolid = GenericMat;
+    matSolid.map = texBase;
+    matSolid.normalMap = texNormal;
+    matSolid.roughnessMap = texRough;
+    const matLight = this.isMovingPlatform() ? LightMatMoving : LightMatStatic;
+    const geo = new THREE.BoxBufferGeometry(opts.width, 0.33, GAME.PlatformZSize);
+    const meshUp = new THREE.Mesh(geo, matSolid);
+    const meshMiddle = new THREE.Mesh(geo, matLight);
+    const meshDown = new THREE.Mesh(geo, matSolid);
+    meshDown.position.y = 0.6;
+    meshMiddle.position.y = 0.3;
+    meshMiddle.scale.set(0.95, 0.95, 0.95);
+    meshUp.castShadow = true;
+    this.lightMaterial = matLight;
+    g.add(meshUp);
+    g.add(meshMiddle);
+    g.add(meshDown);
+    return g;
   }
 
   getBspCylinder() {
@@ -114,6 +142,8 @@ export default class GamePlatform {
       const pos = this.body.meshPositionOffset;
       tl.to(pos, 0.12, { y: -0.7, ease: Power2.easeOut });
       tl.to(pos, 0.15, { y: 0, ease: Power2.easeOut });
+      // tl.to(this.lightMaterial, 0.14, { emissiveIntensity: 1 }, 0);
+      // tl.to(this.lightMaterial, 0.45, { emissiveIntensity: 0.8, ease: Power2.easeOut });
     }
   }
 

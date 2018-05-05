@@ -70,6 +70,8 @@ class Game {
 
   addTools() {
     const tools = new GameTools();
+    tools.addScreen(this.engine, 'engine');
+    tools.addScreen(this.map, 'map');
     tools.addScreen(this.player, 'player');
     tools.addScreen(this.physics, 'physics');
   }
@@ -88,7 +90,7 @@ class Game {
     stats && stats.begin();
     const delta = clock.getDelta();
     player.update(delta, gameInput.state);
-    map.update(delta);
+    map.update(delta, player);
     physics.update(delta);
     engine.render();
     stats && stats.end();

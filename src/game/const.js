@@ -1,6 +1,6 @@
 export const CONFIG = {
-  EnableTools: false,
-  EnableStats: false,
+  EnableTools: true,
+  EnableStats: true,
   EnableOrbitControls: false,
   EnableAxes: false,
   DebugCollisions: false,
