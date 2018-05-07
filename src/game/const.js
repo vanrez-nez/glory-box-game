@@ -49,4 +49,5 @@ export const MAP = {
   Empty: 0,
   StaticPlatform: 1,
   MovingPlatform: 2,
+  Glyph: 3,
 };

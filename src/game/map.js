@@ -5,7 +5,8 @@ import { GetTextureRepeat } from './utils';
 import GameMapParser from './map-parser';
 import GamePlatform from './platform';
 import GameSkytube from './skytube';
-import GameSkybox from './skybox';
+import { StaticInstance as Skybox } from './skybox';
+import MapGlyph from './map-glyph';
 
 const MAP_OFFSET_Y = -10;
 
@@ -15,14 +16,14 @@ export default class GameMap {
     this.mapParser = new GameMapParser('#game_map');
     this.platforms = [];
     this.bodies = [];
-    this.generatePlatformBodies();
-    this.addSkybox();
+    this.glyphs = [];
+    this.generatePlatform();
     this.addCylinder();
     this.addSkytube();
     this.addFloor();
   }
 
-  generatePlatformBodies() {
+  generatePlatform() {
     const { mapParser: map } = this;
     for (let y = 0; y < map.height; y++) {
       let platformWidth = 0;
@@ -32,19 +33,15 @@ export default class GameMap {
         const currTile = map.getTileAt(x, y);
         if (currTile === MAP.Empty) {
           platformWidth = 0;
+        } else if (currTile === MAP.Glyph) {
+          this.addGlyph(x, y);
         } else {
           if (currTile === MAP.StaticPlatform ||
             currTile === MAP.MovingPlatform) {
             platformWidth += 1;
           }
-
           if (nextTile !== currTile && platformWidth > 0) {
-            this.addPlaform(
-              x - platformWidth / 2 - map.width / 2 + 1,
-              map.height - y + MAP_OFFSET_Y,
-              platformWidth,
-              currTile,
-            );
+            this.addPlaform(x, y, platformWidth, currTile);
             platformWidth = 0;
           }
         }
@@ -52,13 +49,17 @@ export default class GameMap {
     }
   }
 
+  addGlyph(x, y) {
+    const { mapParser: map } = this;
+    const xTrans = x - map.width / 2;
+    const yTrans = map.height - y + MAP_OFFSET_Y;
+    const glyph = new MapGlyph(xTrans, yTrans);
+    this.group.add(glyph.group);
+  }
+
   addSkytube() {
     this.skytube = new GameSkytube();
     this.group.add(this.skytube.group);
-  }
-
-  addSkybox() {
-    this.skybox = new GameSkybox();
   }
 
   addFloor() {
@@ -67,7 +68,7 @@ export default class GameMap {
     const texRough = GetTextureRepeat(IMAGE_ASSETS.ImpFloorRoughness, 40, 40);
     const geo = new THREE.CircleGeometry(80, 30);
     const mat = new THREE.MeshStandardMaterial({
-      envMap: this.skybox.textureCube,
+      envMap: Skybox.textureCube,
       envMapIntensity: 0.1,
       map: texBase,
       normalMap: texNormal,
@@ -85,18 +86,20 @@ export default class GameMap {
 
   addCylinder() {
     const height = 550;
-    const texBase = GetTextureRepeat(IMAGE_ASSETS.HullBase, 5, 10);
-    const texEmissive = GetTextureRepeat(IMAGE_ASSETS.HullEmissive, 5, 10);
-    const texNormal = GetTextureRepeat(IMAGE_ASSETS.HullNormal, 5, 10);
+    const ratio = height / (GAME.CilynderRadius * Math.PI * 2);
+    const xScale = 7;
+    const yScale = 7 * ratio;
+    const texBase = GetTextureRepeat(IMAGE_ASSETS.HullBase, xScale, yScale);
+    const texEmissive = GetTextureRepeat(IMAGE_ASSETS.HullEmissive, xScale, yScale);
+    const texNormal = GetTextureRepeat(IMAGE_ASSETS.HullNormal, xScale, yScale);
     const geo = new THREE.CylinderGeometry(GAME.CilynderRadius, GAME.CilynderRadius,
       height, 64, 1, true);
     const mat = new THREE.MeshStandardMaterial({
       color: 0x2C3D55,
-      envMap: this.skybox.textureCube,
+      envMap: Skybox.textureCube,
       map: texBase,
       emissiveMap: texEmissive,
       normalMap: texNormal,
-      normalScale: new THREE.Vector2(0.3, 0.3),
       emissiveIntensity: 0.7,
       emissive: 0x00ffff,
       wireframe: false,
@@ -111,8 +114,10 @@ export default class GameMap {
   }
 
   addPlaform(x, y, width, type) {
-    const { bodies, group, platforms } = this;
-    const platform = new GamePlatform({ x, y, width, type });
+    const { bodies, group, platforms, mapParser: map } = this;
+    const xTrans = x - width / 2 - map.width / 2 + 1;
+    const yTrans = map.height - y + MAP_OFFSET_Y;
+    const platform = new GamePlatform({ x: xTrans, y: yTrans, width, type });
     bodies.push(platform.body);
     group.add(platform.mesh);
     group.add(platform.holderSocketMesh);
@@ -120,12 +125,14 @@ export default class GameMap {
   }
 
   update(delta, player) {
-    const { platforms } = this;
+    const { platforms, glyphs } = this;
     this.skytube.update(delta);
     this.skytube.group.position.y = player.mesh.position.y;
     for (let i = 0; i < platforms.length; i++) {
-      const platform = platforms[i];
-      platform.update(delta);
+      platforms[i].update(delta);
+    }
+    for (let i = 0; i < glyphs.length; i++) {
+      glyphs[i].update(delta);
     }
   }
 }

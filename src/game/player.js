@@ -10,7 +10,7 @@ import GamePhysicsBody from './physics-body';
 import LineTrail from './line-trail';
 
 const DEFAULT = {
-  jumpTolerance: 10,
+  jumpTolerance: 50,
   jumpForce: 1.5,
   walkForce: 0.16,
   gravity: -0.1,
@@ -113,7 +113,6 @@ export default class GamePlayer {
       if (this.jumpLocked === true) return 0;
       this.jumpDefer = 0;
       if (this.grounded) {
-        this.jumpsLeft = opts.maxJumps;
         this.canDoubleJump = true;
         this.jumpLocked = true;
         force = opts.jumpForce;

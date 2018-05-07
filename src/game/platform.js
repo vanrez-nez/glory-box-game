@@ -3,7 +3,7 @@ import { PHYSICS, MAP, EVENTS, GAME } from './const';
 import { IMAGE_ASSETS } from './assets';
 import { TranslateTo3d, GetTextureRepeat } from './utils';
 import GamePhysicsBody from './physics-body';
-import GameSkybox from './skybox';
+import { StaticInstance as Skybox } from './skybox';
 
 const DEFAULT = {
   x: 0,
@@ -11,8 +11,6 @@ const DEFAULT = {
   width: 1,
   type: MAP.StaticPlatform,
 };
-
-const SKYBOX = new GameSkybox();
 
 export const LightMatStatic = new THREE.MeshLambertMaterial({
   color: 0xff00ff,
@@ -27,7 +25,7 @@ export const LightMatMoving = new THREE.MeshLambertMaterial({
 });
 
 export const GenericMat = new THREE.MeshStandardMaterial({
-  envMap: SKYBOX.textureCube,
+  envMap: Skybox.textureCube,
   envMapIntensity: 0.2,
   metalness: 0.5,
   roughness: 0.7,

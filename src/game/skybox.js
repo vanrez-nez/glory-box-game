@@ -26,3 +26,5 @@ export default class GameSkybox {
     this.mesh.position.y = 550 * 0.4;
   }
 }
+
+export const StaticInstance = new GameSkybox();

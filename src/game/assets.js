@@ -6,7 +6,6 @@ export const IMAGE_ASSETS = {
   HullNormal:         `${PREFIX}/macro_hull_normal.jpg`,
   HullBase:           `${PREFIX}/macro_hull_basecolor.jpg`,
   HullRoughness:      `${PREFIX}/macro_hull_roughness.jpg`,
-  HullHeight:         `${PREFIX}/macro_hull_height.jpg`,
   UniverseAmbient:    `${PREFIX}/universe.jpg`,
   SkyboxPX:           `${PREFIX}/universe_cube_0_cubef_cubert.jpg`,
   SkyboxNX:           `${PREFIX}/universe_cube_0_cubef_cubert.jpg`,
@@ -17,9 +16,10 @@ export const IMAGE_ASSETS = {
   ImpFloorBase:       `${PREFIX}/ImperialHangarFloor_basecolor.jpg`,
   ImpFloorNormal:     `${PREFIX}/ImperialHangarFloor_normal.jpg`,
   ImpFloorRoughness:  `${PREFIX}/ImperialHangarFloor_roughness.jpg`,
-  RouberNormal:       `${PREFIX}/rubber_normal.jpg`,
-  RouberRoughness:    `${PREFIX}/rubber_roughness.jpg`,
-  BlackBase:          `${PREFIX}/black_base_color.jpg`,
+  GlyphsBase:         `${PREFIX}/glyphs_base.jpg`,
+  GlyphsDisplacement: `${PREFIX}/glyphs_displacement.jpg`,
+  GlyphsNormal:       `${PREFIX}/glyphs_normal.jpg`,
+  GlyphsEmissive:     `${PREFIX}/glyphs_emissive.jpg`,
 };
 
 export const AUDIO_ASSETS = {};

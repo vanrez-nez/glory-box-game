@@ -4,6 +4,7 @@ const MAP_PARSE_COLORS = {
   '0,0,0': MAP.Empty,
   '255,0,0': MAP.StaticPlatform,
   '0,0,255': MAP.MovingPlatform,
+  '0,255,0': MAP.Glyph,
 };
 
 export default class GameMapParser {
