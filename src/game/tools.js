@@ -70,9 +70,10 @@ export default class GameTools {
     f1.add(obj.body.opts.maxVelocity, 'y', 0.1, 2).name('Max Velocity Y');
 
     gui.remember(obj.opts);
+    f1.add(obj.opts, 'gravity', -1, -0.01).name('Ascend Gravity');
+    f1.add(obj.opts, 'descentGravity', -1, -0.01).name('Descent Gravity');
     f1.add(obj.opts, 'walkForce', 0.01, 2).name('Walk Force');
     f1.add(obj.opts, 'jumpForce', 0.01, 2).name('Jump Force');
-    // const f2 = gui.addFolder('');
   }
 
   buildEngineScreen(obj) {

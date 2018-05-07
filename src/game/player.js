@@ -11,11 +11,12 @@ import LineTrail from './line-trail';
 
 const DEFAULT = {
   jumpTolerance: 50,
-  jumpForce: 1.5,
-  walkForce: 0.16,
-  gravity: -0.1,
+  fallTolerance: 120,
+  jumpForce: 1.7,
+  walkForce: 0.22,
+  gravity: -0.067,
   trailMaxPositions: 25,
-  descentGravity: -0.8,
+  descentGravity: -0.68,
 };
 
 export default class GamePlayer {
@@ -23,6 +24,8 @@ export default class GamePlayer {
     this.opts = { ...DEFAULT, ...opts };
     this.jumpLocked = false;
     this.jumpDefer = 0;
+    this.stateBuff = [];
+    this.groundedTime = 0;
     this.group = new THREE.Object3D();
     this.initCube();
     this.initLights();
@@ -30,12 +33,12 @@ export default class GamePlayer {
     this.body = new GamePhysicsBody({
       type: PHYSICS.Player,
       mesh: this.mesh,
-      mass: 0.16,
-      friction: 0.13,
+      mass: 0.17,
+      friction: 0.15,
       label: 'player',
       scale: new THREE.Vector2(1.5, 1.5),
       gravity: new THREE.Vector2(0, opts.gravity),
-      maxVelocity: new THREE.Vector2(0.3, 1.6),
+      maxVelocity: new THREE.Vector2(0.3, 1.5),
       distance: GAME.PlayerDistance,
     });
     this.body.events.on(EVENTS.CollisionBegan, this.onCollisionBegan.bind(this));
@@ -82,6 +85,12 @@ export default class GamePlayer {
       cE.bottom.opts.type === PHYSICS.WorldBounds);
   }
 
+  get wasGrounded() {
+    const time = performance.now();
+    const dt = time - this.groundedTime;
+    return this.descending && dt < this.opts.fallTolerance;
+  }
+
   onCollisionBegan(edges) {
     const { body, opts } = this;
     if (edges.bottom && (edges.bottom.isPlatform || edges.bottom.isWorldBounds)) {
@@ -99,34 +108,42 @@ export default class GamePlayer {
 
   getJumpForce(inputs) {
     const { opts } = this;
-    let force = 0;
+    const released = inputs.Jump === false;
     const time = performance.now();
-    let isDeferedJump = false;
 
-    // process defered jump
-    const jumpDelta = time - this.jumpDefer;
-    if (this.jumpDefer > 0 && jumpDelta < opts.jumpTolerance) {
-      isDeferedJump = true;
+    if (this.grounded) {
+      this.groundedTime = time;
     }
 
-    if (inputs.Jump || isDeferedJump) {
-      if (this.jumpLocked === true) return 0;
-      this.jumpDefer = 0;
-      if (this.grounded) {
+    const grounded = this.grounded || this.wasGrounded;
+    if (this.jumpLocked === false) {
+      // process defered jump
+      const jumpDelta = time - this.jumpDefer;
+      if (grounded && jumpDelta < opts.jumpTolerance) {
         this.canDoubleJump = true;
         this.jumpLocked = true;
-        force = opts.jumpForce;
-      } else if (this.canDoubleJump) {
-        force = opts.jumpForce;
-        this.canDoubleJump = false;
-        this.jumpLocked = true;
-      } else {
-        this.jumpDefer = time;
+        this.jumpDefer = 0;
+        return opts.jumpForce;
       }
-    } else {
+
+      if (inputs.Jump) {
+        if (grounded) {
+          this.canDoubleJump = true;
+          this.jumpLocked = true;
+          return opts.jumpForce;
+        } else if (this.canDoubleJump) {
+          this.jumpLocked = true;
+          this.canDoubleJump = false;
+          this.body.velocity.y = 0;
+          return opts.jumpForce * 0.5;
+        } else {
+          this.jumpDefer = time;
+        }
+      }
+    } else if (released) {
       this.jumpLocked = false;
     }
-    return force;
+    return 0;
   }
 
   getWalkingForce(inputs) {
@@ -143,6 +160,7 @@ export default class GamePlayer {
 
   processInputs(inputs) {
     const { body } = this;
+    const { opts } = this;
     let [xForce, yForce] = [0, 0];
     yForce = this.getJumpForce(inputs);
     xForce = this.getWalkingForce(inputs);

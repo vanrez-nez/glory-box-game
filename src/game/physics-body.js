@@ -65,10 +65,8 @@ export default class GamePhysicsBody {
     if (delta > 0) {
       const dt = (1000 / 60) / (delta * 1000) * timeScale;
       velocity.multiplyScalar(1 - friction * dt);
-      if (velocity.lengthSq() > 0.005) {
-        position.x += velocity.x * dt;
-        position.y += velocity.y * dt;
-      }
+      position.x += velocity.x * dt;
+      position.y += velocity.y * dt;
     }
     this.sync();
   }

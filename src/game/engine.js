@@ -17,6 +17,7 @@ export default class Engine {
       this.setupPostProcessing();
     }
     this.cameraTarget = this.scene.position;
+    this.cameraTargetTo = new THREE.Vector3();
     // vector to handle camera positions
     this.cameraVector = new THREE.Vector3();
     this.initHelpers();
@@ -96,15 +97,23 @@ export default class Engine {
   }
 
   followTarget() {
-    const { cameraVector, cameraTarget, camera } = this;
+    const { cameraVector, cameraTargetTo, cameraTarget, camera } = this;
+
     TranslateTo3d(
       cameraVector.copy(cameraTarget),
       cameraTarget.x * (Math.PI / 1.5),
       cameraTarget.y + 10,
       64,
     );
-    camera.lookAt(cameraTarget);
-    TweenMax.to(camera.position, 1.5, {
+
+    TweenMax.to(cameraTargetTo, 0.3, {
+      x: cameraTarget.x,
+      y: cameraTarget.y,
+      z: cameraTarget.z,
+      onUpdate: () => camera.lookAt(cameraTargetTo),
+    });
+
+    TweenMax.to(camera.position, 3, {
       x: cameraVector.x,
       y: cameraVector.y,
       z: cameraVector.z,
