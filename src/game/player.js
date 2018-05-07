@@ -97,7 +97,7 @@ export default class GamePlayer {
       const tl = new TimelineMax();
       const pos = body.meshPositionOffset;
       const scale = body.meshScaleOffset;
-      const hitHard = body.velocity.y < opts.descentGravity;
+      const hitHard = body.velocity.y < opts.descentGravity + 0.05;
       const hitForce = hitHard ? 1 : 0.5;
       tl.to(scale, 0.1, { x: 0.5 * hitForce, y: -0.5 * hitForce, ease: Power2.easeOut });
       tl.to(scale, 0.15, { x: 0, y: 0, ease: Power2.easeOut });
