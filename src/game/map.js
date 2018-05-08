@@ -19,6 +19,7 @@ export default class GameMap {
     this.collectibles = [];
     this.generatePlatform();
     this.addCylinder();
+    this.addCylinderBase();
     this.addSkytube();
     this.addFloor();
   }
@@ -93,7 +94,7 @@ export default class GameMap {
     const texBase = GetTextureRepeat(IMAGE_ASSETS.HullBase, xScale, yScale);
     const texEmissive = GetTextureRepeat(IMAGE_ASSETS.HullEmissive, xScale, yScale);
     const texNormal = GetTextureRepeat(IMAGE_ASSETS.HullNormal, xScale, yScale);
-    const geo = new THREE.CylinderGeometry(GAME.CilynderRadius, GAME.CilynderRadius,
+    const geo = new THREE.CylinderBufferGeometry(GAME.CilynderRadius, GAME.CilynderRadius,
       height, 64, 1, true);
     const mat = new THREE.MeshStandardMaterial({
       color: 0x2C3D55,
@@ -112,6 +113,26 @@ export default class GameMap {
     this.cylinder.position.y = height * 0.4;
     this.cylinder.rotation.y = Math.PI / 8;
     this.group.add(this.cylinder);
+  }
+
+  addCylinderBase() {
+    const height = 2.5;
+    const ratio = height / (GAME.CilynderRadius * Math.PI * 2);
+    const xScale = 7;
+    const yScale = 7 * ratio;
+    const geo = new THREE.CylinderBufferGeometry(GAME.CilynderRadius + 0.5,
+      GAME.CilynderRadius + 1.8, height, 64, 1);
+    const texBase = GetTextureRepeat(IMAGE_ASSETS.HullBase, xScale, yScale);
+    const mat = new THREE.MeshStandardMaterial({
+      color: 0x2C3D55,
+      envMap: Skybox.textureCube,
+      map: texBase,
+      metalness: 0.8,
+      roughness: 0.6,
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.y = GAME.BoundsBottom + height / 2;
+    this.group.add(mesh);
   }
 
   addPlaform(x, y, width, type) {
