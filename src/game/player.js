@@ -7,7 +7,6 @@
 import { PHYSICS, EVENTS, GAME } from './const';
 import { Clamp, TranslateTo3d } from './utils';
 import GamePhysicsBody from './physics-body';
-import LineTrail from './line-trail';
 
 const DEFAULT = {
   jumpTolerance: 50,
@@ -15,7 +14,6 @@ const DEFAULT = {
   jumpForce: 1.7,
   walkForce: 0.22,
   gravity: -0.067,
-  trailMaxPositions: 25,
   descentGravity: -0.68,
 };
 
@@ -29,7 +27,6 @@ export default class GamePlayer {
     this.group = new THREE.Object3D();
     this.initCube();
     this.initLights();
-    this.initTrail();
     this.body = new GamePhysicsBody({
       type: PHYSICS.Player,
       mesh: this.mesh,
@@ -64,11 +61,6 @@ export default class GamePlayer {
     this.light.shadow.mapSize = new THREE.Vector2(128, 128);
     this.light.power = 2.45 * Math.PI * 4;
     this.group.add(this.light);
-  }
-
-  initTrail() {
-    this.trail = new LineTrail({});
-    // this.group.add(this.trail.mesh);
   }
 
   get descending() {
@@ -160,7 +152,6 @@ export default class GamePlayer {
 
   processInputs(inputs) {
     const { body } = this;
-    const { opts } = this;
     let [xForce, yForce] = [0, 0];
     yForce = this.getJumpForce(inputs);
     xForce = this.getWalkingForce(inputs);
@@ -170,7 +161,7 @@ export default class GamePlayer {
   }
 
   updateTransforms() {
-    const { opts, mesh, body, descending, grounded } = this;
+    const { opts, mesh, body, grounded, descending } = this;
     mesh.scale.y = Clamp(1 + body.velocity.y * 1.5, 1, 1.5);
     mesh.scale.x = Clamp(1 - body.velocity.y * 0.3, 0.5, 1);
     if (descending) {
@@ -178,7 +169,6 @@ export default class GamePlayer {
     } else {
       body.opts.gravity.set(0, opts.gravity);
     }
-
     if (!grounded) {
       body.meshPositionOffset.multiplyScalar(0.8);
     }
@@ -189,15 +179,9 @@ export default class GamePlayer {
     TranslateTo3d(light.position, body.position.x, body.position.y + 2, GAME.PlayerDistance + 3);
   }
 
-  updateTrail() {
-    const { trail, mesh } = this;
-    trail.pushPosition(mesh.position);
-  }
-
   update(delta, inputState) {
     this.processInputs(inputState);
     this.updateTransforms();
     this.updateLights();
-    this.updateTrail();
   }
 }

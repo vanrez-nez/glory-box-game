@@ -6,14 +6,6 @@ import { TranslateTo3d, GetTextureRepeat } from './utils';
 const RepeatX = 1 / 9;
 const RepeatY = 1 / 9;
 
-const Colors = [
-  0xff4f4f,
-  0xf32fff,
-  0x2fe9ff,
-  0xff8c2f,
-  0xfdff2f,
-];
-
 const Offsets = [
   { x: 0.17, y: 0.83 },
   { x: 0.5, y: 0.83 },
@@ -29,10 +21,11 @@ const Offsets = [
 let idxCount = 0;
 
 export default class MapGlyph {
-  constructor(x, y) {
+  constructor(x, y, color) {
+    this.noise = new Simple1DNoise();
+    this.noiseIdx = Math.random();
     this.group = new THREE.Object3D();
     const offsets = Offsets[idxCount++ % Offsets.length];
-    const color = Colors[~~(Math.random() * Colors.length)];
     this.addInnerMesh(x, y, offsets, color);
     this.addOutterMesh(x, y, offsets);
   }
@@ -56,6 +49,7 @@ export default class MapGlyph {
     const mesh = new THREE.Mesh(geo, mat);
     TranslateTo3d(mesh.position, x, y, GAME.PlatformDistance - 2.2);
     this.setInverseLookAt(mesh, y);
+    this.glypMaterial = mat;
     this.group.add(mesh);
   }
 
@@ -122,5 +116,8 @@ export default class MapGlyph {
   }
 
   update(delta) {
+    const { noise, glypMaterial } = this;
+    glypMaterial.emissiveIntensity = 0.3 + noise.getVal(this.noiseIdx) * 10;
+    this.noiseIdx += delta * 4;
   }
 }

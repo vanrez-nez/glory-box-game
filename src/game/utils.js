@@ -1,4 +1,3 @@
-// const Cylindrical =  new THREE.Cylindrical();
 const TWO_PI = Math.PI * 2;
 
 export function Clamp(val, min, max) {
@@ -17,8 +16,6 @@ export function TranslateTo3d(position, toX, toY, radius = 35) {
   position.x = radius * Math.sin(toX / radius + TWO_PI);
   position.y = toY;
   position.z = radius * Math.cos(toX / radius + TWO_PI);
-  // Cylindrical.set(radius, toX / radius + Math.PI * 2, toY);
-  // position.setFromCylindrical(Cylindrical);
 }
 
 export function AddDot(scene, position, size = 5) {

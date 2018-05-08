@@ -33,12 +33,19 @@ export const GenericMat = new THREE.MeshStandardMaterial({
   color: 0xffffff,
 });
 
+export const SocketMat = new THREE.MeshLambertMaterial({
+  envMap: Skybox.textureCube,
+  color: 0x05070a,
+  emissiveIntensity: 0.5,
+  emissive: 0x05070a,
+  reflectivity: 0.35,
+});
+
 export default class GamePlatform {
   constructor(opts) {
     this.opts = { ...DEFAULT, ...opts };
     this.mesh = this.getMesh();
     this.holderSocketMesh = this.getHolderSocketMesh();
-    // this.tubesMesh = this.getTubesMesh();
     this.body = this.getBody();
     this.oscillator = Math.random();
     this.body.position.set(this.opts.x, this.opts.y);
@@ -61,14 +68,17 @@ export default class GamePlatform {
     matSolid.normalMap = texNormal;
     matSolid.roughnessMap = texRough;
     const matLight = this.isMovingPlatform() ? LightMatMoving : LightMatStatic;
-    const geo = new THREE.BoxBufferGeometry(opts.width, 0.33, GAME.PlatformZSize);
+    const geo = new THREE.BoxBufferGeometry(opts.width, 0.7, GAME.PlatformZSize);
     const meshUp = new THREE.Mesh(geo, matSolid);
     const meshMiddle = new THREE.Mesh(geo, matLight);
     const meshDown = new THREE.Mesh(geo, matSolid);
-    meshDown.position.y = 0.6;
-    meshMiddle.position.y = 0.3;
-    meshMiddle.scale.set(0.95, 0.95, 0.95);
+    meshUp.position.y = 0.4;
+    meshUp.scale.set(1, 0.5, 1);
     meshUp.castShadow = true;
+    meshMiddle.position.y = 0;
+    meshMiddle.scale.set(0.95, 0.4, 0.95);
+    meshDown.position.y = -0.2;
+    meshDown.scale.set(0.8, 0.8, 0.7);
     this.lightMaterial = matLight;
     g.add(meshUp);
     g.add(meshMiddle);
@@ -106,11 +116,7 @@ export default class GamePlatform {
     const BspInnerProjectedBox = this.getBspProjectedBox(innerW, 0.7, 7, 0.985, 0, 0);
     const s1 = BspProjectedBox.intersect(BspCylinder);
     const s2 = s1.subtract(BspInnerProjectedBox);
-    const mesh = s2.toMesh(new THREE.MeshLambertMaterial({
-      color: 0x272932,
-      flatShading: true,
-      wireframe: false,
-    }));
+    const mesh = s2.toMesh(SocketMat);
     mesh.geometry.computeVertexNormals();
     return mesh;
   }

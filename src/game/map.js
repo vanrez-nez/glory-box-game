@@ -6,7 +6,7 @@ import GameMapParser from './map-parser';
 import GamePlatform from './platform';
 import GameSkytube from './skytube';
 import { StaticInstance as Skybox } from './skybox';
-import MapGlyph from './map-glyph';
+import GameCollectible from './collectible';
 
 const MAP_OFFSET_Y = -10;
 
@@ -16,7 +16,7 @@ export default class GameMap {
     this.mapParser = new GameMapParser('#game_map');
     this.platforms = [];
     this.bodies = [];
-    this.glyphs = [];
+    this.collectibles = [];
     this.generatePlatform();
     this.addCylinder();
     this.addSkytube();
@@ -34,7 +34,7 @@ export default class GameMap {
         if (currTile === MAP.Empty) {
           platformWidth = 0;
         } else if (currTile === MAP.Glyph) {
-          this.addGlyph(x, y);
+          this.addCollectible(x, y);
         } else {
           if (currTile === MAP.StaticPlatform ||
             currTile === MAP.MovingPlatform) {
@@ -49,12 +49,13 @@ export default class GameMap {
     }
   }
 
-  addGlyph(x, y) {
+  addCollectible(x, y) {
     const { mapParser: map } = this;
     const xTrans = x - map.width / 2;
     const yTrans = map.height - y + MAP_OFFSET_Y;
-    const glyph = new MapGlyph(xTrans, yTrans);
-    this.group.add(glyph.group);
+    const collectible = new GameCollectible(xTrans, yTrans);
+    this.collectibles.push(collectible);
+    this.group.add(collectible.group);
   }
 
   addSkytube() {
@@ -125,14 +126,14 @@ export default class GameMap {
   }
 
   update(delta, player) {
-    const { platforms, glyphs } = this;
+    const { platforms, collectibles } = this;
     this.skytube.update(delta);
     this.skytube.group.position.y = player.mesh.position.y;
     for (let i = 0; i < platforms.length; i++) {
       platforms[i].update(delta);
     }
-    for (let i = 0; i < glyphs.length; i++) {
-      glyphs[i].update(delta);
+    for (let i = 0; i < collectibles.length; i++) {
+      collectibles[i].update(delta);
     }
   }
 }

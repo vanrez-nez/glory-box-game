@@ -1,11 +1,14 @@
 
 const DEFAULT = {
-  maxPositions: 10,
+  maxPositions: 15,
+  sizeFn: p => p * 0.5,
   material: new MeshLineMaterial({
     color: new THREE.Color(0xffffff),
+    transparent: true,
+    opacity: 1,
     side: THREE.DoubleSide,
     sizeAttenuation: true,
-    lineWidth: 3.8,
+    lineWidth: 1,
     resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
   }),
 };
@@ -15,7 +18,7 @@ export default class LineTrail {
     this.opts = { ...DEFAULT, ...opts };
     this.geo = this.getGeometry();
     this.line = new MeshLine();
-    this.line.setGeometry(this.geo, p => p * 0.5);
+    this.line.setGeometry(this.geo, this.opts.sizeFn);
     this.line.geometry.computeBoundingSphere();
     this.mesh = new THREE.Mesh(this.line.geometry, this.opts.material);
   }

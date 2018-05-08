@@ -31,7 +31,8 @@ module.exports = {
     'ThreeBSP': false,
     'EventEmitter3': false,
     'Stats': false,
-    'dat': false
+    'dat': false,
+    'Simple1DNoise': false
   },
   // add your custom rules here
   rules: {

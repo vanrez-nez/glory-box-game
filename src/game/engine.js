@@ -98,7 +98,6 @@ export default class Engine {
 
   followTarget() {
     const { cameraVector, cameraTargetTo, cameraTarget, camera } = this;
-
     TranslateTo3d(
       cameraVector.copy(cameraTarget),
       cameraTarget.x * (Math.PI / 1.5),
