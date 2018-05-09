@@ -2,7 +2,6 @@ export default class ObjectCulling {
   constructor(maxDistance, maxVisibleNodes) {
     this.maxVisibleNodes = maxVisibleNodes;
     this.maxDistance = maxDistance;
-    this.position = new THREE.Vector2();
     this.prevNearest = [];
     this.objects = [];
     this.rebuild();

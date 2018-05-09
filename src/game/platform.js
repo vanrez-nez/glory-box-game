@@ -51,6 +51,7 @@ export default class GamePlatform {
     this.body = this.getBody();
     this.oscillator = Math.random();
     this.body.position.set(this.opts.x, this.opts.y);
+    this.body.sync(true);
     this.startPosition = this.body.position.clone();
     this.body.events.on(EVENTS.CollisionBegan, this.onCollisionBegan.bind(this));
   }

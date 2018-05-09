@@ -91,6 +91,7 @@ class Game {
     const delta = clock.getDelta();
     player.update(delta, gameInput.state);
     map.update(delta, player);
+    physics.updateCollisionSpace(player.body.position, 15);
     physics.update(delta);
     engine.updateObjectCulling(player.mesh.position);
     engine.render();

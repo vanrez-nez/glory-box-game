@@ -13,7 +13,12 @@ const DEFAULT = {
 export default class GamePhysics {
   constructor(opts) {
     this.opts = { ...DEFAULT, ...opts };
-    this.bodies = [];
+    this.dynamicBodies = [];
+    this.staticBodies = [];
+    this.allBodies = [];
+    // eslint-disable-next-line
+    this.rTree = new rbush();
+    this.collisionSpace = new THREE.Box2();
     /*
       Dummy object to set colliding edges of world bodies
       when hitting world boundaries
@@ -24,9 +29,23 @@ export default class GamePhysics {
   }
 
   add(bodies) {
+    const { rTree, testBoxA, staticBodies, dynamicBodies } = this;
     [].concat(bodies).forEach((body) => {
-      this.bodies.push(body);
+      if (body.opts.isStatic) {
+        staticBodies.push(body);
+        const box = testBoxA.copy(body.box).translate(body.position);
+        rTree.insert({
+          minX: box.min.x,
+          minY: box.min.y,
+          maxX: box.max.x,
+          maxY: box.max.y,
+          body,
+        });
+      } else {
+        dynamicBodies.push(body);
+      }
     });
+    this.allBodies = dynamicBodies.concat(staticBodies);
   }
 
   constrainToBoundaries(body, bounds) {
@@ -69,6 +88,23 @@ export default class GamePhysics {
         body.updateCollisionEvents();
       }
     }
+  }
+
+  getBodiesWithinCollisionSpace() {
+    const { collisionSpace: cS, rTree } = this;
+    return rTree.search({
+      minX: cS.min.x,
+      minY: cS.min.y,
+      maxX: cS.max.x,
+      maxY: cS.max.y,
+    }).map(o => o.body).concat(this.dynamicBodies);
+  }
+
+  updateCollisionSpace(position, area) {
+    const { collisionSpace: cS } = this;
+    cS.min.set(-area * 0.5, -area * 0.5);
+    cS.max.set(area * 0.5, area * 0.5);
+    cS.translate(position);
   }
 
   getCollisions(bodies) {
@@ -129,9 +165,9 @@ export default class GamePhysics {
 
   update(delta) {
     const { gravity, timeScale, bounds } = this.opts;
-    const { bodies } = this;
-    for (let i = 0; i < bodies.length; i++) {
-      const b = bodies[i];
+    const { allBodies } = this;
+    for (let i = 0; i < allBodies.length; i++) {
+      const b = allBodies[i];
       const { opts } = b;
 
       // skip grounded objects from apply gravity
@@ -145,7 +181,8 @@ export default class GamePhysics {
       b.resetCollisionEdges();
       this.constrainToBoundaries(b, bounds);
     }
-    const collisionPairs = this.getCollisions(bodies);
+    const cBodies = this.getBodiesWithinCollisionSpace();
+    const collisionPairs = this.getCollisions(cBodies);
     this.solveCollisions(collisionPairs);
   }
 }

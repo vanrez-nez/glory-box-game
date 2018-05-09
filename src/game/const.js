@@ -4,7 +4,7 @@ export const CONFIG = {
   EnableOrbitControls: false,
   EnableAxes: false,
   DebugCollisions: false,
-  UsePostProcessing: true,
+  UsePostProcessing: false,
   PositionCullingEnabled: true,
 };
 

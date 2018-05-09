@@ -9,7 +9,6 @@ const DEFAULT = {
   mesh: null,
   friction: 0.1,
   isStatic: false,
-  isSensor: false,
   maxVelocity: new THREE.Vector2(1, 1),
   distance: GAME.CilynderRadius,
 };
@@ -30,9 +29,10 @@ export default class GamePhysicsBody {
     this.prevCollisions = new CollisionEdges();
     this.collidingEdges = new CollisionEdges();
     this.isWorldBounds = this.opts.type === PHYSICS.WorldBounds;
-    this.isPlatform = this.opts.type === PHYSICS.StaticPlatform ||
-      this.opts.type === PHYSICS.MovingPlatform;
-    this.sync();
+    this.isMovingPlatform = this.opts.type === PHYSICS.MovingPlatform;
+    this.isStaticPlatform = this.opts.type === PHYSICS.StaticPlatform;
+    this.isPlatform = this.isStaticPlatform || this.isMovingPlatform;
+    this.sync(true);
   }
 
   applyForce(vecForce) {
@@ -68,10 +68,10 @@ export default class GamePhysicsBody {
       position.x += velocity.x * dt;
       position.y += velocity.y * dt;
     }
-    this.sync();
+    this.sync(this.isStaticPlatform === false);
   }
 
-  sync() {
+  sync(updateLookAt) {
     const { opts,
       position: pos,
       collidingEdges: cE,
@@ -90,7 +90,9 @@ export default class GamePhysicsBody {
         pos.y + pOffset.y,
         opts.distance,
       );
-      mesh.lookAt(0, pos.y, 0);
+      if (updateLookAt) {
+        mesh.lookAt(0, pos.y, 0);
+      }
       mesh.scale.x = 1 + sOffset.x;
       mesh.scale.y = 1 + sOffset.y;
     }
