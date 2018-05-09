@@ -6,7 +6,6 @@ export const IMAGE_ASSETS = {
   HullNormal:         `${PREFIX}/macro_hull_normal.jpg`,
   HullBase:           `${PREFIX}/macro_hull_basecolor.jpg`,
   HullRoughness:      `${PREFIX}/macro_hull_roughness.jpg`,
-  UniverseAmbient:    `${PREFIX}/universe.jpg`,
   SkyboxPX:           `${PREFIX}/universe_cube_0_cubef_cubert.jpg`,
   SkyboxNX:           `${PREFIX}/universe_cube_0_cubef_cubert.jpg`,
   SkyboxPY:           `${PREFIX}/universe_cube_0_cubef_cubert.jpg`,

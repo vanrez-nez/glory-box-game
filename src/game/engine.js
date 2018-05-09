@@ -1,7 +1,7 @@
 
 import { CONFIG } from './const';
 import { TranslateTo3d } from './utils';
-import { CRTScreen } from '../shaders/crt-screen';
+import ObjectCulling from './object-culling';
 
 const DEFAULT = {};
 
@@ -10,6 +10,8 @@ export default class Engine {
     this.opts = { ...DEFAULT, ...opts };
     this.width = 0;
     this.height = 0;
+    this.objectCulling = new ObjectCulling(100, 100);
+    this.rebuildCulling = true;
     this.initWorld();
     this.initLights();
     if (CONFIG.UsePostProcessing) {
@@ -61,9 +63,6 @@ export default class Engine {
     this.bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(w, h), 1.5, 0.4, 0.85);
     this.bloomPass.renderToScreen = true;
     composer.addPass(this.bloomPass);
-    this.crtFx = new THREE.ShaderPass(CRTScreen);
-    composer.addPass(this.crtFx);
-    // this.crtFx.renderToScreen = true;
   }
 
   initHelpers() {
@@ -82,14 +81,13 @@ export default class Engine {
   }
 
   resize(w, h) {
-    const { renderer, camera, composer, crtFx } = this;
+    const { renderer, camera, composer } = this;
     renderer.setSize(w, h);
     camera.clearViewOffset();
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h);
     if (CONFIG.UsePostProcessing) {
-      crtFx.uniforms.u_resolution.value = new THREE.Vector2(Math.floor(w / 3), Math.floor(h / 3));
       composer.setSize(w, h);
     }
     this.width = w;
@@ -120,6 +118,16 @@ export default class Engine {
     });
   }
 
+  resetObjectCulling() {
+    const { objectCulling, scene } = this;
+    objectCulling.add(scene);
+    objectCulling.rebuild();
+  }
+
+  updateObjectCulling(position) {
+    this.objectCulling.updateVisibilityFrom(position);
+  }
+
   render() {
     const { renderer, scene, camera, composer } = this;
     if (CONFIG.EnableOrbitControls) {
@@ -127,6 +135,10 @@ export default class Engine {
       this.orbitControls.target = this.cameraTarget;
     } else {
       this.followTarget();
+    }
+    if (this.rebuildCulling && CONFIG.PositionCullingEnabled) {
+      this.resetObjectCulling();
+      this.rebuildCulling = false;
     }
     if (CONFIG.UsePostProcessing) {
       composer.render();

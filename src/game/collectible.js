@@ -31,12 +31,16 @@ export default class GameCollectible {
   }
 
   addParticles(x, y, color) {
+    const g = new THREE.Object3D();
     for (let i = 0; i < MaxParticles; i++) {
       const phi = (Math.PI * 2 / MaxParticles) * i;
       const particle = this.getParticle(x, y, color, phi);
       this.particles.push(particle);
-      this.group.add(particle.trail.mesh);
+      g.add(particle.trail.mesh);
     }
+    g.positionCulled = true;
+    this.particlesGroup = g;
+    this.group.add(g);
   }
 
   getParticle(x, y, color, phi) {
@@ -65,21 +69,23 @@ export default class GameCollectible {
     TranslateTo3d(mesh.position, x, y, GAME.CilynderRadius);
     mesh.position.multiplyScalar(1.05);
     mesh.position.y = y;
+    mesh.positionCulled = true;
     this.collectible = mesh;
     this.group.add(mesh);
   }
 
   updateTrailsPosition(delta) {
-    const { particles } = this;
+    const { particles, particlesGroup } = this;
     const { position: cP } = this.collectible;
+    const pos = new THREE.Vector3();
+    particlesGroup.position.copy(cP);
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
       const { trail, phi, r } = p;
-      const pos = new THREE.Vector3();
       p.theta += delta * 4;
-      pos.x = cP.x + Math.cos(p.theta) * Math.cos(phi) * r;
-      pos.y = cP.y + Math.sin(p.theta) * r;
-      pos.z = cP.z + Math.cos(p.theta) * Math.sin(phi) * r;
+      pos.x = Math.cos(p.theta) * Math.cos(phi) * r;
+      pos.y = Math.sin(p.theta) * r;
+      pos.z = Math.cos(p.theta) * Math.sin(phi) * r;
       trail.pushPosition(pos);
     }
   }
@@ -92,5 +98,9 @@ export default class GameCollectible {
     collectible.position.y = initialPosition.y + Math.sin(this.offsetItem) * 0.5;
     this.glyph.update(delta);
     this.updateTrailsPosition(delta);
+  }
+
+  get visible() {
+    return this.collectible.visible;
   }
 }

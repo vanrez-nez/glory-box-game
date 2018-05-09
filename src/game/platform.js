@@ -45,7 +45,9 @@ export default class GamePlatform {
   constructor(opts) {
     this.opts = { ...DEFAULT, ...opts };
     this.mesh = this.getMesh();
+    this.mesh.positionCulled = true;
     this.holderSocketMesh = this.getHolderSocketMesh();
+    this.holderSocketMesh.positionCulled = true;
     this.body = this.getBody();
     this.oscillator = Math.random();
     this.body.position.set(this.opts.x, this.opts.y);
@@ -146,8 +148,6 @@ export default class GamePlatform {
       const pos = this.body.meshPositionOffset;
       tl.to(pos, 0.12, { y: -0.7, ease: Power2.easeOut });
       tl.to(pos, 0.15, { y: 0, ease: Power2.easeOut });
-      // tl.to(this.lightMaterial, 0.14, { emissiveIntensity: 1 }, 0);
-      // tl.to(this.lightMaterial, 0.45, { emissiveIntensity: 0.8, ease: Power2.easeOut });
     }
   }
 
@@ -158,5 +158,9 @@ export default class GamePlatform {
       body.prevPosition.x = body.position.x;
       body.position.x = startPosition.x + Math.sin(this.oscillator) * opts.width;
     }
+  }
+
+  get visible() {
+    return this.mesh.visible === true;
   }
 }

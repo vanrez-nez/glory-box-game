@@ -59,6 +59,17 @@ export default class GameMap {
     this.group.add(collectible.group);
   }
 
+  addPlaform(x, y, width, type) {
+    const { bodies, group, platforms, mapParser: map } = this;
+    const xTrans = x - width / 2 - map.width / 2 + 1;
+    const yTrans = map.height - y + MAP_OFFSET_Y;
+    const platform = new GamePlatform({ x: xTrans, y: yTrans, width, type });
+    bodies.push(platform.body);
+    group.add(platform.mesh);
+    group.add(platform.holderSocketMesh);
+    platforms.push(platform);
+  }
+
   addSkytube() {
     this.skytube = new GameSkytube();
     this.group.add(this.skytube.group);
@@ -135,26 +146,19 @@ export default class GameMap {
     this.group.add(mesh);
   }
 
-  addPlaform(x, y, width, type) {
-    const { bodies, group, platforms, mapParser: map } = this;
-    const xTrans = x - width / 2 - map.width / 2 + 1;
-    const yTrans = map.height - y + MAP_OFFSET_Y;
-    const platform = new GamePlatform({ x: xTrans, y: yTrans, width, type });
-    bodies.push(platform.body);
-    group.add(platform.mesh);
-    group.add(platform.holderSocketMesh);
-    platforms.push(platform);
-  }
-
   update(delta, player) {
     const { platforms, collectibles } = this;
     this.skytube.update(delta);
     this.skytube.group.position.y = player.mesh.position.y;
     for (let i = 0; i < platforms.length; i++) {
-      platforms[i].update(delta);
+      if (platforms[i].visible) {
+        platforms[i].update(delta);
+      }
     }
     for (let i = 0; i < collectibles.length; i++) {
-      collectibles[i].update(delta);
+      if (collectibles[i].visible) {
+        collectibles[i].update(delta);
+      }
     }
   }
 }

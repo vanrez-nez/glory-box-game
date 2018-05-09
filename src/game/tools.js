@@ -1,4 +1,5 @@
 
+import { CONFIG } from './const';
 import { LightMatStatic, LightMatMoving, GenericMat } from './platform';
 
 export default class GameTools {
@@ -80,13 +81,15 @@ export default class GameTools {
     const { gui } = this;
     const rootFolder = gui.addFolder('Engine');
     const { bloomPass, scene, ambientLight } = obj;
-    // Bloom Pass
-    const f1 = rootFolder.addFolder('BloomPass');
-    gui.remember(obj.bloomPass);
-    f1.add(bloomPass, 'strength', 0.5, 4.5).name('Strength');
-    f1.add(bloomPass, 'radius', 0, 5).name(' Radius');
-    f1.add(bloomPass, 'threshold', 0.1, 1.5).name(' Threshold');
-    this.addColorField(f1, bloomPass.highPassUniforms.defaultColor, 'value', 'HighPass Color');
+    if (CONFIG.UsePostProcessing) {
+      // Bloom Pass
+      const f1 = rootFolder.addFolder('BloomPass');
+      gui.remember(obj.bloomPass);
+      f1.add(bloomPass, 'strength', 0.5, 4.5).name('Strength');
+      f1.add(bloomPass, 'radius', 0, 5).name(' Radius');
+      f1.add(bloomPass, 'threshold', 0.1, 1.5).name(' Threshold');
+      this.addColorField(f1, bloomPass.highPassUniforms.defaultColor, 'value', 'HighPass Color');
+    }
     // Scene
     const f2 = rootFolder.addFolder('Scene');
     f2.add(scene.fog, 'density', 0, 0.095).name('Fog Density');

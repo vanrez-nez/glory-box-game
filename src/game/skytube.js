@@ -1,4 +1,3 @@
-import { IMAGE_ASSETS } from './assets';
 import NebulaShader from '../shaders/nebula';
 
 export default class GameSkytube {
@@ -23,10 +22,8 @@ export default class GameSkytube {
 
   addInnerCylinder() {
     const height = 550;
-    const tex = new THREE.TextureLoader().load(IMAGE_ASSETS.UniverseAmbient);
     const geo = new THREE.CylinderGeometry(100, 100, height, 16, 1, true);
     const mat = new THREE.MeshStandardMaterial({
-      map: tex,
       transparent: true,
       opacity: 0.65,
       side: THREE.BackSide,

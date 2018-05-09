@@ -32,7 +32,8 @@ module.exports = {
     'EventEmitter3': false,
     'Stats': false,
     'dat': false,
-    'Simple1DNoise': false
+    'Simple1DNoise': false,
+    'kdTree': false
   },
   // add your custom rules here
   rules: {

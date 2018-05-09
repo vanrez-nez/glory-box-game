@@ -92,6 +92,7 @@ class Game {
     player.update(delta, gameInput.state);
     map.update(delta, player);
     physics.update(delta);
+    engine.updateObjectCulling(player.mesh.position);
     engine.render();
     stats && stats.end();
     requestAnimationFrame(this.onFrameListener);
