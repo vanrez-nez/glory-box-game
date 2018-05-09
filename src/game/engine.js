@@ -29,7 +29,7 @@ export default class Engine {
     const { opts } = this;
     this.renderer = new THREE.WebGLRenderer({
       canvas: opts.canvas,
-      antialias: false,
+      antialias: !CONFIG.UsePostProcessing,
     });
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(1, 1);
@@ -102,20 +102,9 @@ export default class Engine {
       cameraTarget.y + 10,
       64,
     );
-
-    TweenMax.to(cameraTargetTo, 0.3, {
-      x: cameraTarget.x,
-      y: cameraTarget.y,
-      z: cameraTarget.z,
-      onUpdate: () => camera.lookAt(cameraTargetTo),
-    });
-
-    TweenMax.to(camera.position, 3, {
-      x: cameraVector.x,
-      y: cameraVector.y,
-      z: cameraVector.z,
-      ease: Power2.easeOut,
-    });
+    cameraTargetTo.lerp(cameraTarget, 0.1);
+    camera.lookAt(cameraTargetTo);
+    camera.position.lerp(cameraVector, 0.05);
   }
 
   resetObjectCulling() {

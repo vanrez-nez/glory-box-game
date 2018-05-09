@@ -25,7 +25,10 @@ export default class CollisionEdges {
   }
 
   copy(cE) {
-    this.edges = [...cE.edges];
+    this.edges[0] = cE.edges[0];
+    this.edges[1] = cE.edges[1];
+    this.edges[2] = cE.edges[2];
+    this.edges[3] = cE.edges[3];
   }
 
   diff(cE) {

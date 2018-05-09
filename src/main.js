@@ -70,10 +70,10 @@ class Game {
 
   addTools() {
     const tools = new GameTools();
-    tools.addScreen(this.engine, 'engine');
-    tools.addScreen(this.map, 'map');
-    tools.addScreen(this.player, 'player');
     tools.addScreen(this.physics, 'physics');
+    tools.addScreen(this.engine, 'engine');
+    tools.addScreen(this.player, 'player');
+    tools.addScreen(this.map, 'map');
   }
 
   attachEvents() {
