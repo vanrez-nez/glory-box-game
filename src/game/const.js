@@ -1,5 +1,5 @@
 export const CONFIG = {
-  EnableTools: false,
+  EnableTools: true,
   EnableStats: true,
   EnableOrbitControls: false,
   EnableAxes: false,
@@ -11,6 +11,7 @@ export const CONFIG = {
 export const GAME = {
   CilynderRadius: 35,
   PlatformDistance: 37.25,
+  CameraDistance: 80,
   PlatformZSize: 2,
   PlayerDistance: 37.4,
   BoundsLeft: -128,

@@ -5,10 +5,11 @@ import { GetTextureRepeat } from './utils';
 import GameMapParser from './map-parser';
 import GamePlatform from './platform';
 import GameSkytube from './skytube';
+import GameLobby from './lobby';
 import { StaticInstance as Skybox } from './skybox';
 import GameCollectible from './collectible';
 
-const MAP_OFFSET_Y = -10;
+const MAP_OFFSET_Y = 10;
 
 export default class GameMap {
   constructor() {
@@ -22,6 +23,7 @@ export default class GameMap {
     this.addCylinderBase();
     this.addSkytube();
     this.addFloor();
+    this.addLobby();
   }
 
   generatePlatform() {
@@ -48,6 +50,11 @@ export default class GameMap {
         }
       }
     }
+  }
+
+  addLobby() {
+    this.lobby = new GameLobby();
+    this.group.add(this.lobby.group);
   }
 
   addCollectible(x, y) {

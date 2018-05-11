@@ -1,5 +1,5 @@
 
-import { CONFIG } from './const';
+import { CONFIG, GAME } from './const';
 import { TranslateTo3d } from './utils';
 import ObjectCulling from './object-culling';
 
@@ -38,8 +38,8 @@ export default class Engine {
     this.renderer.gammaOutput = true;
     this.scene = new THREE.Scene();
     this.scene.fog = new THREE.FogExp2(0x000000, 0.02);
-    this.camera = new THREE.PerspectiveCamera(70, 1, 1, 1000);
-    this.camera.position.z = 95;
+    this.camera = new THREE.PerspectiveCamera(45, 1, 1, 200);
+    this.camera.position.z = 200;
   }
 
   initLights() {
@@ -100,7 +100,7 @@ export default class Engine {
       cameraVector.copy(cameraTarget),
       cameraTarget.x * (Math.PI / 1.5),
       cameraTarget.y + 10,
-      64,
+      GAME.CameraDistance,
     );
     cameraTargetTo.lerp(cameraTarget, 0.1);
     camera.lookAt(cameraTargetTo);
