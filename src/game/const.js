@@ -13,11 +13,14 @@ export const GAME = {
   PlatformDistance: 37.25,
   CameraDistance: 80,
   PlatformZSize: 2,
-  PlayerDistance: 37.4,
+  PlayerDistance: 37.3,
   BoundsLeft: -128,
   BoundsRight: 128,
   BoundsBottom: -16,
   BoundsTop: Infinity,
+  CullingMaxDistance: 100,
+  CullingMaxNodes: 100,
+  CullingUpdateRate: 20,
 };
 
 export const KEYBOARD_BINDINGS = {

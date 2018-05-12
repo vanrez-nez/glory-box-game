@@ -30,14 +30,21 @@ import GameTools from './game/tools';
 import GameInput from './game/input';
 import GamePhysics from './game/physics';
 import GamePlayer from './game/player';
+import GameWorld from './game/world';
 import GameMap from './game/map';
+import GameMoodManager from './game/mood-manager';
 
 class Game {
   constructor() {
     this.init(true);
     this.updateSize();
     this.onFrameListener = this.onFrame.bind(this);
-    this.onFrame();
+    this.loader = THREE.DefaultLoadingManager;
+    this.loader.onProgress = (url, itemsLoaded, itemsTotal) => {
+      if (itemsLoaded === itemsTotal) {
+        this.onFrame();
+      }
+    };
   }
 
   init() {
@@ -53,10 +60,17 @@ class Game {
         new THREE.Vector2(GAME.BoundsLeft, GAME.BoundsTop),
         new THREE.Vector2(GAME.BoundsRight, GAME.BoundsBottom)),
     });
+    this.world = new GameWorld();
+    this.moodManager = new GameMoodManager({
+      engine: this.engine,
+      map: this.map,
+      world: this.world,
+    });
     this.physics.add(this.player.body);
     this.physics.add(this.map.bodies);
     this.engine.scene.add(this.player.group);
     this.engine.scene.add(this.map.group);
+    this.engine.scene.add(this.world.group);
     this.engine.cameraTarget = this.player.mesh.position;
     this.attachEvents();
     CONFIG.EnableTools && this.addTools();
@@ -73,6 +87,7 @@ class Game {
     tools.addScreen(this.physics, 'physics');
     tools.addScreen(this.engine, 'engine');
     tools.addScreen(this.player, 'player');
+    tools.addScreen(this.world, 'world');
     tools.addScreen(this.map, 'map');
   }
 
@@ -86,11 +101,13 @@ class Game {
   }
 
   onFrame() {
-    const { stats, clock, gameInput, player, physics, engine, map } = this;
+    const { stats, clock, gameInput, player, physics,
+      engine, map, world } = this;
     stats && stats.begin();
     const delta = clock.getDelta();
     player.update(delta, gameInput.state);
-    map.update(delta, player);
+    map.update(delta);
+    world.update(delta, player.mesh.position);
     physics.updateCollisionSpace(player.body.position, 15);
     physics.update(delta);
     engine.updateObjectCulling(player.mesh.position);

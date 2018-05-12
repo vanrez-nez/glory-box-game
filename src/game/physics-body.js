@@ -21,7 +21,7 @@ export default class GamePhysicsBody {
     this.scale = this.opts.scale || new THREE.Vector2();
     this.position = new THREE.Vector2();
     this.meshPositionOffset = new THREE.Vector2();
-    this.meshScaleOffset = new THREE.Vector2();
+    this.meshScaleOffset = new THREE.Vector3();
     this.prevPosition = new THREE.Vector2();
     this.acceleration = new THREE.Vector2();
     this.velocity = new THREE.Vector2();
@@ -95,6 +95,7 @@ export default class GamePhysicsBody {
       }
       mesh.scale.x = 1 + sOffset.x;
       mesh.scale.y = 1 + sOffset.y;
+      mesh.scale.z = 1 + sOffset.z;
     }
   }
 

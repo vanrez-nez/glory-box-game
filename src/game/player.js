@@ -11,10 +11,10 @@ import GamePhysicsBody from './physics-body';
 const DEFAULT = {
   jumpTolerance: 50,
   fallTolerance: 120,
-  jumpForce: 1.7,
-  walkForce: 0.22,
-  gravity: -0.067,
-  descentGravity: -0.68,
+  jumpForce: 1.3,
+  walkForce: 0.09,
+  gravity: -0.16,
+  descentGravity: -0.34,
 };
 
 export default class GamePlayer {
@@ -30,12 +30,12 @@ export default class GamePlayer {
     this.body = new GamePhysicsBody({
       type: PHYSICS.Player,
       mesh: this.mesh,
-      mass: 0.17,
-      friction: 0.15,
+      mass: 0.26,
+      friction: 0.093,
       label: 'player',
       scale: new THREE.Vector2(1.5, 1.5),
       gravity: new THREE.Vector2(0, opts.gravity),
-      maxVelocity: new THREE.Vector2(0.3, 1.5),
+      maxVelocity: new THREE.Vector2(0.3, 1.7),
       distance: GAME.PlayerDistance,
     });
     this.body.events.on(EVENTS.CollisionBegan, this.onCollisionBegan.bind(this));
@@ -51,7 +51,7 @@ export default class GamePlayer {
       fog: false,
     });
     this.mesh = new THREE.Mesh(geo, mat);
-    this.mesh.castShadow = true;
+    // this.mesh.castShadow = true;
     this.group.add(this.mesh);
   }
 
@@ -84,16 +84,16 @@ export default class GamePlayer {
   }
 
   onCollisionBegan(edges) {
-    const { body, opts } = this;
+    const { body } = this;
     if (edges.bottom && (edges.bottom.isPlatform || edges.bottom.isWorldBounds)) {
       const tl = new TimelineMax();
       const pos = body.meshPositionOffset;
       const scale = body.meshScaleOffset;
-      const hitHard = body.velocity.y < opts.descentGravity + 0.05;
-      const hitForce = hitHard ? 1 : 0.5;
-      tl.to(scale, 0.1, { x: 0.5 * hitForce, y: -0.5 * hitForce, ease: Power2.easeOut });
+      const hitHard = body.velocity.y < -0.8;
+      const hitForce = hitHard ? 0.4 : 0.2;
+      tl.to(scale, 0.1, { x: hitForce, y: -hitForce, ease: Power2.easeOut });
       tl.to(scale, 0.15, { x: 0, y: 0, ease: Power2.easeOut });
-      tl.to(pos, 0.1, { y: -0.6 * hitForce, ease: Power2.easeOut }, 0);
+      tl.to(pos, 0.1, { y: -hitForce, ease: Power2.easeOut }, 0);
       tl.to(pos, 0.15, { y: 0, ease: Power2.easeOut });
     }
   }
@@ -155,28 +155,35 @@ export default class GamePlayer {
     let [xForce, yForce] = [0, 0];
     yForce = this.getJumpForce(inputs);
     xForce = this.getWalkingForce(inputs);
+    if (xForce === 0) {
+      this.body.velocity.x = 0;
+    }
     if (xForce !== 0 || yForce !== 0) {
       body.applyForce(new THREE.Vector2(xForce, yForce));
     }
   }
 
   updateTransforms() {
-    const { opts, mesh, body, grounded, descending } = this;
-    mesh.scale.y = Clamp(1 + body.velocity.y * 1.5, 1, 1.5);
-    mesh.scale.x = Clamp(1 - body.velocity.y * 0.3, 0.5, 1);
+    const { opts, body, grounded, descending } = this;
     if (descending) {
       body.opts.gravity.set(0, opts.descentGravity);
     } else {
       body.opts.gravity.set(0, opts.gravity);
     }
     if (!grounded) {
-      body.meshPositionOffset.multiplyScalar(0.8);
+      // Modify height mass with velocity
+      body.meshScaleOffset.y = Clamp(body.velocity.y * 0.5, -0.1, 0.9);
+      // Modity width mass with velocity
+      body.meshScaleOffset.x = Clamp(body.velocity.y * -0.2, -0.4, 0.15);
+      body.meshScaleOffset.z = body.meshScaleOffset.x;
+      // body.meshPositionOffset.multiplyScalar(0.99);
     }
   }
 
   updateLights() {
     const { light, body } = this;
-    TranslateTo3d(light.position, body.position.x, body.position.y + 2, GAME.PlayerDistance + 3);
+    TranslateTo3d(light.position, body.position.x, body.position.y, GAME.PlayerDistance);
+    light.position.addScalar(0.15);
   }
 
   update(delta, inputState) {

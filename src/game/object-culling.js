@@ -1,9 +1,16 @@
+const DEFAULT = {
+  maxDistance: 80,
+  maxVisibleNodes: 100,
+  updateRate: 10,
+};
+
 export default class ObjectCulling {
-  constructor(maxDistance, maxVisibleNodes) {
-    this.maxVisibleNodes = maxVisibleNodes;
-    this.maxDistance = maxDistance;
+  constructor(opts) {
+    this.opts = { ...DEFAULT, ...opts };
     this.prevNearest = [];
     this.objects = [];
+    // force first frame to render
+    this.updateFrame = opts.updateRate;
     this.rebuild();
   }
 
@@ -48,12 +55,15 @@ export default class ObjectCulling {
   }
 
   updateVisibilityFrom(position) {
-    const { kdTree, maxVisibleNodes, maxDistance } = this;
-    const nearest = kdTree.nearest({
-      y: position.y,
-    }, maxVisibleNodes, maxDistance);
-    this.setVisible(this.prevNearest, false);
-    this.setVisible(nearest, true);
-    this.prevNearest = nearest;
+    const { updateRate, maxVisibleNodes, maxDistance } = this.opts;
+    this.updateFrame++;
+    if (this.updateFrame % updateRate === 0) {
+      const nearest = this.kdTree.nearest({
+        y: position.y,
+      }, maxVisibleNodes, maxDistance);
+      this.setVisible(this.prevNearest, false);
+      this.setVisible(nearest, true);
+      this.prevNearest = nearest;
+    }
   }
 }

@@ -10,7 +10,11 @@ export default class Engine {
     this.opts = { ...DEFAULT, ...opts };
     this.width = 0;
     this.height = 0;
-    this.objectCulling = new ObjectCulling(100, 100);
+    this.objectCulling = new ObjectCulling({
+      maxDistance: GAME.CullingMaxDistance,
+      maxVisibleNodes: GAME.CullingMaxNodes,
+      updateRate: GAME.CullingUpdateRate,
+    });
     this.rebuildCulling = true;
     this.initWorld();
     this.initLights();
@@ -38,7 +42,7 @@ export default class Engine {
     this.renderer.gammaOutput = true;
     this.scene = new THREE.Scene();
     this.scene.fog = new THREE.FogExp2(0x000000, 0.02);
-    this.camera = new THREE.PerspectiveCamera(45, 1, 1, 200);
+    this.camera = new THREE.PerspectiveCamera(45, 1, 1, 300);
     this.camera.position.z = 200;
   }
 

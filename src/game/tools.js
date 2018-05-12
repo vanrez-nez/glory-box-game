@@ -23,17 +23,20 @@ export default class GameTools {
       case 'map':
         this.buildMapScreen(obj);
         break;
+      case 'world':
+        this.buildWorldScreen(obj);
+        break;
       default:
         break;
     }
   }
 
   addColorField(folder, obj, prop, name) {
-    const proxy = { color: obj[prop].toArray() };
+    const proxy = { color: `#${obj[prop].getHexString()}` };
     const controller = folder.addColor(proxy, 'color').name(name);
+    const color = obj[prop];
     controller.onChange((v) => {
-      obj[prop] = new THREE.Color(
-        v[0] / 255, v[1] / 255, v[2] / 255);
+      color.setHex(v.replace('#', '0x'));
     });
   }
 
@@ -51,8 +54,7 @@ export default class GameTools {
 
   buildPhysicsScreen(obj) {
     const { gui } = this;
-    const f1 = gui.addFolder('World');
-
+    const f1 = gui.addFolder('Generic Physics');
     gui.remember(obj.opts.gravity);
     f1.add(obj.opts.gravity, 'x', -0.5, 0.5).name('Gravity X');
     f1.add(obj.opts.gravity, 'y', -0.5, 0.5).name('Gravity Y');
@@ -63,8 +65,8 @@ export default class GameTools {
     const f1 = gui.addFolder('Player');
 
     gui.remember(obj.body.opts);
-    f1.add(obj.body.opts, 'mass', 0.01, 1).name('Mass');
-    f1.add(obj.body.opts, 'friction', 0.01, 1).name('Friction');
+    f1.add(obj.body.opts, 'mass', 0.01, 0.3).name('Mass');
+    f1.add(obj.body.opts, 'friction', 0.01, 0.3).name('Friction');
 
     gui.remember(obj.body.opts.maxVelocity);
     f1.add(obj.body.opts.maxVelocity, 'x', 0.1, 2).name('Max Velocity X');
@@ -100,10 +102,10 @@ export default class GameTools {
     this.addColorField(f3, ambientLight, 'color', 'Color');
   }
 
-  buildMapScreen(obj) {
+  buildWorldScreen(obj) {
     const { gui } = this;
     const { cylinder, floor, skytube } = obj;
-    const rootFolder = gui.addFolder('Map');
+    const rootFolder = gui.addFolder('World');
     const f1 = rootFolder.addFolder('Cylinder Material');
     this.addMaterialFields(f1, cylinder.material);
     const f2 = rootFolder.addFolder('Floor Material');
@@ -121,13 +123,18 @@ export default class GameTools {
     f4.add(stUniforms.tile, 'value', 0, 1).name('Tile');
     f4.add(stUniforms.transverseSpeed, 'value', 0, 4)
       .name('Transverse Speed');
+  }
+
+  buildMapScreen() {
+    const { gui } = this;
+    const rootFolder = gui.addFolder('Map');
     // Platform
-    const f5 = rootFolder.addFolder('Platform');
-    const f6 = f5.addFolder('Static Light Material');
-    this.addMaterialFields(f6, LightMatStatic);
-    const f7 = f5.addFolder('Moving Light Material');
-    this.addMaterialFields(f7, LightMatMoving);
-    const f8 = f5.addFolder('Solid Material');
-    this.addMaterialFields(f8, GenericMat);
+    const f1 = rootFolder.addFolder('Platform');
+    const f2 = f1.addFolder('Static Light Material');
+    this.addMaterialFields(f2, LightMatStatic);
+    const f3 = f1.addFolder('Moving Light Material');
+    this.addMaterialFields(f3, LightMatMoving);
+    const f4 = f1.addFolder('Solid Material');
+    this.addMaterialFields(f4, GenericMat);
   }
 }

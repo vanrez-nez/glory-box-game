@@ -26,7 +26,7 @@ export default class GameLobby {
 
   addLogoMesh() {
     const extrudeSettings = {
-      amount: 0.6,
+      amount: 0.4,
       bevelEnabled: false,
     };
     const loader = new THREE.SVGLoader();
@@ -37,7 +37,7 @@ export default class GameLobby {
       map: GetTextureRepeat(IMAGE_ASSETS.HullBase, 1 / 150, 1 / 150),
       normalMap: GetTextureRepeat(IMAGE_ASSETS.HullNormal, 1 / 150, 1 / 150),
       envMap: Skybox.textureCube,
-      metalness: 1,
+      metalness: 0.7,
       roughness: 0.4,
     });
     Glyphs.forEach((glyph) => {
@@ -54,6 +54,7 @@ export default class GameLobby {
           mesh.lookAt(0, mesh.position.y, 0);
           mesh.positionCulled = true;
           mesh.castShadow = true;
+          mesh.geometry.computeVertexNormals();
           const light = new THREE.PointLight(glyph.color, 24, 8);
           light.position.copy(mesh.position);
           light.position.y -= 5;
@@ -68,7 +69,7 @@ export default class GameLobby {
   addGlobalLight() {
     const rectLight = new THREE.RectAreaLight(0x00eaff, 8, 20, 10);
     TranslateTo3d(rectLight.position, 0, 2, GAME.CilynderRadius - 10);
-    this.group.add(rectLight);
+    // this.group.add(rectLight);
     // const rectLightHelper = new THREE.RectAreaLightHelper( rectLight );
     // this.group.add(rectLightHelper);
   }
