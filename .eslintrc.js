@@ -35,6 +35,7 @@ module.exports = {
     'Simple1DNoise': false,
     'kdTree': false,
     'rbush': false,
+    'merge': false
   },
   // add your custom rules here
   rules: {
