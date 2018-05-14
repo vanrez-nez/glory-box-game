@@ -1,19 +1,22 @@
 export const CONFIG = {
-  EnableTools: true,
+  EnableTools: false,
   EnableStats: true,
   EnableOrbitControls: false,
   EnableAxes: false,
   DebugCollisions: false,
   UsePostProcessing: true,
   PositionCullingEnabled: true,
+  EnableShadows: false,
 };
 
 export const GAME = {
   CilynderRadius: 35,
   PlatformDistance: 37.25,
+  CollectibleDistance: 37.5,
+  PlayerDistance: 37.3,
+  ZoomCameraDistance: 150,
   CameraDistance: 80,
   PlatformZSize: 2,
-  PlayerDistance: 37.3,
   BoundsLeft: -128,
   BoundsRight: 128,
   BoundsBottom: -16,
@@ -32,6 +35,7 @@ export const KEYBOARD_BINDINGS = {
 export const EVENTS = {
   CollisionBegan: 'ECollisionBegan',
   CollisionEnded: 'ECollisionEnded',
+  CollectiblePickup: 'ECollectiblePickUp', 
 };
 
 export const PHYSICS = {
@@ -40,6 +44,7 @@ export const PHYSICS = {
   WorldBounds: 'WorldBounds',
   StaticPlatform: 'PHYSICS.StaticPlatform',
   MovingPlatform: 'PHYSICS.MovingPlatform',
+  Collectible: 'PHYSICS.Collectible',
 };
 
 export const DIRECTIONS = {
@@ -56,3 +61,15 @@ export const MAP = {
   MovingPlatform: 2,
   Glyph: 3,
 };
+
+export const COLLECTIBLE = {
+  Honor: 0,
+  Courage: 1,
+  Destiny: 2,
+  Strength: 3,
+  Peace: 4,
+  Love: 5,
+  Energy: 6,
+  Difficulty: 7,
+  Happiness: 8,
+}

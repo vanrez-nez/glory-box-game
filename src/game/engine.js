@@ -37,13 +37,13 @@ export default class Engine {
     });
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(1, 1);
-    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.enabled = CONFIG.EnableShadows;
     this.renderer.gammaInput = true;
     this.renderer.gammaOutput = true;
     this.scene = new THREE.Scene();
     this.scene.fog = new THREE.FogExp2(0x000000, 0.02);
     this.camera = new THREE.PerspectiveCamera(45, 1, 1, 300);
-    this.camera.position.z = 200;
+    this.camera.position.z = GAME.ZoomCameraDistance;
   }
 
   initLights() {
@@ -102,9 +102,10 @@ export default class Engine {
     const { cameraVector, cameraTargetTo, cameraTarget, camera } = this;
     TranslateTo3d(
       cameraVector.copy(cameraTarget),
-      cameraTarget.x * (Math.PI / 1.5),
-      cameraTarget.y + 10,
-      GAME.CameraDistance,
+      cameraTarget.x * (Math.PI / 2),
+      cameraTarget.y + 5,
+      GAME.PlayerDistance,
+      2
     );
     cameraTargetTo.lerp(cameraTarget, 0.1);
     camera.lookAt(cameraTargetTo);
