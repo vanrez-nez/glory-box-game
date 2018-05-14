@@ -31,13 +31,17 @@ export default class GamePlayer {
       type: PHYSICS.Player,
       mesh: this.mesh,
       mass: 0.26,
-      friction: 0.093,
+      friction: 0.12,
       label: 'player',
       scale: new THREE.Vector2(1.5, 1.5),
       gravity: new THREE.Vector2(0, opts.gravity),
       maxVelocity: new THREE.Vector2(0.3, 1.7),
       distance: GAME.PlayerDistance,
     });
+    this.attachEvents();
+  }
+
+  attachEvents() {
     this.body.events.on(EVENTS.CollisionBegan, this.onCollisionBegan.bind(this));
   }
 
