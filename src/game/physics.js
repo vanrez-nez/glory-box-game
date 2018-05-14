@@ -97,7 +97,9 @@ export default class GamePhysics {
       minY: cS.min.y,
       maxX: cS.max.x,
       maxY: cS.max.y,
-    }).map(o => o.body).concat(this.dynamicBodies);
+    }).map(o => o.body)
+      .concat(this.dynamicBodies)
+      .filter(b => b.enabled);
   }
 
   updateCollisionSpace(position, area) {
@@ -119,6 +121,7 @@ export default class GamePhysics {
         const isColliding = boxA.intersectsBox(boxB);
 
         let shouldCollide = isColliding;
+
         // swap so b1 is always the dynamic object
         const pair = b1.opts.isStatic ? [b2, b1] : [b1, b2];
 
@@ -138,19 +141,18 @@ export default class GamePhysics {
     return collisionPairs;
   }
 
-  // https://gamedev.stackexchange.com/questions/48587/resolving-a-collision-with-forces/48834#48834
-  calcCollisionForce(b1, b2, target) {
-    const { x: b1vx, y: b1vy } = b1.velocity;
-    const { x: b2vx, y: b2vy } = b2.velocity;
-    target.x = (b1vx * (b1.mass - b2.mass) + (2 * b2.mass * b2vx)) / (b1.mass + b2.mass);
-    target.y = (b1vy * (b1.mass - b2.mass) + (2 * b2.mass * b2vy)) / (b1.mass + b2.mass);
-  }
-
   solveCollisions(collisions) {
     if (collisions.length > 0) {
       for (let i = 0; i < collisions.length; i++) {
         const [b1, b2] = collisions[i];
-        SolveRectangleCollision(b1, b2);
+
+        // Solve collision only when any of the two bodies are not sensors
+        const isSensorCollision = b1.opts.isSensor || b2.opts.isSensor;
+        if (!isSensorCollision) {
+          SolveRectangleCollision(b1, b2);
+        } else {
+          b2.collidingEdges.set(b1, b1, b1, b1);
+        }
 
         // if object is colliding with moving platform move b1 along with it
         if (b2.opts.type === PHYSICS.MovingPlatform) {
@@ -169,17 +171,18 @@ export default class GamePhysics {
     for (let i = 0; i < allBodies.length; i++) {
       const b = allBodies[i];
       const { opts } = b;
+      if (b.enabled) {
+        // skip grounded objects from apply gravity
+        if (!opts.isStatic && !b.collidingEdges.bottom) {
+          const g = opts.gravity !== undefined ? opts.gravity : gravity;
+          b.velocity.x += opts.mass * g.x;
+          b.velocity.y += opts.mass * g.y;
+        }
 
-      // skip grounded objects from apply gravity
-      if (!opts.isStatic && !b.collidingEdges.bottom) {
-        const g = opts.gravity !== undefined ? opts.gravity : gravity;
-        b.velocity.x += opts.mass * g.x;
-        b.velocity.y += opts.mass * g.y;
+        b.update(delta, timeScale);
+        b.resetCollisionEdges();
+        this.constrainToBoundaries(b, bounds);
       }
-
-      b.update(delta, timeScale);
-      b.resetCollisionEdges();
-      this.constrainToBoundaries(b, bounds);
     }
     const cBodies = this.getBodiesWithinCollisionSpace();
     const collisionPairs = this.getCollisions(cBodies);

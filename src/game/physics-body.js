@@ -9,6 +9,7 @@ const DEFAULT = {
   mesh: null,
   friction: 0.1,
   isStatic: false,
+  isSensor: false,
   maxVelocity: new THREE.Vector2(1, 1),
   distance: GAME.CilynderRadius,
 };
@@ -17,6 +18,7 @@ export default class GamePhysicsBody {
   constructor(opts) {
     this.id = THREE.Math.generateUUID();
     this.opts = { ...DEFAULT, ...opts };
+    this.enabled = true;
     this.box = new THREE.Box2();
     this.scale = this.opts.scale || new THREE.Vector2();
     this.position = new THREE.Vector2();
@@ -81,7 +83,7 @@ export default class GamePhysicsBody {
     const { mesh } = opts;
     this.updateScale();
     if (mesh) {
-      if (CONFIG.DebugCollisions) {
+      if (CONFIG.DebugCollisions && mesh.material) {
         mesh.material.wireframe = cE.isColliding();
       }
       TranslateTo3d(

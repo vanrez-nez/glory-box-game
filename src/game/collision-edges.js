@@ -24,6 +24,13 @@ export default class CollisionEdges {
     return cE.edges.every((v, i) => this.edges[i] === v);
   }
 
+  set(top, right, bottom, left) {
+    this.edges[0] = top;
+    this.edges[1] = right;
+    this.edges[2] = bottom;
+    this.edges[3] = left;
+  }
+
   copy(cE) {
     this.edges[0] = cE.edges[0];
     this.edges[1] = cE.edges[1];

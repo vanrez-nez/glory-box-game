@@ -1,5 +1,5 @@
 
-import { MAP, DIRECTIONS } from './const';
+import { EVENTS, MAP, DIRECTIONS } from './const';
 import GameMapParser from './map-parser';
 import GamePlatform from './platform';
 import GameCollectible from './collectible';
@@ -8,6 +8,7 @@ const MAP_OFFSET_Y = -10;
 
 export default class GameMap {
   constructor() {
+    this.events = new EventEmitter3();
     this.group = new THREE.Group();
     this.mapParser = new GameMapParser('#game_map');
     this.platforms = [];
@@ -47,8 +48,15 @@ export default class GameMap {
     const xTrans = x - map.width / 2;
     const yTrans = map.height - y + MAP_OFFSET_Y;
     const collectible = new GameCollectible(xTrans, yTrans);
+    collectible.body.events.on(EVENTS.CollisionBegan,
+      this.onCollectibleCollisionBegan.bind(this, collectible));
+    this.bodies.push(collectible.body);
     this.collectibles.push(collectible);
     this.group.add(collectible.group);
+  }
+
+  onCollectibleCollisionBegan(collectible) {
+    this.events.emit(EVENTS.CollectiblePickup, collectible);
   }
 
   addPlaform(x, y, width, type) {
