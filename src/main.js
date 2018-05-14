@@ -32,12 +32,14 @@ import GamePhysics from './game/physics';
 import GamePlayer from './game/player';
 import GameWorld from './game/world';
 import GameMap from './game/map';
+import GameSfxManager from './game/sfx-manager';
 import GameMoodManager from './game/mood-manager';
 
 class Game {
   constructor() {
     this.init(true);
     this.updateSize();
+    this.attachEvents();
     this.onFrameListener = this.onFrame.bind(this);
     this.loader = THREE.DefaultLoadingManager;
     this.loader.onProgress = (url, itemsLoaded, itemsTotal) => {
@@ -61,6 +63,12 @@ class Game {
         new THREE.Vector2(GAME.BoundsRight, GAME.BoundsBottom)),
     });
     this.world = new GameWorld();
+    this.sfxManager = new GameSfxManager({
+      engine: this.engine,
+      player: this.player,
+      map: this.map,
+      world: this.world,
+    });
     this.moodManager = new GameMoodManager({
       engine: this.engine,
       map: this.map,
@@ -72,7 +80,6 @@ class Game {
     this.engine.scene.add(this.map.group);
     this.engine.scene.add(this.world.group);
     this.engine.cameraTarget = this.player.mesh.position;
-    this.attachEvents();
     CONFIG.EnableTools && this.addTools();
     CONFIG.EnableStats && this.addStats();
   }
