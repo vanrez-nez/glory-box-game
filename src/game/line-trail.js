@@ -4,9 +4,10 @@ const DEFAULT = {
   sizeFn: p => p * 0.5,
   material: new MeshLineMaterial({
     color: new THREE.Color(0xffffff),
-    transparent: true,
+    transparent: false,
     opacity: 1,
-    side: THREE.DoubleSide,
+    depthTest: false,
+    side: THREE.FrontSide,
     sizeAttenuation: true,
     lineWidth: 1,
     resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
