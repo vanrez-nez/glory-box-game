@@ -1,47 +1,49 @@
 const DefaultMood = {
   Engine: {
     BloomPass: {
-      Strength: 1.14,
-      Threshold: 0.53,
-      Radius: 0.63,
+      Strength: 2.07,
+      Threshold: 0.54,
+      Radius: 1.1,
       HighPassColor: 0x0,
     },
     Scene: {
-      FogColor: 0x0,
-      FogDensity: 0.02,
+      FogColor: 0x070011,
+      FogDensity: 0.022,
     },
     AmbientLight: {
-      Color: 0x1e02f5,
+      Color: 0x8ad8f0,
       Intensity: 1,
     },
   },
-  Map: {
+  World: {
     CylinderMaterial: {
-      Color: 0x2c3d55,
-      Emissive: 0x00ffff,
-      EmissiveIntensity: 0.7,
-      EnvMapIntensity: 1,
-      Metalness: 0.6,
-      Roughness: 0.6,
+      Color: 0x4578c0,
+      Emissive: 0x0059ff,
+      EmissiveIntensity: 2,
+      EnvMapIntensity: 2,
+      Metalness: 0.83,
+      Roughness: 0.4,
     },
     FloorMaterial: {
-      Color: 0xffffff,
+      Color: 0x473f69,
       Emissive: 0x0,
       EmissiveIntensity: 1,
-      EnvMapIntensity: 1,
-      Metalness: 0.5,
-      Roughness: 0.5,
+      EnvMapIntensity: 0.92,
+      Metalness: 1,
+      Roughness: 0.37,
     },
-    SkytubeShader: {
-      Color: 0xff00ff,
-      Intensity: 0.3,
-      Fade: 0.65,
-      Zoom: 1.3,
+    Skytube: {
+      Color: 0x653ee3,
+      Intensity: 0.35,
+      Fade: 0.92,
+      Zoom: 2.5,
       StepSize: 0.25,
       Tile: 0.65,
-      Transverse: 3,
+      Transverse: 2,
     },
-    Plaforms: {
+  },
+  Map: {
+    Platforms: {
       GenericMaterial: {
         Color: 0xffffff,
         Emissive: 0x0,
@@ -51,14 +53,14 @@ const DefaultMood = {
         Roughness: 0.5,
       },
       StaticLightMaterial: {
-        Color: 0xffffff,
-        Emissive: 0x0,
-        EmissiveIntensity: 1,
+        Color: 0xfffff,
+        Emissive: 0x3789ff,
+        EmissiveIntensity: 2,
       },
       MovingLightMaterial: {
         Color: 0xffffff,
-        Emissive: 0x0,
-        EmissiveIntensity: 1,
+        Emissive: 0xff8700,
+        EmissiveIntensity: 2,
       },
     },
   },
