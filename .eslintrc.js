@@ -27,7 +27,11 @@ module.exports = {
     'TimelineMax': false,
     'MeshLine': false,
     'MeshLineMaterial': false,
+    'Power1': false,
     'Power2': false,
+    'Power3': false,
+    'Power4': false,
+    'Expo': false,
     'ThreeBSP': false,
     'EventEmitter3': false,
     'Stats': false,
@@ -35,7 +39,7 @@ module.exports = {
     'Simple1DNoise': false,
     'kdTree': false,
     'rbush': false,
-    'merge': false
+    'deepmerge': false,
   },
   // add your custom rules here
   rules: {
