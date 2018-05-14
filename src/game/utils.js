@@ -12,10 +12,14 @@ export function GetTextureRepeat(url, repeatX, repeatY) {
   return tex;
 }
 
-export function TranslateTo3d(position, toX, toY, radius = 35) {
+export function TranslateTo3d(position, toX, toY, radius = 35, project = 0) {
   position.x = radius * Math.sin(toX / radius + TWO_PI);
   position.y = toY;
   position.z = radius * Math.cos(toX / radius + TWO_PI);
+  if (project > 0) {
+    position.multiplyScalar(project);
+    position.y = toY;
+  }
 }
 
 export function AddDot(scene, position, size = 5) {
