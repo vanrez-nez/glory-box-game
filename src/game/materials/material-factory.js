@@ -1,6 +1,7 @@
 import { CONFIG } from '../const';
 import WorldFloorMaterial from './world-floor';
 import WorldCylinderMaterial from './world-cylinder';
+import WorldSkyCylinder from './world-sky-cylinder';
 import PlatformSocketMaterial from './platform-socket';
 import PlatformLightMaterial from './platform-light';
 import PlatformStepsMaterial from './platform-steps';
@@ -12,6 +13,7 @@ const DEFAULT = {};
 const MATERIALS = {
   WorldCylinder: WorldCylinderMaterial,
   WorldFloor: WorldFloorMaterial,
+  WorldSkyCylinder: WorldSkyCylinder, 
   PlatformLight: PlatformLightMaterial,
   PlatformSteps: PlatformStepsMaterial,
   PlatformSocket: PlatformSocketMaterial,

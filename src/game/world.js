@@ -1,5 +1,4 @@
 import { GAME } from './const';
-import GameSkytube from './skytube';
 import GameLobby from './lobby';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 import CylinderFxShader from '../shaders/cylinder-fx';
@@ -12,7 +11,7 @@ export default class GameWorld {
     this.addMainCylinder();
     this.addFxCylinder();
     this.addCylinderBase();
-    this.addSkytube();
+    this.addSkyCylinder();
   }
 
   addLobby() {
@@ -20,9 +19,11 @@ export default class GameWorld {
     // this.group.add(this.lobby.group);
   }
 
-  addSkytube() {
-    this.skytube = new GameSkytube();
-    // this.group.add(this.skytube.group);
+  addSkyCylinder() {
+    const geo = new THREE.CylinderGeometry(200, 200, 250, 16, 1, true);
+    const mat = MaterialFactory.getMaterial('WorldSkyCylinder');
+    this.skyCylinder = new THREE.Mesh(geo, mat);
+    this.group.add(this.skyCylinder);
   }
 
   addFloor() {
@@ -101,7 +102,7 @@ export default class GameWorld {
   }
 
   update(delta, playerPosition) {
-    this.skytube.update(delta);
-    this.skytube.group.position.y = playerPosition.y;
+    this.skyCylinder.material.uniforms.time.value += delta * 0.35;
+    this.skyCylinder.position.y = playerPosition.y;
   }
 }
