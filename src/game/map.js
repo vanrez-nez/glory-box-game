@@ -66,7 +66,7 @@ export default class GameMap {
     const platform = new GamePlatform({ x: xTrans, y: yTrans, width, type });
     bodies.push(platform.body);
     group.add(platform.mesh);
-    // group.add(platform.holderSocketMesh);
+    group.add(platform.holderSocketMesh);
     platforms.push(platform);
   }
 

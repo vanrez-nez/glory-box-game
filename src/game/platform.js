@@ -31,10 +31,14 @@ export default class GamePlatform {
   getMesh() {
     const { opts } = this;
     const g = new THREE.Object3D();
-    const lightColor = this.isMovingPlatform() ? 0xff0000 : 0x00ff00;
     const geo = new THREE.BoxBufferGeometry(opts.width, 0.7, GAME.PlatformZSize);
-    const stepsMat = MaterialFactory.getMaterial('PlatformSteps', { width: opts.width });
-    const lightMat = MaterialFactory.getMaterial('PlatformLight', { color: lightColor });
+    const stepsMat = MaterialFactory.getMaterial('PlatformSteps', { 
+      width: opts.width,
+      color: 0x0,
+    });
+    const lightMat = MaterialFactory.getMaterial('PlatformLight', {
+      color: this.isMovingPlatform() ? 0xff0000 : 0x00ff00,
+    });
     const meshUp = new THREE.Mesh(geo, stepsMat);
     const meshMiddle = new THREE.Mesh(geo, lightMat);
     const meshDown = new THREE.Mesh(geo, stepsMat);

@@ -10,6 +10,7 @@ export default class PlatformStepsMaterial extends GameMetaMaterial {
       low: {
         type: 'MeshBasicMaterial',
         args: {
+          color: opts.color,
           // map: GetTextureRepeatDefer(IMAGE_ASSETS.ImpFloorBase, width, 0.5),
         },
       },
