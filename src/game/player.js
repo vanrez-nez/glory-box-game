@@ -6,6 +6,7 @@
 
 import { PHYSICS, EVENTS, GAME } from './const';
 import { Clamp, TranslateTo3d } from './utils';
+import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 import GamePhysicsBody from './physics-body';
 
 const DEFAULT = {
@@ -48,13 +49,7 @@ export default class GamePlayer {
 
   initCube() {
     const geo = new THREE.BoxBufferGeometry(1.5, 1.5, 1.5);
-    const mat = new THREE.MeshStandardMaterial({
-      color: 0xffffff,
-      emissive: 0xffffff,
-      transparent: true,
-      flatShading: true,
-      fog: false,
-    });
+    const mat = MaterialFactory.getMaterial('PlayerMaterial');
     this.mesh = new THREE.Mesh(geo, mat);
     // this.mesh.castShadow = true;
     this.group.add(this.mesh);
