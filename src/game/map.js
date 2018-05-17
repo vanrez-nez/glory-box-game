@@ -3,8 +3,6 @@ import { EVENTS, MAP, DIRECTIONS } from './const';
 import GameMapParser from './map-parser';
 import GamePlatform from './platform';
 import GameCollectible from './collectible';
-import { IMAGE_ASSETS } from './assets';
-import { GetTextureRepeat } from './utils';
 
 const MAP_OFFSET_Y = -10;
 
@@ -17,46 +15,7 @@ export default class GameMap {
     this.bodies = [];
     this.collectibles = [];
     this.generatePlatform();
-    // this.mergePlatforms();
   }
-
-  mergePlatforms() {
-    const solidGeo = new THREE.Geometry();
-    const lightsGeo = new THREE.Geometry();
-    this.platforms.forEach((p) => {
-      const [up, light, down] = p.getPlatformGeo();
-      const startSolid = solidGeo.vertices.length;
-      const startLights = lightsGeo.vertices.length;
-      solidGeo.merge(up);
-      solidGeo.merge(down);
-      light.faces.forEach((f) => {
-        const c = p.opts.type === MAP.StaticPlatform
-          ? new THREE.Color(0xff0000) : new THREE.Color(0x0000ff);
-        f.vertexColors[0] = c;
-        f.vertexColors[1] = c;
-        f.vertexColors[2] = c;
-      });
-      lightsGeo.merge(light);
-      p.setPlatformGeometries(solidGeo, lightsGeo, startSolid, startLights);
-    });
-    const solidMat = new THREE.MeshStandardMaterial({
-      map: GetTextureRepeat(IMAGE_ASSETS.ImpFloorBase, 6, 0.5),
-    });
-
-    const lightMat = new THREE.MeshBasicMaterial({
-      vertexColors: THREE.VertexColors,
-    });
-
-    const solidMesh = new THREE.Mesh(solidGeo, solidMat);
-    const lightsMesh = new THREE.Mesh(lightsGeo, lightMat);
-
-    this.mergedSolidMesh = solidMesh;
-    this.mergedLightsMesh = lightsMesh;
-
-    this.group.add(solidMesh);
-    this.group.add(lightsMesh);
-  }
-
 
   generatePlatform() {
     const { mapParser: map } = this;

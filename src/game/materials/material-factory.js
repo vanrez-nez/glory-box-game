@@ -13,6 +13,7 @@ import PlayerMaterial from './player-material';
 
 const DEFAULT = {};
 const MATERIALS = {
+  PlayerMaterial,
   WorldCylinder: WorldCylinderMaterial,
   WorldFloor: WorldFloorMaterial,
   WorldSkyCylinder: WorldSkyCylinderMaterial,

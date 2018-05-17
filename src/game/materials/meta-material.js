@@ -78,7 +78,6 @@ export default class GameMetaMaterial {
         */
         mat = new window[mType](profile.args);
       }
-      
     }
     return mat;
   }

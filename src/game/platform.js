@@ -58,57 +58,6 @@ export default class GamePlatform {
     return g;
   }
 
-  /*
-    Creates and returns 3 geometries and applies local transforms
-    to be merged by a single geometry
-  */
-  getPlatformGeo() {
-    const { opts } = this;
-    const mesh = new THREE.Object3D();
-    const geoTop = new THREE.BoxGeometry(opts.width, 0.5, GAME.PlatformZSize);
-    const geoBottom = new THREE.BoxGeometry(opts.width * 0.8, 0.25, GAME.PlatformZSize);
-    const geoLight = new THREE.BoxGeometry(opts.width, 0.25, GAME.PlatformZSize);
-    mesh.updateMatrix();
-    geoTop.applyMatrix(mesh.matrix).translate(0, 0.25, 0);
-    geoLight.applyMatrix(mesh.matrix).translate(0, -0.15, 0);
-    geoBottom.applyMatrix(mesh.matrix).translate(0, -0.4, 0);
-    return [geoTop, geoLight, geoBottom];
-  }
-
-  /*
-    Save vertex references into a single mesh to handle transforms more easily,
-    this geometries have references to the actual vertices of the
-    global geometry so any modification to position, scale, rotation, etc.
-    will took place after applying the matrix from the mesh into the geometry
-    by invoking applyTransforms method (see below).
-  */
-  setPlatformGeometries(solidGeo, lightsGeo, startSolid, startLights) {
-    // Get vertices from global geometry: 8 vertices per box
-    const solidVertices = solidGeo.vertices.slice(startSolid, startSolid + 16);
-    const lightVertices = lightsGeo.vertices.slice(startLights, startLights + 8);
-
-    // Create geometry and mesh
-    const groupGeometry = new THREE.Geometry();
-    groupGeometry.vertices = solidVertices.concat(lightVertices);
-    const mesh = new THREE.Mesh(groupGeometry);
-    mesh.name = 'Platform Mesh';
-
-    // link physics body with current mesh
-    this.body.opts.mesh = mesh;
-
-    // apply global position for the mesh
-    this.mesh = mesh;
-    this.applyTransforms();
-  }
-
-  applyTransforms() {
-    const { mesh, opts } = this;
-    TranslateTo3d(mesh.position, opts.x, opts.y, GAME.PlatformDistance);
-    mesh.lookAt(0, opts.y, 0);
-    mesh.updateMatrix();
-    mesh.geometry.applyMatrix(this.mesh.matrix);
-  }
-
   getBspCylinder() {
     const { opts } = this;
     const r = GAME.CilynderRadius + 0.5;
@@ -161,7 +110,6 @@ export default class GamePlatform {
       mass: 0.01,
       friction: 0.05,
       isStatic: true,
-      // onMeshSync: this.applyTransforms.bind(this),
       scale: new THREE.Vector2(opts.width, 1),
       distance: GAME.PlatformDistance,
     });
