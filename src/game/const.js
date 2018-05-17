@@ -1,12 +1,20 @@
+export const MATERIAL = {
+  QualityLow: 0,
+  QualityMedium: 1,
+  QualityHigh: 2,
+};
+
 export const CONFIG = {
   EnableTools: false,
-  EnableStats: true,
+  EnableStats: false,
   EnableOrbitControls: false,
   EnableAxes: false,
   DebugCollisions: false,
-  UsePostProcessing: true,
-  PositionCullingEnabled: true,
+  UsePostProcessing: false,
+  PositionCullingEnabled: false,
   EnableShadows: false,
+  ToneMapping: THREE.NoToneMapping,
+  MaterialQuality: MATERIAL.QualityLow,
 };
 
 export const GAME = {
@@ -35,7 +43,7 @@ export const KEYBOARD_BINDINGS = {
 export const EVENTS = {
   CollisionBegan: 'ECollisionBegan',
   CollisionEnded: 'ECollisionEnded',
-  CollectiblePickup: 'ECollectiblePickUp', 
+  CollectiblePickup: 'ECollectiblePickUp',
 };
 
 export const PHYSICS = {
@@ -72,4 +80,4 @@ export const COLLECTIBLE = {
   Energy: 6,
   Difficulty: 7,
   Happiness: 8,
-}
+};

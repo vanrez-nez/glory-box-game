@@ -6,10 +6,14 @@ export function Clamp(val, min, max) {
 
 export function GetTextureRepeat(url, repeatX, repeatY) {
   const tex = new THREE.TextureLoader().load(url);
-  tex.wrapS = THREE.MirroredRepeatWrapping;
-  tex.wrapT = THREE.MirroredRepeatWrapping;
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
   tex.repeat.set(repeatX, repeatY);
   return tex;
+}
+
+export function GetTextureRepeatDefer(url, repeatX, repeatY) {
+  return () => GetTextureRepeat(url, repeatX, repeatY);
 }
 
 export function TranslateTo3d(position, toX, toY, radius = 35, project = 0) {

@@ -40,6 +40,9 @@ export default class Engine {
     this.renderer.shadowMap.enabled = CONFIG.EnableShadows;
     this.renderer.gammaInput = true;
     this.renderer.gammaOutput = true;
+    this.renderer.gammaFactor = 2.3;
+    this.renderer.sortObjects = false;
+    this.renderer.toneMapping = CONFIG.ToneMapping;
     this.scene = new THREE.Scene();
     this.scene.fog = new THREE.FogExp2(0x000000, 0.02);
     this.camera = new THREE.PerspectiveCamera(45, 1, 1, 300);
@@ -90,7 +93,6 @@ export default class Engine {
     camera.clearViewOffset();
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    renderer.setSize(w, h);
     if (CONFIG.UsePostProcessing) {
       composer.setSize(w, h);
     }
@@ -105,7 +107,7 @@ export default class Engine {
       cameraTarget.x * (Math.PI / 2),
       cameraTarget.y + 5,
       GAME.PlayerDistance,
-      2
+      2,
     );
     cameraTargetTo.lerp(cameraTarget, 0.1);
     camera.lookAt(cameraTargetTo);

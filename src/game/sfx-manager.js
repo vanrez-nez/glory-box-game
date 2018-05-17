@@ -14,7 +14,7 @@ export default class GameSfxManager {
   }
 
   attachEvents() {
-    const { engine, world, player, map } = this.opts;
+    const { map } = this.opts;
     map.events.on(EVENTS.CollectiblePickup, this.onCollectiblePickup.bind(this));
   }
 

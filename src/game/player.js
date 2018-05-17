@@ -24,7 +24,8 @@ export default class GamePlayer {
     this.jumpDefer = 0;
     this.stateBuff = [];
     this.groundedTime = 0;
-    this.group = new THREE.Object3D();
+    this.group = new THREE.Group();
+    this.group.name = 'GamePlayer';
     this.initCube();
     this.initLights();
     this.body = new GamePhysicsBody({
@@ -193,6 +194,6 @@ export default class GamePlayer {
   update(delta, inputState) {
     this.processInputs(inputState);
     this.updateTransforms();
-    this.updateLights();
+    // this.updateLights();
   }
 }

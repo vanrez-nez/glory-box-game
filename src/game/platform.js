@@ -1,9 +1,8 @@
 
 import { PHYSICS, MAP, EVENTS, GAME } from './const';
-import { IMAGE_ASSETS } from './assets';
-import { TranslateTo3d, GetTextureRepeat } from './utils';
+import { TranslateTo3d } from './utils';
 import GamePhysicsBody from './physics-body';
-import { StaticInstance as Skybox } from './skybox';
+import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 
 const DEFAULT = {
   x: 0,
@@ -12,42 +11,11 @@ const DEFAULT = {
   type: MAP.StaticPlatform,
 };
 
-export const LightMatStatic = new THREE.MeshLambertMaterial({
-  color: 0xff00ff,
-  emissive: 0xffffff,
-  emissiveIntensity: 1,
-});
-
-export const LightMatMoving = new THREE.MeshLambertMaterial({
-  color: 0xff00ff,
-  emissive: 0xffffff,
-  emissiveIntensity: 1,
-});
-
-export const GenericMat = new THREE.MeshStandardMaterial({
-  envMap: Skybox.textureCube,
-  envMapIntensity: 0.2,
-  metalness: 0.5,
-  roughness: 0.7,
-  flatShading: true,
-  color: 0xffffff,
-});
-
-export const SocketMat = new THREE.MeshLambertMaterial({
-  envMap: Skybox.textureCube,
-  color: 0x05070a,
-  emissiveIntensity: 0.5,
-  emissive: 0x05070a,
-  reflectivity: 0.35,
-});
-
 export default class GamePlatform {
   constructor(opts) {
     this.opts = { ...DEFAULT, ...opts };
     this.mesh = this.getMesh();
-    this.mesh.positionCulled = true;
     this.holderSocketMesh = this.getHolderSocketMesh();
-    this.holderSocketMesh.positionCulled = true;
     this.body = this.getBody();
     this.oscillator = Math.random();
     this.body.position.set(this.opts.x, this.opts.y);
@@ -63,18 +31,13 @@ export default class GamePlatform {
   getMesh() {
     const { opts } = this;
     const g = new THREE.Object3D();
-    const texBase = GetTextureRepeat(IMAGE_ASSETS.ImpFloorBase, opts.width * 0.15, 0.5);
-    const texRough = GetTextureRepeat(IMAGE_ASSETS.ImpFloorRoughness, opts.width * 0.15, 0.5);
-    const texNormal = GetTextureRepeat(IMAGE_ASSETS.ImpFloorNormal, opts.width * 0.15, 0.5);
-    const matSolid = GenericMat;
-    matSolid.map = texBase;
-    matSolid.normalMap = texNormal;
-    matSolid.roughnessMap = texRough;
-    const matLight = this.isMovingPlatform() ? LightMatMoving : LightMatStatic;
+    const lightColor = this.isMovingPlatform() ? 0xff0000 : 0x00ff00;
     const geo = new THREE.BoxBufferGeometry(opts.width, 0.7, GAME.PlatformZSize);
-    const meshUp = new THREE.Mesh(geo, matSolid);
-    const meshMiddle = new THREE.Mesh(geo, matLight);
-    const meshDown = new THREE.Mesh(geo, matSolid);
+    const stepsMat = MaterialFactory.getMaterial('PlatformSteps', { width: opts.width });
+    const lightMat = MaterialFactory.getMaterial('PlatformLight', { color: lightColor });
+    const meshUp = new THREE.Mesh(geo, stepsMat);
+    const meshMiddle = new THREE.Mesh(geo, lightMat);
+    const meshDown = new THREE.Mesh(geo, stepsMat);
     meshUp.position.y = 0.4;
     meshUp.scale.set(1, 0.5, 1);
     meshUp.castShadow = true;
@@ -82,11 +45,68 @@ export default class GamePlatform {
     meshMiddle.scale.set(0.95, 0.4, 0.95);
     meshDown.position.y = -0.2;
     meshDown.scale.set(0.8, 0.8, 0.7);
-    this.lightMaterial = matLight;
+    meshUp.matrixAutoUpdate = false;
+    meshUp.updateMatrix();
+    meshMiddle.matrixAutoUpdate = false;
+    meshMiddle.updateMatrix();
+    meshDown.matrixAutoUpdate = false;
+    meshDown.updateMatrix();
+    this.lightMaterial = meshMiddle.material;
     g.add(meshUp);
     g.add(meshMiddle);
     g.add(meshDown);
     return g;
+  }
+
+  /*
+    Creates and returns 3 geometries and applies local transforms
+    to be merged by a single geometry
+  */
+  getPlatformGeo() {
+    const { opts } = this;
+    const mesh = new THREE.Object3D();
+    const geoTop = new THREE.BoxGeometry(opts.width, 0.5, GAME.PlatformZSize);
+    const geoBottom = new THREE.BoxGeometry(opts.width * 0.8, 0.25, GAME.PlatformZSize);
+    const geoLight = new THREE.BoxGeometry(opts.width, 0.25, GAME.PlatformZSize);
+    mesh.updateMatrix();
+    geoTop.applyMatrix(mesh.matrix).translate(0, 0.25, 0);
+    geoLight.applyMatrix(mesh.matrix).translate(0, -0.15, 0);
+    geoBottom.applyMatrix(mesh.matrix).translate(0, -0.4, 0);
+    return [geoTop, geoLight, geoBottom];
+  }
+
+  /*
+    Save vertex references into a single mesh to handle transforms more easily,
+    this geometries have references to the actual vertices of the
+    global geometry so any modification to position, scale, rotation, etc.
+    will took place after applying the matrix from the mesh into the geometry
+    by invoking applyTransforms method (see below).
+  */
+  setPlatformGeometries(solidGeo, lightsGeo, startSolid, startLights) {
+    // Get vertices from global geometry: 8 vertices per box
+    const solidVertices = solidGeo.vertices.slice(startSolid, startSolid + 16);
+    const lightVertices = lightsGeo.vertices.slice(startLights, startLights + 8);
+
+    // Create geometry and mesh
+    const groupGeometry = new THREE.Geometry();
+    groupGeometry.vertices = solidVertices.concat(lightVertices);
+    const mesh = new THREE.Mesh(groupGeometry);
+    mesh.name = 'Platform Mesh';
+
+    // link physics body with current mesh
+    this.body.opts.mesh = mesh;
+
+    // apply global position for the mesh
+    this.mesh = mesh;
+    this.applyTransforms();
+  }
+
+  applyTransforms() {
+    const { mesh, opts } = this;
+    TranslateTo3d(mesh.position, opts.x, opts.y, GAME.PlatformDistance);
+    mesh.lookAt(0, opts.y, 0);
+    mesh.updateMatrix();
+    mesh.geometry.applyMatrix(this.mesh.matrix);
   }
 
   getBspCylinder() {
@@ -119,8 +139,11 @@ export default class GamePlatform {
     const BspInnerProjectedBox = this.getBspProjectedBox(innerW, 0.7, 7, 0.985, 0, 0);
     const s1 = BspProjectedBox.intersect(BspCylinder);
     const s2 = s1.subtract(BspInnerProjectedBox);
-    const mesh = s2.toMesh(SocketMat);
+    const mesh = s2.toMesh();
+    mesh.material = MaterialFactory.getMaterial('PlatformSocket', { color: 0x0 });
     mesh.geometry.computeVertexNormals();
+    mesh.matrixAutoUpdate = false;
+    mesh.updateMatrix();
     return mesh;
   }
 
@@ -138,6 +161,7 @@ export default class GamePlatform {
       mass: 0.01,
       friction: 0.05,
       isStatic: true,
+      // onMeshSync: this.applyTransforms.bind(this),
       scale: new THREE.Vector2(opts.width, 1),
       distance: GAME.PlatformDistance,
     });

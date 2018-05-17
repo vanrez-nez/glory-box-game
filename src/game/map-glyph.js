@@ -49,6 +49,8 @@ export default class MapGlyph {
     const mesh = new THREE.Mesh(geo, mat);
     TranslateTo3d(mesh.position, x, y, GAME.CollectibleDistance, 0.935);
     mesh.positionCulled = true;
+    mesh.matrixAutoUpdate = false;
+    mesh.updateMatrix();
     this.setInverseLookAt(mesh, y);
     this.glypMaterial = mat;
     this.group.add(mesh);
@@ -64,6 +66,7 @@ export default class MapGlyph {
     const mesh = new THREE.Mesh(geo, mat);
     mesh.castShadow = true;
     mesh.positionCulled = true;
+    mesh.matrixAutoUpdate = false;
     TranslateTo3d(mesh.position, x, y, GAME.CollectibleDistance, 0.935);
     this.setInverseLookAt(mesh, y);
     this.group.add(mesh);

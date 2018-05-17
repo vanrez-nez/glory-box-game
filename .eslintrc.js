@@ -72,6 +72,8 @@ module.exports = {
     "key-spacing": 0,
     "no-unused-expressions": 0,
     "no-else-return": 0,
+    "consistent-return ": 0,
+    "default-case": 0,
     // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
   }

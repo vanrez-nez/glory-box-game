@@ -2,7 +2,7 @@ import { CONFIG } from './const';
 import DefaultMood from './mood-presets/default';
 import NeutralMood from './mood-presets/neutral';
 
-import { LightMatStatic, LightMatMoving, GenericMat } from './platform';
+// import { LightMatStatic, LightMatMoving, GenericMat } from './platform';
 
 const DEFAULT = {
   engine: null,
@@ -14,7 +14,7 @@ const DEFAULT = {
 export default class GameMoodManager {
   constructor(opts) {
     this.opts = { ...DEFAULT, ...opts };
-    this.transitionTo(this.opts.initialMood, 0);
+    // this.transitionTo(this.opts.initialMood, 0);
   }
 
   getColorTween(property, targetColor, time) {
@@ -56,7 +56,7 @@ export default class GameMoodManager {
   }
 
   transitionWorld(presetNode, time) {
-    const { floor, skytube, lobby, cylinder } = this.opts.world;
+    const { floor, skytube, cylinder } = this.opts.world;
     const { uniforms: stUniforms } = skytube.outterCylinder.material;
     const { FloorMaterial, CylinderMaterial, Skytube } = presetNode;
     const tl = new TimelineMax();
@@ -72,11 +72,11 @@ export default class GameMoodManager {
   }
 
   transitionMap(presetNode, time) {
-    const { GenericMaterial, StaticLightMaterial, MovingLightMaterial } = presetNode.Platforms;
-    const tl = new TimelineMax();
-    tl.add(this.getMaterialTweens(GenericMat, GenericMaterial, time));
-    tl.add(this.getMaterialTweens(LightMatMoving, MovingLightMaterial, time));
-    tl.add(this.getMaterialTweens(LightMatStatic, StaticLightMaterial, time));
+    // const { GenericMaterial, StaticLightMaterial, MovingLightMaterial } = presetNode.Platforms;
+    // const tl = new TimelineMax();
+    // tl.add(this.getMaterialTweens(GenericMat, GenericMaterial, time));
+    // tl.add(this.getMaterialTweens(LightMatMoving, MovingLightMaterial, time));
+    // tl.add(this.getMaterialTweens(LightMatStatic, StaticLightMaterial, time));
   }
 
   transitionTo(moodPreset, time) {

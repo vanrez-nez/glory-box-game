@@ -1,6 +1,6 @@
 
 import { CONFIG } from './const';
-import { LightMatStatic, LightMatMoving, GenericMat } from './platform';
+// import { LightMatStatic, LightMatMoving, GenericMat } from './platform';
 
 export default class GameTools {
   constructor() {
@@ -26,8 +26,6 @@ export default class GameTools {
       case 'world':
         this.buildWorldScreen(obj);
         break;
-      default:
-        break;
     }
   }
 
@@ -40,16 +38,19 @@ export default class GameTools {
     });
   }
 
-  addMaterialFields(folder, material) {
-    this.addColorField(folder, material, 'color', 'Color');
-    this.addColorField(folder, material, 'emissive', 'Emissive Color');
-    folder.add(material, 'emissiveIntensity', 0, 2).name('Emissive Int');
-    folder.add(material, 'opacity', 0, 1).name('Opacity');
-    if (material.type === 'MeshStandardMaterial') {
-      folder.add(material, 'envMapIntensity', 0, 2).name('Env Map Int');
-      folder.add(material, 'metalness', 0, 1).name('Metalness');
-      folder.add(material, 'roughness', 0, 1).name('Roughness');
-    }
+  addMaterialFields(folder, mat) {
+    const has = name => Object.prototype.hasOwnProperty.call(mat, name);
+    has('color') && this.addColorField(folder, mat, 'color', 'Color');
+    has('opacity') && folder.add(mat, 'opacity', 0, 1).name('Opacity');
+    has('emissive') && this.addColorField(folder, mat, 'emissive', 'Emissive Color');
+    has('emissiveIntensity') && folder.add(mat, 'emissiveIntensity', 0, 2).name('Emissive Int');
+    has('reflectivity') && folder.add(mat, 'reflectivity', 0, 1).name('Reflectivity');
+    has('shininess') && folder.add(mat, 'shininess', 0, 60).name('Shininess');
+    has('refractionRatio') && folder.add(mat, 'refractionRatio', 0, 1).name('Refraction');
+    has('specular') && this.addColorField(folder, mat, 'specular', 'Specular Color');
+    has('envMapIntensity') && folder.add(mat, 'envMapIntensity', 0, 2).name('Env Map Int');
+    has('metalness') && folder.add(mat, 'metalness', 0.0, 1).name('Metalness');
+    has('roughness') && folder.add(mat, 'roughness', 0.0, 1).name('Roughness');
   }
 
   buildPhysicsScreen(obj) {
@@ -82,7 +83,11 @@ export default class GameTools {
   buildEngineScreen(obj) {
     const { gui } = this;
     const rootFolder = gui.addFolder('Engine');
-    const { bloomPass, scene, ambientLight } = obj;
+    const { renderer, bloomPass, scene, ambientLight } = obj;
+    const f0 = rootFolder.addFolder('Renderer');
+    f0.add(renderer, 'toneMappingExposure', 0.0, 10);
+    f0.add(renderer, 'toneMappingWhitePoint', 0.0, 10);
+    f0.add(renderer, 'gammaFactor', 0.5, 5);
     if (CONFIG.UsePostProcessing) {
       // Bloom Pass
       const f1 = rootFolder.addFolder('BloomPass');
@@ -104,37 +109,39 @@ export default class GameTools {
 
   buildWorldScreen(obj) {
     const { gui } = this;
-    const { cylinder, floor, skytube } = obj;
+    const { cylinder, cylinderBase, floor, skytube } = obj;
     const rootFolder = gui.addFolder('World');
     const f1 = rootFolder.addFolder('Cylinder Material');
     this.addMaterialFields(f1, cylinder.material);
-    const f2 = rootFolder.addFolder('Floor Material');
-    this.addMaterialFields(f2, floor.material);
-    const f3 = rootFolder.addFolder('Skytube Inner Material');
-    this.addMaterialFields(f3, skytube.innerCylinder.material);
+    const f2 = rootFolder.addFolder('Base Cylinder Material');
+    this.addMaterialFields(f2, cylinderBase.material);
+    const f3 = rootFolder.addFolder('Floor Material');
+    this.addMaterialFields(f3, floor.material);
+    const f4 = rootFolder.addFolder('Skytube Inner Material');
+    this.addMaterialFields(f4, skytube.innerCylinder.material);
     // Skytube Shader
-    const f4 = rootFolder.addFolder('Skytube Shader');
+    const f5 = rootFolder.addFolder('Skytube Shader');
     const stUniforms = skytube.outterCylinder.material.uniforms;
-    this.addColorField(f4, stUniforms.color, 'value', 'Color');
-    f4.add(stUniforms.intensity, 'value', 0, 1).name('Intensity');
-    f4.add(stUniforms.fade, 'value', 0, 2).name('Fade');
-    f4.add(stUniforms.zoom, 'value', 0, 4).name('Zoom');
-    f4.add(stUniforms.stepSize, 'value', 0, 1).name('Step Size');
-    f4.add(stUniforms.tile, 'value', 0, 1).name('Tile');
-    f4.add(stUniforms.transverseSpeed, 'value', 0, 4)
+    this.addColorField(f5, stUniforms.color, 'value', 'Color');
+    f5.add(stUniforms.intensity, 'value', 0, 1).name('Intensity');
+    f5.add(stUniforms.fade, 'value', 0, 2).name('Fade');
+    f5.add(stUniforms.zoom, 'value', 0, 4).name('Zoom');
+    f5.add(stUniforms.stepSize, 'value', 0, 1).name('Step Size');
+    f5.add(stUniforms.tile, 'value', 0, 1).name('Tile');
+    f5.add(stUniforms.transverseSpeed, 'value', 0, 4)
       .name('Transverse Speed');
   }
 
   buildMapScreen() {
-    const { gui } = this;
-    const rootFolder = gui.addFolder('Map');
+    // const { gui } = this;
+    // const rootFolder = gui.addFolder('Map');
     // Platform
-    const f1 = rootFolder.addFolder('Platform');
-    const f2 = f1.addFolder('Static Light Material');
-    this.addMaterialFields(f2, LightMatStatic);
-    const f3 = f1.addFolder('Moving Light Material');
-    this.addMaterialFields(f3, LightMatMoving);
-    const f4 = f1.addFolder('Solid Material');
-    this.addMaterialFields(f4, GenericMat);
+    // const f1 = rootFolder.addFolder('Platform');
+    // const f2 = f1.addFolder('Static Light Material');
+    // this.addMaterialFields(f2, LightMatStatic);
+    // const f3 = f1.addFolder('Moving Light Material');
+    // this.addMaterialFields(f3, LightMatMoving);
+    // const f4 = f1.addFolder('Solid Material');
+    // this.addMaterialFields(f4, GenericMat);
   }
 }
