@@ -74,17 +74,19 @@ export default class Engine {
 
   initHelpers() {
     const { scene, camera, renderer } = this;
-    const c = new THREE.OrbitControls(camera, renderer.domElement);
-    c.enableDamping = true;
-    c.dampingFactor = 0.25;
-    c.minDistance = 1;
-    c.maxDistance = 1000;
-    c.enableKeys = false;
-    c.enabled = CONFIG.EnableOrbitControls;
-    this.orbitControls = c;
-    this.axesHelper = new THREE.AxesHelper(500);
-    scene.add(this.axesHelper);
-    this.axesHelper.visible = CONFIG.EnableAxes;
+    if (CONFIG.EnableOrbitControls) {
+      const c = new THREE.OrbitControls(camera, renderer.domElement);
+      c.enableDamping = true;
+      c.dampingFactor = 0.25;
+      c.minDistance = 1;
+      c.maxDistance = 1000;
+      c.enableKeys = false;
+      this.orbitControls = c;
+    }
+    if (CONFIG.EnableAxes) {
+      this.axesHelper = new THREE.AxesHelper(500);
+      scene.add(this.axesHelper);
+    }
   }
 
   resize(w, h) {
