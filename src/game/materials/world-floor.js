@@ -12,7 +12,7 @@ export default class WorldFloorMaterial extends GameMetaMaterial {
         args: {
           // envMap: Skybox.textureCube,
           color: 0x484b57,
-          shading: THREE.FlatShading,
+          flatShading: true,
           map: GetTextureRepeatDefer(IMAGE_ASSETS.ImpFloorBase, scale, scale),
           wireframe: false,
         },

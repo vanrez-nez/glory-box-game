@@ -4,16 +4,17 @@ export function Clamp(val, min, max) {
   return Math.min(Math.max(val, min), max);
 }
 
-export function GetTextureRepeat(url, repeatX, repeatY) {
+export function GetTextureRepeat(url, repeatX, repeatY, offsetX = 0, offsetY = 0) {
   const tex = new THREE.TextureLoader().load(url);
   tex.wrapS = THREE.RepeatWrapping;
   tex.wrapT = THREE.RepeatWrapping;
   tex.repeat.set(repeatX, repeatY);
+  tex.offset.set(offsetX, offsetY);
   return tex;
 }
 
-export function GetTextureRepeatDefer(url, repeatX, repeatY) {
-  return () => GetTextureRepeat(url, repeatX, repeatY);
+export function GetTextureRepeatDefer(url, repeatX, repeatY, offsetX, offsetY) {
+  return () => GetTextureRepeat(url, repeatX, repeatY, offsetX, offsetY);
 }
 
 export function TranslateTo3d(position, toX, toY, radius = 35, project = 0) {

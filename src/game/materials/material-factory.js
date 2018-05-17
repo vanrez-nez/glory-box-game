@@ -4,6 +4,9 @@ import WorldCylinderMaterial from './world-cylinder';
 import PlatformSocketMaterial from './platform-socket';
 import PlatformLightMaterial from './platform-light';
 import PlatformStepsMaterial from './platform-steps';
+import CollectibleSocketMaterial from './collectible-socket';
+import CollectibleGlyphMaterial from './collectible-glyph';
+import CollectibleItemMaterial from './collectible-item';
 
 const DEFAULT = {};
 const MATERIALS = {
@@ -12,6 +15,9 @@ const MATERIALS = {
   PlatformLight: PlatformLightMaterial,
   PlatformSteps: PlatformStepsMaterial,
   PlatformSocket: PlatformSocketMaterial,
+  CollectibleSocket: CollectibleSocketMaterial,
+  CollectibleGlyph: CollectibleGlyphMaterial,
+  CollectibleItem: CollectibleItemMaterial,
 };
 
 export default class GameMaterialFactory {

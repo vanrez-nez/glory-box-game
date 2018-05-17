@@ -1,7 +1,7 @@
 import { GAME, PHYSICS, EVENTS, COLLECTIBLE } from './const';
 import { TranslateTo3d } from './utils';
+import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 import MapGlyph from './map-glyph';
-import { StaticInstance as Skybox } from './skybox';
 import LineTrail from './line-trail';
 import GamePhysicsBody from './physics-body';
 
@@ -44,13 +44,7 @@ export default class GameCollectible {
 
   addCollectible(x, y, color) {
     const geo = new THREE.DodecahedronBufferGeometry(0.8);
-    const mat = new THREE.MeshLambertMaterial({
-      envMap: Skybox.textureCube,
-      reflectivity: 0.35,
-      color,
-      emissive: color,
-      emissiveIntensity: 6,
-    });
+    const mat = MaterialFactory.getMaterial('CollectibleSocket', { color });
     const mesh = new THREE.Mesh(geo, mat);
     TranslateTo3d(mesh.position, x, y, GAME.CollectibleDistance, 1.05);
     this.body = new GamePhysicsBody({
@@ -89,13 +83,7 @@ export default class GameCollectible {
 
   getTrailParticle(x, y, color, phi) {
     const trail = new LineTrail({
-      material: new MeshLineMaterial({
-        color: new THREE.Color(color),
-        side: THREE.DoubleSide,
-        sizeAttenuation: true,
-        lineWidth: 0.3,
-        resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
-      }),
+      material: MaterialFactory.getMaterial('CollectibleTrail'),
     });
     return { trail, theta: Math.random() * Math.PI, phi, r: 1.5 };
   }

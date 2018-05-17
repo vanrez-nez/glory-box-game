@@ -1,10 +1,6 @@
 import { GAME } from './const';
-import { IMAGE_ASSETS } from './assets';
-import { StaticInstance as Skybox } from './skybox';
-import { TranslateTo3d, GetTextureRepeat } from './utils';
-
-const RepeatX = 1 / 9;
-const RepeatY = 1 / 9;
+import { TranslateTo3d } from './utils';
+import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 
 const Offsets = [
   { x: 0.17, y: 0.83 },
@@ -26,43 +22,30 @@ export default class MapGlyph {
     this.noiseIdx = Math.random();
     this.group = new THREE.Object3D();
     const offsets = Offsets[idxCount++ % Offsets.length];
-    this.addInnerMesh(x, y, offsets, color);
-    this.addOutterMesh(x, y, offsets);
+    this.addGlyphMesh(x, y, offsets, color);
+    this.addSocketMesh(x, y, offsets);
   }
 
-  addInnerMesh(x, y, offsets, color) {
-    const texBase = GetTextureRepeat(IMAGE_ASSETS.HullBase, RepeatX, RepeatY);
-    texBase.offset.set(offsets.x, offsets.y);
-    const texEmissive = this.getTexture(IMAGE_ASSETS.GlyphsEmissive, offsets);
-    const geo = this.getInnerGeometry();
-    const mat = new THREE.MeshStandardMaterial({
-      envMap: Skybox.textureCube,
-      map: texBase,
-      color: 0x090c11,
-      emissiveMap: texEmissive,
-      emissiveIntensity: 6,
-      emissive: color,
-      roughness: 0.25,
-      metalness: 0.5,
-      side: THREE.DoubleSide,
+  addGlyphMesh(x, y, offsets, color) {
+    const geo = this.getGlyphGeometry();
+    const mat = MaterialFactory.getMaterial('CollectibleGlyph', {
+      emissiveColor: color,
+      xOffset: offsets.x,
+      yOffset: offsets.y,
     });
     const mesh = new THREE.Mesh(geo, mat);
     TranslateTo3d(mesh.position, x, y, GAME.CollectibleDistance, 0.935);
     mesh.positionCulled = true;
-    mesh.matrixAutoUpdate = false;
-    mesh.updateMatrix();
     this.setInverseLookAt(mesh, y);
+    mesh.updateMatrix();
+    mesh.matrixAutoUpdate = false;
     this.glypMaterial = mat;
     this.group.add(mesh);
   }
 
-  addOutterMesh(x, y) {
-    const geo = this.getOutterGeometry();
-    const mat = new THREE.MeshLambertMaterial({
-      envMap: Skybox.textureCube,
-      color: 0x05070a,
-      reflectivity: 0.35,
-    });
+  addSocketMesh(x, y) {
+    const geo = this.getSocketGeometry();
+    const mat = MaterialFactory.getMaterial('CollectibleSocket', { color: 0x0 });
     const mesh = new THREE.Mesh(geo, mat);
     mesh.castShadow = true;
     mesh.positionCulled = true;
@@ -76,13 +59,6 @@ export default class MapGlyph {
     const lookPosition = new THREE.Vector3(0, y, 0);
     lookPosition.subVectors(target.position, lookPosition).add(target.position);
     target.lookAt(lookPosition);
-  }
-
-  getTexture(url, offsets) {
-    const tex = new THREE.TextureLoader().load(url);
-    tex.repeat.set(RepeatX, RepeatY);
-    tex.offset.set(offsets.x, offsets.y);
-    return tex;
   }
 
   setHexVertices(target, cellSize) {
@@ -101,7 +77,7 @@ export default class MapGlyph {
     target.autoClose = true;
   }
 
-  getOutterGeometry() {
+  getSocketGeometry() {
     const shape = new THREE.Shape();
     this.setHexVertices(shape, 2.6);
     const pathHole = new THREE.Path();
@@ -114,7 +90,7 @@ export default class MapGlyph {
     return new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
   }
 
-  getInnerGeometry() {
+  getGlyphGeometry() {
     const shape = new THREE.Shape();
     this.setHexVertices(shape, 2);
     return new THREE.ShapeGeometry(shape);
