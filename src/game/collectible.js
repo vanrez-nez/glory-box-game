@@ -83,7 +83,7 @@ export default class GameCollectible {
 
   getTrailParticle(x, y, color, phi) {
     const trail = new LineTrail({
-      material: MaterialFactory.getMaterial('CollectibleTrail'),
+      material: MaterialFactory.getMaterial('CollectibleTrail', { color }),
     });
     return { trail, theta: Math.random() * Math.PI, phi, r: 1.5 };
   }

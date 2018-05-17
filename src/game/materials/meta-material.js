@@ -68,7 +68,17 @@ export default class GameMetaMaterial {
     if (profile.type) {
       const mType = profile.type;
       this.solveArgumentDefers(profile.args);
-      mat = new THREE[mType](profile.args);
+      if (THREE[mType]) {
+        mat = new THREE[mType](profile.args);
+      } else if (window[mType]) {
+        /*
+          Some materials are from external libraries such as
+          the MeshLineMaterial, in that case we search for
+          a global declaration
+        */
+        mat = new window[mType](profile.args);
+      }
+      
     }
     return mat;
   }

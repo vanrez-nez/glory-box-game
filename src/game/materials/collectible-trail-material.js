@@ -1,5 +1,4 @@
 import GameMetaMaterial from './meta-material';
-import { StaticInstance as Skybox } from '../skybox';
 
 export default class CollectibleTrailMaterial extends GameMetaMaterial {
   constructor(opts) {
@@ -7,7 +6,7 @@ export default class CollectibleTrailMaterial extends GameMetaMaterial {
       low: {
         type: 'MeshLineMaterial',
         args: {
-          color: mew THREE.Color(opts.color),
+          color: new THREE.Color(opts.color),
           side: THREE.DoubleSide,
           sizeAttenuation: true,
           lineWidth: 0.3,

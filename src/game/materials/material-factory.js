@@ -8,6 +8,7 @@ import PlatformStepsMaterial from './platform-steps-material';
 import CollectibleSocketMaterial from './collectible-socket-material';
 import CollectibleGlyphMaterial from './collectible-glyph-material';
 import CollectibleItemMaterial from './collectible-item-material';
+import CollectibleTrailMaterial from './collectible-trail-material';
 import PlayerMaterial from './player-material';
 
 const DEFAULT = {};
@@ -21,6 +22,7 @@ const MATERIALS = {
   CollectibleSocket: CollectibleSocketMaterial,
   CollectibleGlyph: CollectibleGlyphMaterial,
   CollectibleItem: CollectibleItemMaterial,
+  CollectibleTrail: CollectibleTrailMaterial,
 };
 
 export default class GameMaterialFactory {
