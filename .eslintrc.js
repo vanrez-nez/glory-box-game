@@ -40,6 +40,7 @@ module.exports = {
     'kdTree': false,
     'rbush': false,
     'deepmerge': false,
+    'MainLoop': false
   },
   // add your custom rules here
   rules: {

@@ -78,6 +78,7 @@ export default class GameCollectible {
       g.add(particle.trail.mesh);
     }
     g.positionCulled = true;
+    g.position.y = y;
     this.particlesGroup = g;
     this.group.add(g);
   }
@@ -91,9 +92,8 @@ export default class GameCollectible {
 
   updateTrailsPosition(delta) {
     const { particles, particlesGroup } = this;
-    const { position: cP } = this.itemMesh;
     const pos = new THREE.Vector3();
-    particlesGroup.position.copy(cP);
+    particlesGroup.position.copy(this.itemMesh.position);
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
       const { trail, phi, r } = p;

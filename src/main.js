@@ -37,14 +37,13 @@ import GameMoodManager from './game/mood-manager';
 
 class Game {
   constructor() {
-    this.init(true);
+    this.init();
     this.updateSize();
     this.attachEvents();
-    this.onFrameListener = this.onFrame.bind(this);
     this.loader = THREE.DefaultLoadingManager;
     this.loader.onProgress = (url, itemsLoaded, itemsTotal) => {
       if (itemsLoaded === itemsTotal) {
-        this.onFrame();
+        MainLoop.start();
       }
     };
   }
@@ -99,6 +98,9 @@ class Game {
   }
 
   attachEvents() {
+    MainLoop.setUpdate(this.onUpdate.bind(this));
+    MainLoop.setDraw(this.onDraw.bind(this));
+    MainLoop.setEnd(this.onEnd.bind(this));
     window.addEventListener('resize', this.updateSize.bind(this));
   }
 
@@ -107,20 +109,28 @@ class Game {
     this.engine.resize(w, h);
   }
 
-  onFrame() {
-    const { stats, clock, gameInput, player, physics,
-      engine, map, world } = this;
-    stats && stats.begin();
-    const delta = clock.getDelta();
+  onUpdate(delta) {
+    const { gameInput, player, map, world, physics } = this;
+    delta /= 1000;
+    physics.updateCollisionSpace(player.body.position, 15);
+    physics.update(delta);
     player.update(delta, gameInput.state);
     map.update(delta);
     world.update(delta, player.mesh.position);
-    physics.updateCollisionSpace(player.body.position, 15);
-    physics.update(delta);
+  }
+
+  onDraw() {
+    const { stats, engine, player } = this;
+    stats && stats.begin();
     engine.updateObjectCulling(player.mesh.position);
     engine.render();
     stats && stats.end();
-    requestAnimationFrame(this.onFrameListener);
+  }
+
+  onEnd(fps, panic) {
+    if (panic) {
+      console.log('Panic!');
+    }
   }
 }
 
