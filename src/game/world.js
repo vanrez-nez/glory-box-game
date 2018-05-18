@@ -6,6 +6,7 @@ import CylinderFxShader from '../shaders/cylinder-fx';
 export default class GameWorld {
   constructor() {
     this.group = new THREE.Group();
+    this.group.name = 'GameWorld';
     this.addFloor();
     this.addLobby();
     this.addMainCylinder();

@@ -98,7 +98,7 @@ export default class GamePlatform {
 
   getMesh() {
     const { opts } = this;
-    const g = new THREE.Object3D();
+    const g = new THREE.Group();
     const lightGeo = GamePlatform.GetBoxGeomery(opts.width, 0.7, GAME.PlatformZSize);
     const stepsGeo = GamePlatform.GetStepsGeometry(opts.width, 1, GAME.PlaformZSize);
     const stepsMat = MaterialFactory.getMaterial('PlatformSteps', {
@@ -121,6 +121,7 @@ export default class GamePlatform {
     this.lightMaterial = meshLight.material;
     g.add(meshSteps);
     g.add(meshLight);
+    g.positionCulled = true;
     return g;
   }
 

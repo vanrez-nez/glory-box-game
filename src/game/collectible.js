@@ -21,10 +21,11 @@ const ItemGeometry = new THREE.DodecahedronBufferGeometry(0.8);
 
 export default class GameCollectible {
   constructor(x, y) {
+    this.group = new THREE.Group();
+    this.group.name = 'GameCollectible';
     const pick = Collectibles[~~(Math.random() * Collectibles.length)];
     this.color = pick.color;
     this.type = pick.type;
-    this.group = new THREE.Group();
     this.particles = [];
     this.offsetItem = Math.random();
     this.addGlyph(x, y, pick.color);

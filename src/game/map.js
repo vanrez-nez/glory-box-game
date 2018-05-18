@@ -11,6 +11,7 @@ export default class GameMap {
   constructor() {
     this.events = new EventEmitter3();
     this.group = new THREE.Group();
+    this.group.name = 'GameMap';
     this.mapParser = new GameMapParser('#game_map');
     this.platforms = [];
     this.bodies = [];
@@ -65,8 +66,9 @@ export default class GameMap {
       const p = platforms[i];
       geo.merge(p.getSocketGeometry());
     }
+    const buffGeo = new THREE.BufferGeometry().fromGeometry(geo);
     const mat = MaterialFactory.getMaterial('PlatformSocket', { color: 0xffffff });
-    const mesh = new THREE.Mesh(geo, mat);
+    const mesh = new THREE.Mesh(buffGeo, mat);
     this.group.add(mesh);
   }
 
@@ -77,8 +79,9 @@ export default class GameMap {
       const c = collectibles[i];
       geo.merge(c.glyph.getSocketGeometry());
     }
+    const buffGeo = new THREE.BufferGeometry().fromGeometry(geo);
     const mat = MaterialFactory.getMaterial('CollectibleSocket', { color: 0xffffff });
-    const mesh = new THREE.Mesh(geo, mat);
+    const mesh = new THREE.Mesh(buffGeo, mat);
     mesh.castShadow = true;
     this.group.add(mesh);
   }
