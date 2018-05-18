@@ -122,7 +122,7 @@ class Game {
   onDraw() {
     const { stats, engine, player } = this;
     stats && stats.begin();
-    engine.updateObjectCulling(player.mesh.position);
+    engine.updateObjectCulling(player.body.position);
     engine.render();
     stats && stats.end();
   }
