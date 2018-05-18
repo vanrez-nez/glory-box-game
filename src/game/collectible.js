@@ -17,17 +17,18 @@ const Collectibles = [
   { type: COLLECTIBLE.Difficulty, color: 0xff4f4f },
   { type: COLLECTIBLE.Happiness, color: 0xff4f4f },
 ];
+const ItemGeometry = new THREE.DodecahedronBufferGeometry(0.8);
 
 export default class GameCollectible {
   constructor(x, y) {
     const pick = Collectibles[~~(Math.random() * Collectibles.length)];
     this.color = pick.color;
     this.type = pick.type;
-    this.group = new THREE.Object3D();
+    this.group = new THREE.Group();
     this.particles = [];
     this.offsetItem = Math.random();
     this.addGlyph(x, y, pick.color);
-    this.addCollectible(x, y, pick.color);
+    this.addItem(x, y, pick.color);
     this.addTrailParticles(x, y, pick.color);
     this.attachEvents();
   }
@@ -38,14 +39,13 @@ export default class GameCollectible {
 
   onCollisionBegan() {
     this.body.enabled = false;
-    this.collectible.visible = false;
+    this.itemMesh.visible = false;
     this.particlesGroup.visible = false;
   }
 
-  addCollectible(x, y, color) {
-    const geo = new THREE.DodecahedronBufferGeometry(0.8);
-    const mat = MaterialFactory.getMaterial('CollectibleSocket', { color });
-    const mesh = new THREE.Mesh(geo, mat);
+  addItem(x, y, color) {
+    const mat = MaterialFactory.getMaterial('CollectibleItem', { color });
+    const mesh = new THREE.Mesh(ItemGeometry, mat);
     TranslateTo3d(mesh.position, x, y, GAME.CollectibleDistance, 1.05);
     this.body = new GamePhysicsBody({
       type: PHYSICS.Collectible,
@@ -59,17 +59,17 @@ export default class GameCollectible {
     mesh.position.y = y;
     this.body.position.set(x, y);
     mesh.positionCulled = true;
-    this.collectible = mesh;
+    this.itemMesh = mesh;
     this.group.add(mesh);
   }
 
   addGlyph(x, y, color) {
-    this.glyph = new MapGlyph(x, y, color);
+    this.glyph = new MapGlyph({ x, y, color });
     this.group.add(this.glyph.group);
   }
 
   addTrailParticles(x, y, color) {
-    const g = new THREE.Object3D();
+    const g = new THREE.Group();
     for (let i = 0; i < MaxParticles; i++) {
       const phi = (Math.PI * 2 / MaxParticles) * i;
       const particle = this.getTrailParticle(x, y, color, phi);
@@ -90,7 +90,7 @@ export default class GameCollectible {
 
   updateTrailsPosition(delta) {
     const { particles, particlesGroup } = this;
-    const { position: cP } = this.collectible;
+    const { position: cP } = this.itemMesh;
     const pos = new THREE.Vector3();
     particlesGroup.position.copy(cP);
     for (let i = 0; i < particles.length; i++) {
@@ -105,17 +105,17 @@ export default class GameCollectible {
   }
 
   update(delta) {
-    const { collectible, body } = this;
+    const { itemMesh, body } = this;
     this.offsetItem += delta * 3;
-    collectible.rotation.x += delta * 0.5;
-    collectible.rotation.y += delta * 0.5;
+    itemMesh.rotation.x += delta * 0.5;
+    itemMesh.rotation.y += delta * 0.5;
     body.meshPositionOffset.y = Math.sin(this.offsetItem) * 0.5;
     this.glyph.update(delta);
     this.updateTrailsPosition(delta);
   }
 
   get visible() {
-    return this.collectible.visible
-      && this.collectible.parent !== null;
+    return this.itemMesh.visible
+      && this.itemMesh.parent !== null;
   }
 }

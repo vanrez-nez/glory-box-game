@@ -11,17 +11,85 @@ const DEFAULT = {
   type: MAP.StaticPlatform,
 };
 
+const CACHED_GEOMETRIES = {};
+const CACHED_SOCKET_MESHES = {};
+
 export default class GamePlatform {
   constructor(opts) {
     this.opts = { ...DEFAULT, ...opts };
     this.mesh = this.getMesh();
-    this.holderSocketMesh = this.getHolderSocketMesh();
     this.body = this.getBody();
     this.oscillator = Math.random();
     this.body.position.set(this.opts.x, this.opts.y);
     this.body.sync(true);
     this.startPosition = this.body.position.clone();
     this.body.events.on(EVENTS.CollisionBegan, this.onCollisionBegan.bind(this));
+  }
+
+  static GetBoxGeomery(width, height, depth) {
+    const hash = `box_${width},${height},${depth}`;
+    if (!CACHED_GEOMETRIES[hash]) {
+      CACHED_GEOMETRIES[hash] = new THREE.BoxGeometry(width, height, depth);
+    }
+    return CACHED_GEOMETRIES[hash];
+  }
+
+  static GetStepsGeometry(width) {
+    const hash = `steps_${width}`;
+    if (!CACHED_GEOMETRIES[hash]) {
+      const geoTop = GamePlatform.GetBoxGeomery(width, 0.5, GAME.PlatformZSize);
+      const geoBottom = GamePlatform.GetBoxGeomery(width * 0.8, 1, GAME.PlatformZSize * 0.8);
+      geoBottom.translate(0, -0.5, 0);
+      geoTop.merge(geoBottom);
+      CACHED_GEOMETRIES[hash] = geoTop;
+    }
+    return CACHED_GEOMETRIES[hash];
+  }
+
+  static GetBspCylinder() {
+    const r = GAME.CilynderRadius + 0.5;
+    const geo = new THREE.CylinderGeometry(r, r, 10, 64, 1);
+    const mesh = new THREE.Mesh(geo);
+    return new ThreeBSP(mesh);
+  }
+
+  static GetBspBox(width, height, depth, project) {
+    const geo = new THREE.BoxGeometry(width, height, depth);
+    const mesh = new THREE.Mesh(geo);
+    TranslateTo3d(mesh.position, 0, 0, GAME.PlatformDistance, project);
+    mesh.lookAt(0, 0, 0);
+    return new ThreeBSP(mesh);
+  }
+
+  static CreateSocketMesh(width) {
+    const BspCylinder = GamePlatform.GetBspCylinder();
+    const BspProjectedBox = GamePlatform.GetBspBox(width, 1.4, 10, -0.3);
+    const BspInnerProjectedBox = GamePlatform.GetBspBox(width * 0.8, 0.7, 10, 0);
+    const s1 = BspProjectedBox.intersect(BspCylinder);
+    const s2 = s1.subtract(BspInnerProjectedBox);
+    const mesh = s2.toMesh();
+    mesh.geometry.computeVertexNormals();
+    return mesh;
+  }
+
+  static GetSocketMesh(width) {
+    const hash = `socket_${width}`;
+    if (!CACHED_SOCKET_MESHES[hash]) {
+      CACHED_SOCKET_MESHES[hash] = GamePlatform.CreateSocketMesh(width);
+    }
+    return CACHED_SOCKET_MESHES[hash];
+  }
+
+  getSocketGeometry() {
+    const { opts } = this;
+    const width = this.isMovingPlatform() ? opts.width * 3 : opts.width;
+    const mesh = GamePlatform.GetSocketMesh(width);
+    const geo = mesh.geometry.clone();
+    TranslateTo3d(mesh.position, opts.x, opts.y, GAME.PlatformDistance);
+    mesh.lookAt(0, opts.y, 0);
+    mesh.updateMatrix();
+    geo.applyMatrix(mesh.matrix);
+    return geo;
   }
 
   isMovingPlatform() {
@@ -31,73 +99,29 @@ export default class GamePlatform {
   getMesh() {
     const { opts } = this;
     const g = new THREE.Object3D();
-    const geo = new THREE.BoxBufferGeometry(opts.width, 0.7, GAME.PlatformZSize);
-    const stepsMat = MaterialFactory.getMaterial('PlatformSteps', { 
+    const lightGeo = GamePlatform.GetBoxGeomery(opts.width, 0.7, GAME.PlatformZSize);
+    const stepsGeo = GamePlatform.GetStepsGeometry(opts.width, 1, GAME.PlaformZSize);
+    const stepsMat = MaterialFactory.getMaterial('PlatformSteps', {
       width: opts.width,
       color: 0x0,
     });
     const lightMat = MaterialFactory.getMaterial('PlatformLight', {
       color: this.isMovingPlatform() ? 0xff0000 : 0x00ff00,
     });
-    const meshUp = new THREE.Mesh(geo, stepsMat);
-    const meshMiddle = new THREE.Mesh(geo, lightMat);
-    const meshDown = new THREE.Mesh(geo, stepsMat);
-    meshUp.position.y = 0.4;
-    meshUp.scale.set(1, 0.5, 1);
-    meshUp.castShadow = true;
-    meshMiddle.position.y = 0;
-    meshMiddle.scale.set(0.95, 0.4, 0.95);
-    meshDown.position.y = -0.2;
-    meshDown.scale.set(0.8, 0.8, 0.7);
-    meshUp.matrixAutoUpdate = false;
-    meshUp.updateMatrix();
-    meshMiddle.matrixAutoUpdate = false;
-    meshMiddle.updateMatrix();
-    meshDown.matrixAutoUpdate = false;
-    meshDown.updateMatrix();
-    this.lightMaterial = meshMiddle.material;
-    g.add(meshUp);
-    g.add(meshMiddle);
-    g.add(meshDown);
+    const meshSteps = new THREE.Mesh(stepsGeo, stepsMat);
+    const meshLight = new THREE.Mesh(lightGeo, lightMat);
+    meshSteps.position.y = 0.2;
+    meshSteps.castShadow = true;
+    meshLight.position.y = -0.2;
+    meshLight.scale.set(0.95, 0.4, 0.95);
+    meshSteps.matrixAutoUpdate = false;
+    meshSteps.updateMatrix();
+    meshLight.matrixAutoUpdate = false;
+    meshLight.updateMatrix();
+    this.lightMaterial = meshLight.material;
+    g.add(meshSteps);
+    g.add(meshLight);
     return g;
-  }
-
-  getBspCylinder() {
-    const { opts } = this;
-    const r = GAME.CilynderRadius + 0.5;
-    const geo = new THREE.CylinderGeometry(r, r, 10, 64, 1);
-    const mesh = new THREE.Mesh(geo);
-    mesh.position.y = opts.y;
-    return new ThreeBSP(mesh);
-  }
-
-  getBspProjectedBox(width, height, depth, dist) {
-    const { opts } = this;
-    const geo = new THREE.BoxGeometry(width, height, depth);
-    const mesh = new THREE.Mesh(geo);
-    TranslateTo3d(mesh.position, opts.x, opts.y, GAME.PlatformDistance);
-    mesh.position.x *= dist;
-    mesh.position.z *= dist;
-    mesh.lookAt(0, opts.y, 0);
-    return new ThreeBSP(mesh);
-  }
-
-  getHolderSocketMesh() {
-    const { opts } = this;
-    const BspCylinder = this.getBspCylinder();
-    const w = this.isMovingPlatform() ? opts.width * 3 : opts.width;
-    const BspProjectedBox = this.getBspProjectedBox(
-      w, 1.4, 5, 0.98, 0, 0);
-    const innerW = w * 0.8;
-    const BspInnerProjectedBox = this.getBspProjectedBox(innerW, 0.7, 7, 0.985, 0, 0);
-    const s1 = BspProjectedBox.intersect(BspCylinder);
-    const s2 = s1.subtract(BspInnerProjectedBox);
-    const mesh = s2.toMesh();
-    mesh.material = MaterialFactory.getMaterial('PlatformSocket', { color: 0x0 });
-    mesh.geometry.computeVertexNormals();
-    mesh.matrixAutoUpdate = false;
-    mesh.updateMatrix();
-    return mesh;
   }
 
   getBody() {

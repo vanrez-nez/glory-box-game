@@ -23,12 +23,12 @@ export default class GameWorld {
     const geo = new THREE.CylinderGeometry(200, 200, 250, 16, 1, true);
     const mat = MaterialFactory.getMaterial('WorldSkyCylinder');
     this.skyCylinder = new THREE.Mesh(geo, mat);
-    this.group.add(this.skyCylinder);
+    // this.group.add(this.skyCylinder);
   }
 
   addFloor() {
-    const geo = new THREE.PlaneBufferGeometry(200, 200);
-    const mat = MaterialFactory.getMaterial('WorldFloor', { scale: 40 });
+    const geo = new THREE.PlaneBufferGeometry(1000, 1000);
+    const mat = MaterialFactory.getMaterial('WorldFloor', { scale: 200 });
     const mesh = new THREE.Mesh(geo, mat);
     this.floor = mesh;
     mesh.rotation.x = -Math.PI / 2;

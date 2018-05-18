@@ -15,53 +15,26 @@ const Offsets = [
 ];
 
 let idxCount = 0;
+let SocketGeometry = null;
+let GlyphGeometry = null;
+
+const DEFAULT = {
+  x: 0,
+  y: 0,
+  color: 0xffffff,
+};
 
 export default class MapGlyph {
-  constructor(x, y, color) {
+  constructor(opts) {
+    this.opts = { ...DEFAULT, ...opts };
     this.noise = new Simple1DNoise();
     this.noiseIdx = Math.random();
     this.group = new THREE.Object3D();
     const offsets = Offsets[idxCount++ % Offsets.length];
-    this.addGlyphMesh(x, y, offsets, color);
-    this.addSocketMesh(x, y, offsets);
+    this.addGlyphMesh(offsets);
   }
 
-  addGlyphMesh(x, y, offsets, color) {
-    const geo = this.getGlyphGeometry();
-    const mat = MaterialFactory.getMaterial('CollectibleGlyph', {
-      emissiveColor: color,
-      xOffset: offsets.x,
-      yOffset: offsets.y,
-    });
-    const mesh = new THREE.Mesh(geo, mat);
-    TranslateTo3d(mesh.position, x, y, GAME.CollectibleDistance, 0.935);
-    mesh.positionCulled = true;
-    this.setInverseLookAt(mesh, y);
-    mesh.updateMatrix();
-    mesh.matrixAutoUpdate = false;
-    this.glypMaterial = mat;
-    this.group.add(mesh);
-  }
-
-  addSocketMesh(x, y) {
-    const geo = this.getSocketGeometry();
-    const mat = MaterialFactory.getMaterial('CollectibleSocket', { color: 0x0 });
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.castShadow = true;
-    mesh.positionCulled = true;
-    mesh.matrixAutoUpdate = false;
-    TranslateTo3d(mesh.position, x, y, GAME.CollectibleDistance, 0.935);
-    this.setInverseLookAt(mesh, y);
-    this.group.add(mesh);
-  }
-
-  setInverseLookAt(target, y) {
-    const lookPosition = new THREE.Vector3(0, y, 0);
-    lookPosition.subVectors(target.position, lookPosition).add(target.position);
-    target.lookAt(lookPosition);
-  }
-
-  setHexVertices(target, cellSize) {
+  static SetHexVertices(target, cellSize) {
     const verts = [];
     for (let i = 0; i < 6; i++) {
       const angle = (Math.PI * 2 / 6) * i;
@@ -77,23 +50,64 @@ export default class MapGlyph {
     target.autoClose = true;
   }
 
-  getSocketGeometry() {
-    const shape = new THREE.Shape();
-    this.setHexVertices(shape, 2.6);
-    const pathHole = new THREE.Path();
-    this.setHexVertices(pathHole, 2);
-    shape.holes.push(pathHole);
-    const extrudeSettings = {
-      amount: 0.3,
-      bevelEnabled: false,
-    };
-    return new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
+  static GetSocketGeometry() {
+    if (SocketGeometry === null) {
+      const shape = new THREE.Shape();
+      MapGlyph.SetHexVertices(shape, 2.6);
+      const pathHole = new THREE.Path();
+      MapGlyph.SetHexVertices(pathHole, 2);
+      shape.holes.push(pathHole);
+      const extrudeSettings = {
+        amount: 0.3,
+        bevelEnabled: false,
+      };
+      SocketGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+    }
+    return SocketGeometry;
   }
 
-  getGlyphGeometry() {
-    const shape = new THREE.Shape();
-    this.setHexVertices(shape, 2);
-    return new THREE.ShapeGeometry(shape);
+  static GetGlyphGeometry() {
+    if (GlyphGeometry === null) {
+      const shape = new THREE.Shape();
+      MapGlyph.SetHexVertices(shape, 2);
+      GlyphGeometry = new THREE.ShapeGeometry(shape);
+    }
+    return GlyphGeometry;
+  }
+
+  addGlyphMesh(offsets) {
+    const { x, y, color } = this.opts;
+    const geo = MapGlyph.GetGlyphGeometry();
+    const mat = MaterialFactory.getMaterial('CollectibleGlyph', {
+      emissiveColor: color,
+      xOffset: offsets.x,
+      yOffset: offsets.y,
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    TranslateTo3d(mesh.position, x, y, GAME.CollectibleDistance, 0.935);
+    mesh.positionCulled = true;
+    this.setInverseLookAt(mesh, y);
+    mesh.updateMatrix();
+    mesh.matrixAutoUpdate = false;
+    this.glypMaterial = mat;
+    this.group.add(mesh);
+  }
+
+  getSocketGeometry() {
+    const { x, y } = this.opts;
+    const geo = MapGlyph.GetSocketGeometry().clone();
+    const mesh = new THREE.Mesh(geo);
+    TranslateTo3d(mesh.position, x, y, GAME.CollectibleDistance, 0.935);
+    this.setInverseLookAt(mesh, y);
+    mesh.updateMatrix();
+    geo.applyMatrix(mesh.matrix);
+    return geo;
+  }
+
+  setInverseLookAt(target, y) {
+    const lookPosition = new THREE.Vector3(0, y, 0);
+    lookPosition.subVectors(target.position, lookPosition).add(target.position);
+    target.lookAt(lookPosition);
   }
 
   update(delta) {

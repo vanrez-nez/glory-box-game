@@ -6,12 +6,12 @@ export const MATERIAL = {
 
 export const CONFIG = {
   EnableTools: false,
-  EnableStats: false,
+  EnableStats: true,
   EnableOrbitControls: false,
   EnableAxes: false,
   DebugCollisions: false,
   UsePostProcessing: false,
-  PositionCullingEnabled: false,
+  PositionCullingEnabled: true,
   EnableShadows: false,
   ToneMapping: THREE.NoToneMapping,
   MaterialQuality: MATERIAL.QualityLow,

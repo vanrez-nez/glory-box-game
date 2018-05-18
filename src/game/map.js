@@ -1,5 +1,6 @@
 
 import { EVENTS, MAP, DIRECTIONS } from './const';
+import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 import GameMapParser from './map-parser';
 import GamePlatform from './platform';
 import GameCollectible from './collectible';
@@ -15,6 +16,8 @@ export default class GameMap {
     this.bodies = [];
     this.collectibles = [];
     this.generatePlatform();
+    this.mergePlatformSockets();
+    this.mergeCollectibleSockets();
   }
 
   generatePlatform() {
@@ -55,6 +58,31 @@ export default class GameMap {
     this.group.add(collectible.group);
   }
 
+  mergePlatformSockets() {
+    const { platforms } = this;
+    const geo = new THREE.Geometry();
+    for (let i = 0; i < platforms.length; i++) {
+      const p = platforms[i];
+      geo.merge(p.getSocketGeometry());
+    }
+    const mat = MaterialFactory.getMaterial('PlatformSocket', { color: 0xffffff });
+    const mesh = new THREE.Mesh(geo, mat);
+    this.group.add(mesh);
+  }
+
+  mergeCollectibleSockets() {
+    const { collectibles } = this;
+    const geo = new THREE.Geometry();
+    for (let i = 0; i < collectibles.length; i++) {
+      const c = collectibles[i];
+      geo.merge(c.glyph.getSocketGeometry());
+    }
+    const mat = MaterialFactory.getMaterial('CollectibleSocket', { color: 0xffffff });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.castShadow = true;
+    this.group.add(mesh);
+  }
+
   onCollectibleCollisionBegan(collectible) {
     this.events.emit(EVENTS.CollectiblePickup, collectible);
   }
@@ -66,14 +94,11 @@ export default class GameMap {
     const platform = new GamePlatform({ x: xTrans, y: yTrans, width, type });
     bodies.push(platform.body);
     group.add(platform.mesh);
-    group.add(platform.holderSocketMesh);
     platforms.push(platform);
   }
 
   update(delta) {
     const { platforms, collectibles } = this;
-    // this.mergedSolidMesh.geometry.verticesNeedUpdate = true;
-    // this.mergedLightsMesh.geometry.verticesNeedUpdate = true;
 
     for (let i = 0; i < platforms.length; i++) {
       if (platforms[i].visible) {
