@@ -29,7 +29,7 @@ export const GAME = {
   BoundsRight: 128,
   BoundsBottom: -16,
   BoundsTop: Infinity,
-  CullingMaxDistance: 100,
+  CullingMaxDistance: 50,
   CullingMaxNodes: 100,
   CullingUpdateRate: 20,
 };
