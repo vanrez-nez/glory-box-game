@@ -129,7 +129,7 @@ class Game {
 
   onEnd(fps, panic) {
     if (panic) {
-      console.log('Panic!');
+      MainLoop.resetFrameDelta();
     }
   }
 }

@@ -45,7 +45,8 @@ export default class GameCollectible {
   }
 
   addItem(x, y, color) {
-    const mat = MaterialFactory.getMaterial('CollectibleItem', { color });
+    const cacheId = color;
+    const mat = MaterialFactory.getMaterial('CollectibleItem', { color }, cacheId);
     const mesh = new THREE.Mesh(ItemGeometry, mat);
     TranslateTo3d(mesh.position, x, y, GAME.CollectibleDistance, 1.05);
     this.body = new GamePhysicsBody({
@@ -84,8 +85,9 @@ export default class GameCollectible {
   }
 
   getTrailParticle(x, y, color, phi) {
+    const cacheId = color;
     const trail = new LineTrail({
-      material: MaterialFactory.getMaterial('CollectibleTrail', { color }),
+      material: MaterialFactory.getMaterial('CollectibleTrail', { color }, cacheId),
     });
     return { trail, theta: Math.random() * Math.PI, phi, r: 1.5 };
   }

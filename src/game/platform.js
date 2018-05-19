@@ -105,9 +105,10 @@ export default class GamePlatform {
       width: opts.width,
       color: 0x0,
     });
+    const cacheId = opts.type;
     const lightMat = MaterialFactory.getMaterial('PlatformLight', {
       color: this.isMovingPlatform() ? 0xff0000 : 0x00ff00,
-    });
+    }, cacheId);
     const meshSteps = new THREE.Mesh(stepsGeo, stepsMat);
     const meshLight = new THREE.Mesh(lightGeo, lightMat);
     meshSteps.position.y = 0.2;

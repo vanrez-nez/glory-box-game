@@ -28,14 +28,26 @@ const MATERIALS = {
 
 export default class GameMaterialFactory {
   constructor(opts) {
-    this.materials = [];
+    this.materialsCache = {};
     this.opts = { ...DEFAULT, ...opts };
   }
 
-  getMaterial(materialName, params) {
+  getMaterial(materialName, params, cacheId = null) {
+    const { materialsCache } = this;
     let material;
     if (MATERIALS[materialName]) {
-      material = new MATERIALS[materialName](params);
+      const useCache = cacheId !== null;
+      let cacheHash = '';
+      if (useCache) {
+        cacheHash = `${materialName}_${cacheId}`;
+        material = this.materialsCache[cacheHash];
+      }
+      if (!material) {
+        material = new MATERIALS[materialName](params);
+        if (useCache) {
+          this.materialsCache[cacheHash] = material;
+        }
+      }
       return material.getMaterial(CONFIG.MaterialQuality);
     } else {
       return new THREE.MeshBasicMaterial();
