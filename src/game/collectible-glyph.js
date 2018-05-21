@@ -24,7 +24,7 @@ const DEFAULT = {
   color: 0xffffff,
 };
 
-export default class MapGlyph {
+export default class CollectibleGlyph {
   constructor(opts) {
     this.opts = { ...DEFAULT, ...opts };
     this.noise = new Simple1DNoise();
@@ -53,9 +53,9 @@ export default class MapGlyph {
   static GetSocketGeometry() {
     if (SocketGeometry === null) {
       const shape = new THREE.Shape();
-      MapGlyph.SetHexVertices(shape, 2.6);
+      CollectibleGlyph.SetHexVertices(shape, 2.6);
       const pathHole = new THREE.Path();
-      MapGlyph.SetHexVertices(pathHole, 2);
+      CollectibleGlyph.SetHexVertices(pathHole, 2);
       shape.holes.push(pathHole);
       const extrudeSettings = {
         amount: 0.3,
@@ -69,7 +69,7 @@ export default class MapGlyph {
   static GetGlyphGeometry() {
     if (GlyphGeometry === null) {
       const shape = new THREE.Shape();
-      MapGlyph.SetHexVertices(shape, 2);
+      CollectibleGlyph.SetHexVertices(shape, 2);
       GlyphGeometry = new THREE.ShapeGeometry(shape);
     }
     return GlyphGeometry;
@@ -77,7 +77,7 @@ export default class MapGlyph {
 
   addGlyphMesh(offsets) {
     const { x, y, color } = this.opts;
-    const geo = MapGlyph.GetGlyphGeometry();
+    const geo = CollectibleGlyph.GetGlyphGeometry();
     const cacheId = color;
     const mat = MaterialFactory.getMaterial('CollectibleGlyph', {
       emissiveColor: color,
@@ -96,7 +96,7 @@ export default class MapGlyph {
 
   getSocketGeometry() {
     const { x, y } = this.opts;
-    const geo = MapGlyph.GetSocketGeometry().clone();
+    const geo = CollectibleGlyph.GetSocketGeometry().clone();
     const mesh = new THREE.Mesh(geo);
     TranslateTo3d(mesh.position, x, y, GAME.CollectibleDistance, 0.935);
     this.setInverseLookAt(mesh, y);

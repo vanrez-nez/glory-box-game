@@ -1,7 +1,7 @@
 import { GAME, PHYSICS, EVENTS, COLLECTIBLE } from './const';
 import { TranslateTo3d } from './utils';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
-import MapGlyph from './map-glyph';
+import CollectibleGlyph from './collectible-glyph';
 import LineTrail from './line-trail';
 import GamePhysicsBody from './physics-body';
 
@@ -66,7 +66,7 @@ export default class GameCollectible {
   }
 
   addGlyph(x, y, color) {
-    this.glyph = new MapGlyph({ x, y, color });
+    this.glyph = new CollectibleGlyph({ x, y, color });
     this.group.add(this.glyph.group);
   }
 

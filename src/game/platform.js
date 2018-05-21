@@ -64,7 +64,7 @@ export default class GamePlatform {
   static CreateSocketMesh(width) {
     const BspCylinder = GamePlatform.GetBspCylinder();
     const BspProjectedBox = GamePlatform.GetBspBox(width, 1.4, 10, -0.3);
-    const BspInnerProjectedBox = GamePlatform.GetBspBox(width * 0.8, 0.7, 10, 0);
+    const BspInnerProjectedBox = GamePlatform.GetBspBox(width - 0.8, 0.4, 10, 0);
     const s1 = BspProjectedBox.intersect(BspCylinder);
     const s2 = s1.subtract(BspInnerProjectedBox);
     const mesh = s2.toMesh();
