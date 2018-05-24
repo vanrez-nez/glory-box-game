@@ -23,6 +23,7 @@ export const GAME = {
   CollectibleDistance: 37.5,
   PlayerDistance: 37.3,
   ZoomCameraDistance: 150,
+  EnemyDistance: 39,
   CameraDistance: 80,
   PlatformZSize: 2,
   BoundsLeft: -128,

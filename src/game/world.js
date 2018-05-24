@@ -8,23 +8,23 @@ export default class GameWorld {
     this.group = new THREE.Group();
     this.group.name = 'GameWorld';
     this.addFloor();
-    this.addLobby();
+    // this.addLobby();
     this.addMainCylinder();
     this.addFxCylinder();
     this.addCylinderBase();
-    this.addSkyCylinder();
+    // this.addSkyCylinder();
   }
 
   addLobby() {
     this.lobby = new GameLobby();
-    // this.group.add(this.lobby.group);
+    this.group.add(this.lobby.group);
   }
 
   addSkyCylinder() {
     const geo = new THREE.CylinderGeometry(200, 200, 250, 16, 1, true);
     const mat = MaterialFactory.getMaterial('WorldSkyCylinder');
     this.skyCylinder = new THREE.Mesh(geo, mat);
-    // this.group.add(this.skyCylinder);
+    this.group.add(this.skyCylinder);
   }
 
   addFloor() {
@@ -103,7 +103,7 @@ export default class GameWorld {
   }
 
   update(delta, playerPosition) {
-    this.skyCylinder.material.uniforms.time.value += delta * 0.35;
-    this.skyCylinder.position.y = playerPosition.y;
+    // this.skyCylinder.material.uniforms.time.value += delta * 0.35;
+    // this.skyCylinder.position.y = playerPosition.y;
   }
 }

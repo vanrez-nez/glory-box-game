@@ -34,6 +34,7 @@ import GameWorld from './game/world';
 import GameMap from './game/map';
 import GameSfxManager from './game/sfx-manager';
 import GameMoodManager from './game/mood-manager';
+import GameEnemy from './game/enemy';
 
 class Game {
   constructor() {
@@ -56,6 +57,7 @@ class Game {
     });
     this.player = new GamePlayer({});
     this.map = new GameMap({});
+    this.enemy = new GameEnemy({});
     this.physics = new GamePhysics({
       bounds: new THREE.Box2(
         new THREE.Vector2(GAME.BoundsLeft, GAME.BoundsTop),
@@ -76,6 +78,7 @@ class Game {
     this.physics.add(this.player.body);
     this.physics.add(this.map.bodies);
     this.engine.scene.add(this.player.group);
+    this.engine.scene.add(this.enemy.group);
     this.engine.scene.add(this.map.group);
     this.engine.scene.add(this.world.group);
     this.engine.cameraTarget = this.player.mesh.position;
@@ -110,11 +113,12 @@ class Game {
   }
 
   onUpdate(delta) {
-    const { gameInput, player, map, world, physics } = this;
+    const { gameInput, enemy, player, map, world, physics } = this;
     delta /= 1000;
     physics.updateCollisionSpace(player.body.position, 15);
     physics.update(delta);
     player.update(delta, gameInput.state);
+    enemy.update(delta);
     map.update(delta);
     world.update(delta, player.mesh.position);
   }

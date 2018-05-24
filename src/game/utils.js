@@ -17,6 +17,7 @@ export function GetTextureRepeatDefer(url, repeatX, repeatY, offsetX, offsetY) {
   return () => GetTextureRepeat(url, repeatX, repeatY, offsetX, offsetY);
 }
 
+/* Map 2D cartesian coords to polar coords */
 export function TranslateTo3d(position, toX, toY, radius = 35, project = 0) {
   position.x = radius * Math.sin(toX / radius + TWO_PI);
   position.y = toY;
@@ -27,7 +28,7 @@ export function TranslateTo3d(position, toX, toY, radius = 35, project = 0) {
   }
 }
 
-export function AddDot(scene, position, size = 5) {
+export function AddDot(parent, position, size = 5) {
   const geo = new THREE.Geometry();
   geo.vertices.push(position.clone());
   const mat = new THREE.PointsMaterial({
@@ -36,6 +37,6 @@ export function AddDot(scene, position, size = 5) {
     color: 0xffffff,
   });
   const dot = new THREE.Points(geo, mat);
-  scene.add(dot);
+  parent.add(dot);
   return dot;
 }

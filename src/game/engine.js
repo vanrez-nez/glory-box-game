@@ -43,14 +43,16 @@ export default class Engine {
     this.renderer.gammaFactor = 2.3;
     this.renderer.sortObjects = false;
     this.renderer.toneMapping = CONFIG.ToneMapping;
+    this.renderer.toneMappingExposure = 1.5;
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.FogExp2(0x000000, 0.02);
+    this.scene.matrixAutoUpdate = false;
+    this.scene.fog = new THREE.FogExp2(0x000000, 0.015);
     this.camera = new THREE.PerspectiveCamera(45, 1, 1, 300);
     this.camera.position.z = GAME.ZoomCameraDistance;
   }
 
   initLights() {
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.35);
     this.ambientLight = ambientLight;
     this.scene.add(ambientLight);
   }
