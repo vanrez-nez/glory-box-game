@@ -1,5 +1,5 @@
 import { GAME } from './const';
-import { TranslateTo3d } from './utils';
+import { CartesianToCylinder } from './utils';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 
 const Offsets = [
@@ -85,7 +85,7 @@ export default class CollectibleGlyph {
       yOffset: offsets.y,
     }, cacheId);
     const mesh = new THREE.Mesh(geo, mat);
-    TranslateTo3d(mesh.position, x, y, GAME.CollectibleDistance, 0.935);
+    CartesianToCylinder(mesh.position, x, y, GAME.CollectibleSocketOffset);
     mesh.positionCulled = true;
     this.setInverseLookAt(mesh, y);
     mesh.updateMatrix();
@@ -98,7 +98,7 @@ export default class CollectibleGlyph {
     const { x, y } = this.opts;
     const geo = CollectibleGlyph.GetSocketGeometry().clone();
     const mesh = new THREE.Mesh(geo);
-    TranslateTo3d(mesh.position, x, y, GAME.CollectibleDistance, 0.935);
+    CartesianToCylinder(mesh.position, x, y, GAME.CollectibleSocketOffset);
     this.setInverseLookAt(mesh, y);
     mesh.updateMatrix();
     geo.applyMatrix(mesh.matrix);

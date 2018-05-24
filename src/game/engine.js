@@ -1,6 +1,6 @@
 
 import { CONFIG, GAME } from './const';
-import { TranslateTo3d } from './utils';
+import { CartesianToCylinder } from './utils';
 import ObjectCulling from './object-culling';
 
 const DEFAULT = {};
@@ -46,7 +46,7 @@ export default class Engine {
     this.renderer.toneMappingExposure = 1.5;
     this.scene = new THREE.Scene();
     this.scene.matrixAutoUpdate = false;
-    this.scene.fog = new THREE.FogExp2(0x000000, 0.015);
+    // this.scene.fog = new THREE.FogExp2(0x000000, 0.015);
     this.camera = new THREE.PerspectiveCamera(45, 1, 1, 300);
     this.camera.position.z = GAME.ZoomCameraDistance;
   }
@@ -106,12 +106,11 @@ export default class Engine {
 
   followTarget() {
     const { cameraVector, cameraTargetTo, cameraTarget, camera } = this;
-    TranslateTo3d(
+    CartesianToCylinder(
       cameraVector.copy(cameraTarget),
       cameraTarget.x * (Math.PI / 2),
       cameraTarget.y + 5,
-      GAME.PlayerDistance,
-      2,
+      GAME.CameraDistance,
     );
     cameraTargetTo.lerp(cameraTarget, 0.1);
     camera.lookAt(cameraTargetTo);

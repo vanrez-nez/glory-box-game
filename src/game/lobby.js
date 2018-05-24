@@ -1,6 +1,6 @@
 import { GAME } from './const';
 import { IMAGE_ASSETS } from './assets';
-import { TranslateTo3d, GetTextureRepeat } from './utils';
+import { CartesianToCylinder, GetTextureRepeat } from './utils';
 import { StaticInstance as Skybox } from './skybox';
 
 const GlyphsOffsetX = -21.3;
@@ -49,8 +49,8 @@ export default class GameLobby {
           const geo = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
           const mesh = new THREE.Mesh(geo, mat);
           mesh.scale.set(-0.1, -0.1, 1);
-          TranslateTo3d(mesh.position, glyph.x + GlyphsOffsetX, GlyphsOffsetY,
-            GAME.PlatformDistance - 1);
+          CartesianToCylinder(mesh.position, glyph.x + GlyphsOffsetX, GlyphsOffsetY,
+            GAME.PlatformOffset - 1);
           mesh.lookAt(0, mesh.position.y, 0);
           mesh.positionCulled = true;
           mesh.castShadow = true;
@@ -68,7 +68,7 @@ export default class GameLobby {
 
   addGlobalLight() {
     const rectLight = new THREE.RectAreaLight(0x00eaff, 8, 20, 10);
-    TranslateTo3d(rectLight.position, 0, 2, GAME.CilynderRadius - 10);
+    CartesianToCylinder(rectLight.position, 0, 2, GAME.CilynderRadius - 10);
     // this.group.add(rectLight);
     // const rectLightHelper = new THREE.RectAreaLightHelper( rectLight );
     // this.group.add(rectLightHelper);

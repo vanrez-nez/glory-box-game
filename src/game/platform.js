@@ -1,6 +1,6 @@
 
 import { PHYSICS, MAP, EVENTS, GAME } from './const';
-import { TranslateTo3d } from './utils';
+import { CartesianToCylinder } from './utils';
 import GamePhysicsBody from './physics-body';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 
@@ -56,7 +56,7 @@ export default class GamePlatform {
   static GetBspBox(width, height, depth, project) {
     const geo = new THREE.BoxGeometry(width, height, depth);
     const mesh = new THREE.Mesh(geo);
-    TranslateTo3d(mesh.position, 0, 0, GAME.PlatformDistance, project);
+    CartesianToCylinder(mesh.position, 0, 0, GAME.PlatformOffset, project);
     mesh.lookAt(0, 0, 0);
     return new ThreeBSP(mesh);
   }
@@ -85,7 +85,7 @@ export default class GamePlatform {
     const width = this.isMovingPlatform() ? opts.width * 3 : opts.width;
     const mesh = GamePlatform.GetSocketMesh(width);
     const geo = mesh.geometry.clone();
-    TranslateTo3d(mesh.position, opts.x, opts.y, GAME.PlatformDistance);
+    CartesianToCylinder(mesh.position, opts.x, opts.y, GAME.PlatformOffset);
     mesh.lookAt(0, opts.y, 0);
     mesh.updateMatrix();
     geo.applyMatrix(mesh.matrix);
@@ -141,7 +141,7 @@ export default class GamePlatform {
       friction: 0.05,
       isStatic: true,
       scale: new THREE.Vector2(opts.width, 1),
-      distance: GAME.PlatformDistance,
+      distance: GAME.PlatformOffset,
     });
   }
 

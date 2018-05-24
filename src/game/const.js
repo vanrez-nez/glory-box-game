@@ -19,12 +19,13 @@ export const CONFIG = {
 
 export const GAME = {
   CilynderRadius: 35,
-  PlatformDistance: 37.25,
-  CollectibleDistance: 37.5,
-  PlayerDistance: 37.3,
+  PlatformOffset: 2.25,
+  CollectibleSocketOffset: 0,
+  CollectibleItemOffset: 1.9,
+  PlayerOffset: 2.25,
+  EnemyOffset: 4,
+  CameraDistance: 40,
   ZoomCameraDistance: 150,
-  EnemyDistance: 39,
-  CameraDistance: 80,
   PlatformZSize: 2,
   BoundsLeft: -128,
   BoundsRight: 128,

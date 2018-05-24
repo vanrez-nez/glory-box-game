@@ -1,6 +1,6 @@
 
 import { EVENTS, PHYSICS, CONFIG, GAME } from './const';
-import { Clamp, TranslateTo3d } from './utils';
+import { Clamp, CartesianToCylinder } from './utils';
 import CollisionEdges from './collision-edges';
 
 const DEFAULT = {
@@ -86,7 +86,7 @@ export default class GamePhysicsBody {
       if (CONFIG.DebugCollisions && mesh.material) {
         mesh.material.wireframe = cE.isColliding();
       }
-      TranslateTo3d(
+      CartesianToCylinder(
         mesh.position,
         pos.x + pOffset.x,
         pos.y + pOffset.y,

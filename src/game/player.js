@@ -5,7 +5,7 @@
 // https://kotaku.com/5420545/lets-talk-about-jumping
 
 import { PHYSICS, EVENTS, GAME } from './const';
-import { Clamp, TranslateTo3d } from './utils';
+import { Clamp, CartesianToCylinder } from './utils';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 import GamePhysicsBody from './physics-body';
 
@@ -38,7 +38,7 @@ export default class GamePlayer {
       scale: new THREE.Vector2(1.5, 1.5),
       gravity: new THREE.Vector2(0, opts.gravity),
       maxVelocity: new THREE.Vector2(0.3, 1.7),
-      distance: GAME.PlayerDistance,
+      distance: GAME.PlayerOffset,
     });
     this.attachEvents();
   }
@@ -182,7 +182,7 @@ export default class GamePlayer {
 
   updateLights() {
     const { light, body } = this;
-    TranslateTo3d(light.position, body.position.x, body.position.y, GAME.PlayerDistance);
+    CartesianToCylinder(light.position, body.position.x, body.position.y, GAME.PlayerDistance);
     light.position.addScalar(0.15);
   }
 

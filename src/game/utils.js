@@ -1,4 +1,7 @@
 const TWO_PI = Math.PI * 2;
+const PI_WIDTH = 128 / Math.PI;
+
+import { GAME } from './const';
 
 export function Clamp(val, min, max) {
   return Math.min(Math.max(val, min), max);
@@ -17,15 +20,25 @@ export function GetTextureRepeatDefer(url, repeatX, repeatY, offsetX, offsetY) {
   return () => GetTextureRepeat(url, repeatX, repeatY, offsetX, offsetY);
 }
 
-/* Map 2D cartesian coords to polar coords */
-export function TranslateTo3d(position, toX, toY, radius = 35, project = 0) {
-  position.x = radius * Math.sin(toX / radius + TWO_PI);
-  position.y = toY;
-  position.z = radius * Math.cos(toX / radius + TWO_PI);
-  if (project > 0) {
-    position.multiplyScalar(project);
-    position.y = toY;
-  }
+/* Map 2D cartesian coords to cylindrical coords */
+export function CartesianToCylinder(vec3, x, y, project = 0) {
+  const theta = x / PI_WIDTH;
+  const radius = GAME.CilynderRadius + project;
+  vec3.x = radius * Math.sin(theta);
+  vec3.y = y;
+  vec3.z = radius * Math.cos(theta);
+}
+
+export function CylinderToCartesian(vec3) {
+  const r = Math.sqrt(vec3.x * vec3.x + vec3.z * vec3.z);
+  const theta = Math.atan2(vec3.x, vec3.z);
+
+}
+
+export function CartesianToCylindrical(vec3, radius, theta) {
+  vec3.x = radius * Math.sin(theta);
+  vec3.z = radius * Math.cos(theta);
+  
 }
 
 export function AddDot(parent, position, size = 5) {
