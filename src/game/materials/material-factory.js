@@ -9,11 +9,13 @@ import CollectibleSocketMaterial from './collectible-socket-material';
 import CollectibleGlyphMaterial from './collectible-glyph-material';
 import CollectibleItemMaterial from './collectible-item-material';
 import CollectibleTrailMaterial from './collectible-trail-material';
+import EnemyHeadMaterial from './enemy-head-material';
+import EnemyArmorMaterial from './enemy-armor-material';
+import GenericColorMaterial from './generic-color-material';
 import PlayerMaterial from './player-material';
 
 const DEFAULT = {};
 const MATERIALS = {
-  PlayerMaterial,
   WorldCylinder: WorldCylinderMaterial,
   WorldFloor: WorldFloorMaterial,
   WorldSkyCylinder: WorldSkyCylinderMaterial,
@@ -24,6 +26,10 @@ const MATERIALS = {
   CollectibleGlyph: CollectibleGlyphMaterial,
   CollectibleItem: CollectibleItemMaterial,
   CollectibleTrail: CollectibleTrailMaterial,
+  EnemyHead: EnemyHeadMaterial,
+  EnemyArmor: EnemyArmorMaterial,
+  GenericColor: GenericColorMaterial,
+  PlayerMaterial,
 };
 
 export default class GameMaterialFactory {
@@ -40,12 +46,12 @@ export default class GameMaterialFactory {
       let cacheHash = '';
       if (useCache) {
         cacheHash = `${materialName}_${cacheId}`;
-        material = this.materialsCache[cacheHash];
+        material = materialsCache[cacheHash];
       }
       if (!material) {
         material = new MATERIALS[materialName](params);
         if (useCache) {
-          this.materialsCache[cacheHash] = material;
+          materialsCache[cacheHash] = material;
         }
       }
       return material.getMaterial(CONFIG.MaterialQuality);

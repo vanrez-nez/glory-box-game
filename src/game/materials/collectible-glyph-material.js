@@ -21,7 +21,6 @@ export default class CollectibleGlyphMaterial extends GameMetaMaterial {
           emissiveIntensity: 6,
           emissive: emissiveColor,
           reflectivity: 0.5,
-          side: THREE.DoubleSide,
         },
       },
     });

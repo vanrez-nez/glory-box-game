@@ -13,6 +13,7 @@ export default class WorldCylinderMaterial extends GameMetaMaterial {
           map: GetTextureRepeatDefer(IMAGE_ASSETS.HullBase, xScale, yScale),
           color: 0x1c284d,
           reflectivity: 0.5,
+          wireframe: false,
         },
       },
       medium: {

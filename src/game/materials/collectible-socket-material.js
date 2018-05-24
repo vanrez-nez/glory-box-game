@@ -12,9 +12,11 @@ export default class CollectibleSocketMaterial extends GameMetaMaterial {
       },
       medium: {
         type: 'MeshLambertMaterial',
-        envMap: Skybox.textureCube,
-        reflectivity: 0.35,
-        color: opts.color,
+        args: {
+          envMap: Skybox.textureCube,
+          reflectivity: 0.35,
+          color: opts.color,
+        },
       },
     });
   }

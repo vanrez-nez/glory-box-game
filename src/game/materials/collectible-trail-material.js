@@ -9,7 +9,7 @@ export default class CollectibleTrailMaterial extends GameMetaMaterial {
           color: new THREE.Color(opts.color),
           side: THREE.DoubleSide,
           sizeAttenuation: true,
-          lineWidth: 0.3,
+          lineWidth: opts.lineWidth,
         },
       },
     });
