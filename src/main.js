@@ -68,6 +68,7 @@ class Game {
       engine: this.engine,
       player: this.player,
       map: this.map,
+      enemy: this.enemy,
       world: this.world,
     });
     this.moodManager = new GameMoodManager({

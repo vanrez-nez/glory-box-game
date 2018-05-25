@@ -1,14 +1,12 @@
 import { GAME } from './const';
 import { MODEL_ASSETS } from './assets';
-import { TranslateTo3d, AddDot } from './utils';
+import { CartesianToCylinder } from './utils';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 import LineTrail from './line-trail';
 
 const DEFAULT = {
   tailSize: 90,
 };
-
-const AngleVector = new THREE.Vector2();
 
 export default class GameEnemy {
   constructor(opts) {
@@ -20,7 +18,6 @@ export default class GameEnemy {
     this.headAmp = 3;
     this.tailPositions = [];
     this.tailSegments = [];
-    // this.debugDots = [];
     this.modelLoaded = false;
     this.theta = 0;
     this.positionY = 0;
@@ -33,8 +30,7 @@ export default class GameEnemy {
       const scene = glft.scenes[0];
       this.head = scene.getObjectByName('head');
       this.eyes = scene.getObjectByName('eyes');
-      this.tailSegmentA = scene.getObjectByName('tail_segment_a');
-      this.tailSegmentB = scene.getObjectByName('tail_segment_b');
+      this.tailSegment = scene.getObjectByName('tail_segment_a');
       this.group.add(this.head);
       this.initHead();
       this.initTail();
@@ -45,22 +41,20 @@ export default class GameEnemy {
 
   initHead() {
     const { head, eyes } = this;
-    TranslateTo3d(this.head.position, 0, 0, GAME.EnemyDistance);
+    CartesianToCylinder(this.head.position, 0, 0, GAME.EnemyOffset);
     head.material = MaterialFactory.getMaterial('EnemyHead', { color: 0x0 });
     eyes.material = MaterialFactory.getMaterial('GenericColor', { color: 0xff0000 });
   }
 
   initTail() {
-    const { group, tailPositions, tailSegments, tailSegmentA, tailSegmentB } = this;
+    const { group, tailPositions, tailSegments, tailSegment } = this;
     const { tailSize } = this.opts;
-    tailSegmentA.material = MaterialFactory.getMaterial('EnemyArmor', { color: 0xff0000 });
-    //tailSegmentA.up = (new THREE.Vector3(1, -1, 0)).normalize();
+    tailSegment.material = MaterialFactory.getMaterial('EnemyArmor', { color: 0xff0000 });
     tailPositions.push(new THREE.Vector2());
     for (let i = 0; i < tailSize; i++) {
-      const t = tailSegmentA.clone();
+      const t = tailSegment.clone();
       tailSegments.push(t);
       tailPositions.push(new THREE.Vector2());
-      // this.debugDots.push(AddDot(this.group, new THREE.Vector3()));
       group.add(t);
     }
   }
@@ -73,8 +67,8 @@ export default class GameEnemy {
         color: 0xffff00,
         lineWidth: 2,
       }),
-      sizeFn: p => {
-        let i = idx++ % this.opts.tailSize;
+      sizeFn: () => {
+        const i = idx++ % this.opts.tailSize;
         if (i === this.opts.tailSize - 1) {
           return 0.1;
         } else {
@@ -87,13 +81,13 @@ export default class GameEnemy {
   }
 
   setOrbitPosition(obj, theta) {
-    const x = GAME.EnemyDistance * Math.sin(theta);
+    const x = (GAME.CilynderRadius + GAME.EnemyOffset) * Math.sin(theta);
     const y = this.positionY;
-    const z = GAME.EnemyDistance * Math.cos(theta);
+    const z = (GAME.CilynderRadius + GAME.EnemyOffset) * Math.cos(theta);
     obj.position.set(x, y, z);
   }
 
-  /* 
+  /*
     Keeps the object facing towards the center, this is a performant
     but simplistic alternative for using THREE.Object3D's lookAt method
     https://stackoverflow.com/questions/1251828/calculate-rotations-to-look-at-a-3d-point
@@ -107,7 +101,7 @@ export default class GameEnemy {
     obj.rotation.set(rotX, rotY, rotZ + zRotationOffset);
   }
 
-  updateHead(delta) {
+  updateHead() {
     const { positionY, head, headAmp } = this;
     this.setOrbitPosition(this.head, this.theta);
     this.lookAtCenter(head, Math.PI / 4 * 6);
@@ -123,9 +117,13 @@ export default class GameEnemy {
     this.tailPositions[0].y = head.position.y + 0.5;
   }
 
+  /*
+    Updates segment position to behave like a chain
+    https://processing.org/examples/follow3.html
+  */
   getSegmentPosition(idx) {
     const { tailPositions } = this;
-    if (idx == 0) {
+    if (idx === 0) {
       return tailPositions[idx];
     } else {
       const prev = tailPositions[idx - 1];
@@ -140,17 +138,17 @@ export default class GameEnemy {
       return pos;
     }
   }
-  
-  easeExpoIn(t) {
-    return t === 0 ? 0 : Math.pow(1024, t - 1);
-  };
 
-  easeExpoOut(t) {
-    return t === 1 ? 1 : 1 - Math.pow(2, - 10 * t);
+  easeExpoIn(t) {
+    return t === 0 ? 0 : 1024 ** (t - 1);
   }
 
-  updateTail(delta) {
-    const { position, head, tailSegments } = this;
+  easeExpoOut(t) {
+    return t === 1 ? 1 : 1 - (2 ** (-10 * t));
+  }
+
+  updateTail() {
+    const { tailSegments } = this;
     const len = tailSegments.length;
     for (let i = 0; i < len; i++) {
       const seg = tailSegments[i];
@@ -161,7 +159,6 @@ export default class GameEnemy {
       this.setOrbitPosition(seg, this.theta - thetaOffset);
       seg.position.y = pos.y;
       this.updateTrailPosition(i, seg.position);
-      //const rotOffset = (seg.position.y - prev.position.y) * 0.4;
       this.lookAtCenter(seg, Math.PI / 4 * 6);
     }
   }
@@ -179,16 +176,6 @@ export default class GameEnemy {
     attributes.position.needsUpdate = true;
   }
 
-  debug(delta) {
-    const { positio } = this;
-    for (let i = 0; i < this.debugDots.length; i++) {
-      const dot = this.debugDots[i];
-      const { x, y } = this.tailPositions[i];
-      dot.position.x = x;
-      dot.position.y = y;
-    }
-  }
-
   updateTrail() {
     this.trail.pushPosition(this.head.position);
   }
@@ -197,10 +184,9 @@ export default class GameEnemy {
     if (this.modelLoaded) {
       this.theta += delta * 0.3 * this.speed;
       this.time += delta * this.speed;
-      this.updateHead(delta);
-      this.updateTail(delta);
+      this.updateHead();
+      this.updateTail();
       this.updateTrail(delta);
-      // this.debug(delta);
     }
   }
 }
