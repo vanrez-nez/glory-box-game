@@ -1,4 +1,4 @@
-import { MATERIAL } from '../const';
+import { QUALITY } from '../const';
 
 const DEFAULTS = {
   low: {
@@ -20,17 +20,17 @@ export default class GameMetaMaterial {
   getMaterial(quality) {
     let mat = null;
     switch (quality) {
-      case MATERIAL.QualityLow:
+      case QUALITY.Low:
         this.createLowQualityMaterial();
         mat = this.low;
         break;
-      case MATERIAL.QualityMedium:
+      case QUALITY.Medium:
         this.createMediumQualityMaterial();
-        mat = this.medium || this.getMaterial(MATERIAL.QualityLow);
+        mat = this.medium || this.getMaterial(QUALITY.Low);
         break;
-      case MATERIAL.QualityHigh:
+      case QUALITY.High:
         this.createHighQualityMaterial();
-        mat = this.high || this.getMaterial(MATERIAL.QualityMedium);
+        mat = this.high || this.getMaterial(QUALITY.Medium);
         break;
     }
     return mat;

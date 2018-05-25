@@ -1,7 +1,7 @@
-export const MATERIAL = {
-  QualityLow: 0,
-  QualityMedium: 1,
-  QualityHigh: 2,
+export const QUALITY = {
+  Low: 0,
+  Medium: 1,
+  High: 2,
 };
 
 export const CONFIG = {
@@ -14,7 +14,7 @@ export const CONFIG = {
   PositionCullingEnabled: true,
   EnableShadows: false,
   ToneMapping: THREE.NoToneMapping,
-  MaterialQuality: MATERIAL.QualityLow,
+  MaterialQuality: QUALITY.Low,
 };
 
 export const GAME = {
@@ -24,7 +24,7 @@ export const GAME = {
   CollectibleItemOffset: 1.9,
   PlayerOffset: 2.25,
   EnemyOffset: 4,
-  CameraDistance: 40,
+  CameraDistance: 50,
   ZoomCameraDistance: 150,
   PlatformZSize: 2,
   BoundsLeft: -128,
