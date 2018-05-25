@@ -1,8 +1,8 @@
 import { GAME, PHYSICS, EVENTS, COLLECTIBLE } from './const';
-import { TranslateTo3d } from './utils';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 import CollectibleGlyph from './collectible-glyph';
 import LineTrail from './line-trail';
+import SteeringParticle from './steering-particle';
 import GamePhysicsBody from './physics-body';
 
 const MaxParticles = 5;
@@ -18,6 +18,8 @@ const Collectibles = [
   { type: COLLECTIBLE.Happiness, color: 0xff4f4f },
 ];
 const ItemGeometry = new THREE.DodecahedronBufferGeometry(0.8);
+const cacheVA = new THREE.Vector3();
+const cacheVB = new THREE.Vector3();
 
 export default class GameCollectible {
   constructor(x, y) {
@@ -27,6 +29,8 @@ export default class GameCollectible {
     this.color = pick.color;
     this.type = pick.type;
     this.particles = [];
+    this.tracers = [];
+    this.tracerMode = false;
     this.offsetItem = Math.random();
     this.addGlyph(x, y, pick.color);
     this.addItem(x, y, pick.color);
@@ -40,22 +44,19 @@ export default class GameCollectible {
 
   onCollisionBegan() {
     this.body.enabled = false;
-    this.itemMesh.visible = false;
-    this.particlesGroup.visible = false;
   }
 
   addItem(x, y, color) {
     const cacheId = color;
     const mat = MaterialFactory.getMaterial('CollectibleItem', { color }, cacheId);
     const mesh = new THREE.Mesh(ItemGeometry, mat);
-    TranslateTo3d(mesh.position, x, y, GAME.CollectibleDistance, 1.05);
     this.body = new GamePhysicsBody({
       type: PHYSICS.Collectible,
       mesh,
       isStatic: true,
       isSensor: true,
       label: 'collectible',
-      distance: GAME.CollectibleDistance,
+      distance: GAME.CollectibleItemOffset,
       scale: new THREE.Vector3(1.5, 1.5),
     });
     mesh.position.y = y;
@@ -95,7 +96,7 @@ export default class GameCollectible {
     return { trail, theta: Math.random() * Math.PI, phi, r: 1.5 };
   }
 
-  updateTrailsPosition(delta) {
+  updateStationaryTrailsPosition(delta) {
     const { particles, particlesGroup } = this;
     const pos = new THREE.Vector3();
     particlesGroup.position.copy(this.itemMesh.position);
@@ -110,18 +111,59 @@ export default class GameCollectible {
     }
   }
 
+  updateTracerTrailsPosition(delta) {
+    const { tracers } = this;
+    for (let i = 0; i < tracers.length; i++) {
+      const { targetPosition, trail, particle } = tracers[i];
+      const { opts } = particle;
+      particle.update();
+      particle.seek(targetPosition);
+      opts.maxForce += 0.001;
+      opts.maxSpeed = Math.max(0, opts.maxSpeed - 0.005);
+      cacheVA.copy(particle.position);
+      this.particlesGroup.worldToLocal(cacheVA);
+      trail.pushPosition(cacheVA);
+    }
+  }
+
+  startTracerMode(targetObject) {
+    const { particles } = this;
+    this.tracerMode = true;
+    const rotStep = Math.PI / particles.length;
+    for (let i = 0; i < particles.length; i++) {
+      const particle = particles[i];
+      const x = Math.sin(rotStep * i) * 2;
+      const y = Math.cos(rotStep * i) * 2;
+      const z = 1;
+      const p = new SteeringParticle({});
+      cacheVA.copy(particle.trail.mesh.position);
+      p.acceleration.set(x, y, z);
+      this.particlesGroup.localToWorld(cacheVA);
+      p.position.copy(cacheVA);
+      this.tracers.push({
+        trail: particle.trail,
+        targetPosition: targetObject.position,
+        particle: p,
+      });
+    }
+  }
+
   update(delta) {
     const { itemMesh, body } = this;
-    this.offsetItem += delta * 3;
-    itemMesh.rotation.x += delta * 0.5;
-    itemMesh.rotation.y += delta * 0.5;
-    body.meshPositionOffset.y = Math.sin(this.offsetItem) * 0.5;
-    this.glyph.update(delta);
-    this.updateTrailsPosition(delta);
+    if (!this.tracerMode) {
+      this.offsetItem += delta * 3;
+      itemMesh.rotation.x += delta * 0.5;
+      itemMesh.rotation.y += delta * 0.5;
+      body.meshPositionOffset.y = Math.sin(this.offsetItem) * 0.5;
+      this.glyph.update(delta);
+      this.updateStationaryTrailsPosition(delta);
+    } else {
+      this.updateTracerTrailsPosition(delta);
+    }
   }
 
   get visible() {
-    return this.itemMesh.visible
+    return (this.itemMesh.visible || this.particlesGroup.visible)
       && this.itemMesh.parent !== null;
   }
 }
