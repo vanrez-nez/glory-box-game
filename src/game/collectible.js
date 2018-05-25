@@ -17,7 +17,7 @@ const Collectibles = [
   { type: COLLECTIBLE.Difficulty, color: 0xff4f4f },
   { type: COLLECTIBLE.Happiness, color: 0xff4f4f },
 ];
-const ItemGeometry = new THREE.DodecahedronBufferGeometry(0.8);
+const ItemGeometry = new THREE.IcosahedronGeometry(0.8);
 const cacheVA = new THREE.Vector3();
 const cacheVB = new THREE.Vector3();
 
