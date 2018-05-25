@@ -180,6 +180,7 @@ export default class GameEnemy {
     if (this.modelLoaded) {
       this.theta += delta * 0.3 * this.speed;
       this.time += delta * this.speed;
+      this.positionY += delta * this.speed * 0.5;
       this.updateHead();
       this.updateTail();
       this.updateTrail(delta);
