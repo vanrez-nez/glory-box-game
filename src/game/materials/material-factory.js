@@ -11,6 +11,7 @@ import CollectibleItemMaterial from './collectible-item-material';
 import CollectibleTrailMaterial from './collectible-trail-material';
 import EnemyHeadMaterial from './enemy-head-material';
 import EnemyArmorMaterial from './enemy-armor-material';
+import EnemyEyesMaterial from './enemy-eyes-material';
 import GenericColorMaterial from './generic-color-material';
 import PlayerMaterial from './player-material';
 
@@ -28,6 +29,7 @@ const MATERIALS = {
   CollectibleTrail: CollectibleTrailMaterial,
   EnemyHead: EnemyHeadMaterial,
   EnemyArmor: EnemyArmorMaterial,
+  EnemyEyes: EnemyEyesMaterial,
   GenericColor: GenericColorMaterial,
   PlayerMaterial,
 };

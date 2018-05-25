@@ -30,7 +30,7 @@ export default class GameEnemy {
       const scene = glft.scenes[0];
       this.head = scene.getObjectByName('head');
       this.eyes = scene.getObjectByName('eyes');
-      this.tailSegment = scene.getObjectByName('tail_segment_a');
+      this.tailSegment = scene.getObjectByName('tail_segment');
       this.group.add(this.head);
       this.initHead();
       this.initTail();
@@ -43,7 +43,7 @@ export default class GameEnemy {
     const { head, eyes } = this;
     CartesianToCylinder(this.head.position, 0, 0, GAME.EnemyOffset);
     head.material = MaterialFactory.getMaterial('EnemyHead', { color: 0x0 });
-    eyes.material = MaterialFactory.getMaterial('GenericColor', { color: 0xff0000 });
+    eyes.material = MaterialFactory.getMaterial('EnemyEyes', { color: 0xffffff });
   }
 
   initTail() {
@@ -54,7 +54,7 @@ export default class GameEnemy {
     for (let i = 0; i < tailSize; i++) {
       const t = tailSegment.clone();
       tailSegments.push(t);
-      tailPositions.push(new THREE.Vector2());
+      tailPositions.push(new THREE.Vector2(-100, 0, 0));
       group.add(t);
     }
   }
@@ -69,11 +69,7 @@ export default class GameEnemy {
       }),
       sizeFn: () => {
         const i = idx++ % this.opts.tailSize;
-        if (i === this.opts.tailSize - 1) {
-          return 0.1;
-        } else {
-          return this.easeExpoOut(i / this.opts.tailSize);
-        }
+        return this.easeExpoOut(i / this.opts.tailSize);
       },
     });
     this.trail.line.geometry.boundingSphere.radius = 100;
@@ -114,7 +110,7 @@ export default class GameEnemy {
     */
     this.tailPositions[0].x = this.theta * 6;
     // update first tail position to follow the head
-    this.tailPositions[0].y = head.position.y + 0.5;
+    this.tailPositions[0].y = head.position.y + 0.7;
   }
 
   /*
@@ -155,7 +151,7 @@ export default class GameEnemy {
       const pos = this.getSegmentPosition(i);
       const scale = Math.max(0.05, 1.4 - this.easeExpoIn(i / len));
       seg.scale.set(scale, scale, scale);
-      const thetaOffset = Math.max(0.1, i * 0.05);
+      const thetaOffset = (i + 1.8) * 0.05;
       this.setOrbitPosition(seg, this.theta - thetaOffset);
       seg.position.y = pos.y;
       this.updateTrailPosition(i, seg.position);
