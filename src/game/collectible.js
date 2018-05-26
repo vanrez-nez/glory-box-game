@@ -18,8 +18,7 @@ const Collectibles = [
   { type: COLLECTIBLE.Happiness, color: 0xff4f4f },
 ];
 const ItemGeometry = new THREE.IcosahedronGeometry(0.8);
-const cacheVA = new THREE.Vector3();
-const cacheVB = new THREE.Vector3();
+const cachedVecA = new THREE.Vector3();
 
 export default class GameCollectible {
   constructor(x, y) {
@@ -114,35 +113,38 @@ export default class GameCollectible {
   updateTracerTrailsPosition(delta) {
     const { tracers } = this;
     for (let i = 0; i < tracers.length; i++) {
-      const { targetPosition, trail, particle } = tracers[i];
+      const { positionFn, trail, particle } = tracers[i];
       const { opts } = particle;
-      particle.update();
+      const targetPosition = positionFn();
+      particle.update(delta);
       particle.seek(targetPosition);
-      opts.maxForce += 0.001;
-      opts.maxSpeed = Math.max(0, opts.maxSpeed - 0.005);
-      cacheVA.copy(particle.position);
-      this.particlesGroup.worldToLocal(cacheVA);
-      trail.pushPosition(cacheVA);
+      if (particle.position.distanceTo(targetPosition) < 1) {
+        opts.maxForce = 1;
+        opts.maxSpeed = 0;
+      }
+      const globalPosition = cachedVecA.copy(particle.position);
+      this.particlesGroup.worldToLocal(globalPosition);
+      trail.pushPosition(cachedVecA);
     }
   }
 
-  startTracerMode(targetObject) {
+  startTracerMode(positionFn) {
     const { particles } = this;
     this.tracerMode = true;
     const rotStep = Math.PI / particles.length;
     for (let i = 0; i < particles.length; i++) {
       const particle = particles[i];
-      const x = Math.sin(rotStep * i) * 2;
-      const y = Math.cos(rotStep * i) * 2;
+      const x = Math.sin(rotStep * i) * 1;
+      const y = Math.cos(rotStep * i) * 1;
       const z = 1;
       const p = new SteeringParticle({});
-      cacheVA.copy(particle.trail.mesh.position);
+      cachedVecA.copy(particle.trail.mesh.position);
       p.acceleration.set(x, y, z);
-      this.particlesGroup.localToWorld(cacheVA);
-      p.position.copy(cacheVA);
+      this.particlesGroup.localToWorld(cachedVecA);
+      p.position.copy(cachedVecA);
       this.tracers.push({
         trail: particle.trail,
-        targetPosition: targetObject.position,
+        positionFn,
         particle: p,
       });
     }

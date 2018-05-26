@@ -5,8 +5,8 @@
 */
 
 const DEFAULT = {
-  maxSpeed: 1.4,
-  maxForce: 0.07,
+  maxSpeed: 2,
+  maxForce: 0.09,
 };
 
 const cacheVecA = new THREE.Vector3();
@@ -35,7 +35,7 @@ export default class SteeringParticle {
     this.applyForce(steer);
   }
 
-  update() {
+  update(delta) {
     const { maxSpeed } = this.opts;
     const { acceleration, velocity, position } = this;
     velocity.add(acceleration);

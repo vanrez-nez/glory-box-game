@@ -7,7 +7,7 @@ export default class EnemyHeadMaterial extends GameMetaMaterial {
       low: {
         type: 'MeshBasicMaterial',
         args: {
-          color: 0x131e,
+          color: opts.color,
           flatShading: true,
           vertexColors: THREE.VertexColors,
         },
