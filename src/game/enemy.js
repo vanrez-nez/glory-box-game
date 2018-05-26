@@ -42,14 +42,14 @@ export default class GameEnemy {
   initHead() {
     const { head, eyes } = this;
     CartesianToCylinder(this.head.position, 0, 0, GAME.EnemyOffset);
-    head.material = MaterialFactory.getMaterial('EnemyHead', { color: 0x0 });
+    head.material = MaterialFactory.getMaterial('EnemyHead', { color: 0x131e });
     eyes.material = MaterialFactory.getMaterial('EnemyEyes', { color: 0xffffff });
   }
 
   initTail() {
     const { group, tailPositions, tailSegments, tailSegment } = this;
     const { tailSize } = this.opts;
-    tailSegment.material = MaterialFactory.getMaterial('EnemyArmor', { color: 0xff0000 });
+    tailSegment.material = MaterialFactory.getMaterial('EnemyArmor', { color: 0x131e });
     tailPositions.push(new THREE.Vector2());
     for (let i = 0; i < tailSize; i++) {
       const t = tailSegment.clone();

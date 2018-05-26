@@ -14,6 +14,7 @@ import EnemyArmorMaterial from './enemy-armor-material';
 import EnemyEyesMaterial from './enemy-eyes-material';
 import GenericColorMaterial from './generic-color-material';
 import PlayerMaterial from './player-material';
+import PlayerHudFireballMaterial from './player-hud-fireball-material';
 
 const DEFAULT = {};
 const MATERIALS = {
@@ -32,6 +33,7 @@ const MATERIALS = {
   EnemyEyes: EnemyEyesMaterial,
   GenericColor: GenericColorMaterial,
   PlayerMaterial,
+  PlayerHudFireball: PlayerHudFireballMaterial,
 };
 
 export default class GameMaterialFactory {

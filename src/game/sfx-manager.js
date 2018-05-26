@@ -1,6 +1,7 @@
 import { EVENTS } from './const';
 
 const DEFAULT = {
+  playerHud: null,
   engine: null,
   player: null,
   enemy: null,
@@ -20,12 +21,12 @@ export default class GameSfxManager {
   }
 
   onCollectiblePickup(collectible) {
-    const { world, enemy } = this.opts;
+    const { world, playerHud } = this.opts;
     if (this.collectiblePickTimeline) {
       this.collectiblePickTimeline.kill();
     }
     const tl = new TimelineMax({});
-    collectible.startTracerMode(enemy.head);
+    collectible.startTracerMode(() => playerHud.position);
     collectible.itemMesh.visible = false;
     world.addCylinderBurstTweens(tl, collectible.body.position, collectible.color);
     this.collectiblePickTimeline = tl;

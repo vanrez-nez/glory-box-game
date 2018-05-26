@@ -19,6 +19,7 @@ export const CONFIG = {
 
 export const GAME = {
   CilynderRadius: 35,
+  HudDistanceFromCamera: 20,
   PlatformOffset: 2.25,
   CollectibleSocketOffset: 0,
   CollectibleItemOffset: 1.9,

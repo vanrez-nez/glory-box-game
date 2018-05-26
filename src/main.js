@@ -35,6 +35,7 @@ import GameMap from './game/map';
 import GameSfxManager from './game/sfx-manager';
 import GameMoodManager from './game/mood-manager';
 import GameEnemy from './game/enemy';
+import GamePlayerHud from './game/player-hud';
 
 class Game {
   constructor() {
@@ -64,20 +65,28 @@ class Game {
         new THREE.Vector2(GAME.BoundsRight, GAME.BoundsBottom)),
     });
     this.world = new GameWorld();
+    this.moodManager = new GameMoodManager({
+      engine: this.engine,
+      map: this.map,
+      world: this.world,
+    });
+
+    this.playerHud = new GamePlayerHud({
+      camera: this.engine.camera,
+    });
+
     this.sfxManager = new GameSfxManager({
       engine: this.engine,
       player: this.player,
       map: this.map,
       enemy: this.enemy,
       world: this.world,
+      playerHud: this.playerHud,
     });
-    this.moodManager = new GameMoodManager({
-      engine: this.engine,
-      map: this.map,
-      world: this.world,
-    });
+
     this.physics.add(this.player.body);
     this.physics.add(this.map.bodies);
+
     this.engine.scene.add(this.player.group);
     this.engine.scene.add(this.enemy.group);
     this.engine.scene.add(this.map.group);
@@ -114,13 +123,14 @@ class Game {
   }
 
   onUpdate(delta) {
-    const { gameInput, enemy, player, map, world, physics } = this;
+    const { gameInput, enemy, player, map, world, physics, playerHud } = this;
     delta /= 1000;
     physics.updateCollisionSpace(player.body.position, 15);
     physics.update(delta);
     player.update(delta, gameInput.state);
     enemy.update(delta);
     map.update(delta);
+    playerHud.update(delta);
     world.update(delta, player.mesh.position);
   }
 

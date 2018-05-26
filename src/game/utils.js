@@ -1,6 +1,5 @@
 import { GAME } from './const';
 
-const TWO_PI = Math.PI * 2;
 const PI_WIDTH = 128 / Math.PI;
 
 export function Clamp(val, min, max) {
@@ -18,6 +17,19 @@ export function GetTextureRepeat(url, repeatX, repeatY, offsetX = 0, offsetY = 0
 
 export function GetTextureRepeatDefer(url, repeatX, repeatY, offsetX, offsetY) {
   return () => GetTextureRepeat(url, repeatX, repeatY, offsetX, offsetY);
+}
+
+/*
+  Returns current world coords based on current camera distance
+  and FOV. (x) and (y) params should be a range from 0 to 1
+*/
+export function GetScreenCoords(x, y, camera, dst) {
+  const vFOV = camera.fov * Math.PI / 180;
+  const h = 2 * Math.tan(vFOV / 2) * Math.abs(dst);
+  const w = h * camera.aspect;
+  const xResult = w * -0.5 + (w * x);
+  const yResult = h * -0.5 + (h * y);
+  return [xResult, yResult];
 }
 
 /*
