@@ -14,6 +14,7 @@ export const CONFIG = {
   PositionCullingEnabled: true,
   EnableShadows: false,
   ToneMapping: THREE.NoToneMapping,
+  EnableSkyShader: true,
   MaterialQuality: QUALITY.Low,
 };
 
