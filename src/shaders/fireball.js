@@ -1,16 +1,22 @@
 const FireballShader = {
   uniforms: {
-    tint: { value: new THREE.Color(0.5, 0.4, 0.0) },
+    fissuresColor: { value: new THREE.Color(1.0, 0.5, 0.0) },
+    glowColor: { value: new THREE.Color(1.0, 1.0, 0.0) },
+    ringColor: { value: new THREE.Color(1.0, 0.4, 0.1) },
+    fissuresIntensity: { value: 1.6 }, // Range from 0.0 to 10.0
+    ringTickness: { value: 0.2 }, // Range from 0.0 to 1.2
+    glowIntensity: { value: 0.3 }, // Range from 0.0 to 1.0
     time: { value: 0 },
-    intensity: { value: 0.9 },
-    ringTickness: { value: 1 }
   },
   fragmentShader: `
     #define field_fn length(fract(q*=m*=.6+.1*2.)-.5)
-    uniform vec3 tint;
+    uniform vec3 fissuresColor;
+    uniform vec3 glowColor;
+    uniform vec3 ringColor;
     uniform float time;
-    uniform float intensity;
+    uniform float fissuresIntensity;
     uniform float ringTickness;
+    varying float vGlowIntensity;
     varying vec2 vUv;
 
     float Hash( vec2 p, float s ){
@@ -35,41 +41,59 @@ const FireballShader = {
 
     // https://gist.github.com/sakrist/8706749
     float hex(vec2 p) {
-      p.x *= 0.57735*2.0;
-      p.y += mod(floor(p.x), 2.0)*0.5;
+      p.x *= (0.57735*2.0);
+      p.y += (mod(floor(p.x), 2.0)*0.5);
       p = abs((mod(p, 1.0) - 0.5));
-      return abs(max(p.x*1.5 + p.y, p.y*2.0) - 1.0);
+      return abs(max(p.x * 1.5 + p.y, p.y*2.0) - 1.0);
     }
 
     void main() {
       vec2 ratio = vec2(2.0, 1.0);
       vec2 uv = vUv * ratio;
-      vec2 pos = ratio * 0.5;
-      float hex = smoothstep(0.0, 0.45, hex(uv * 5.0));
 
+      // Hexagon + Caustic water like
       // http://glslsandbox.com/e#45218.0
+      float h = smoothstep(0.0, 0.45, hex((uv + time * 0.2) * 7.0));
       vec3 q = vec3(uv, time);
       mat3 m = mat3(-2,-1,2, 3,-2,1, -1,1,3);
-      float field = pow(min(min(field_fn,field_fn),field_fn), 7.) * 100. * intensity;
-      float col = step(hex, 0.1) * field;
-      col += (hex + field) * intensity * 0.15;
+      float field = pow(min(min(field_fn,field_fn),field_fn), 7.) * 100. * fissuresIntensity;
+      float col = step(h, 0.1) * field;
 
+      // Ring
       // http://glslsandbox.com/e#46950.0
-      float energyDisp = mod(time * 10., 1.5) + 0.3;
-      float tickness = 220. - (200. * ringTickness);
       uv *= 2. - 1.0;
-      float energy = abs((2.0) / ((uv.y - energyDisp + fbm(uv + time * 10.)) * tickness));
-      // enable ring only if energy > 0
-      col += step(max(sign(0.01 - ringTickness), 0.0), 0.5) * energy;
+      float energyDisp = mod(time * 10., 2.5) + 0.3;
+      float tickness = 220. - (200. * ringTickness);
+      float energy = abs((10.0) / ((uv.y - energyDisp + fbm(uv + time * 10.)) * tickness));
+      // enable ring only if ringTickness > 0
+      float ringCol = step(max(sign(0.01 - ringTickness), 0.0), 1.0) * energy;
+      vec3 ring = vec3(ringCol) * ringColor;
+      
+      // inner glow
+      vec3 glow = vGlowIntensity * glowColor;
 
-      vec3 color = vec3(col) * tint;
+      // mix all
+      vec3 color = mix(glow, vec3(col) * fissuresColor, 0.5);
+      color = mix(ring, color, 0.5);
+
       gl_FragColor = vec4(color, 1.0);
     }
   `,
   vertexShader: `
+    uniform float glowIntensity;
     varying vec2 vUv;
+    varying float vGlowIntensity;
+    uniform float time;
+
     void main() {
       vUv = uv;
+      
+      // http://stemkoski.github.io/Three.js/Shader-Halo.html
+      float c = clamp(glowIntensity, 0.25, 1.);
+      float pTwo = 7.0 - c * 3.0;
+      vec3 vNormal = normalize( normalMatrix * normal );
+      vGlowIntensity = pow( c - dot( vNormal, vec3( 0.0, 0.0, 1.0 ) ), pTwo );
+
       gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
     }
   `,

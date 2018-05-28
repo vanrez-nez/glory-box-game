@@ -31,6 +31,7 @@ module.exports = {
     'Power2': false,
     'Power3': false,
     'Power4': false,
+    'Back': false,
     'Expo': false,
     'ThreeBSP': false,
     'EventEmitter3': false,
