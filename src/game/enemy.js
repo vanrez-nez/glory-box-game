@@ -90,7 +90,7 @@ export default class GameEnemy {
   */
   lookAtCenter(obj, zRotationOffset) {
     const { x, y, z } = obj.position;
-    const rotX = Math.atan2(y, z);
+    const rotX = Math.atan2(y - this.positionY, z);
     const cosRotX = Math.cos(rotX);
     const rotY = z >= 0 ? -Math.atan2(x * cosRotX, -z) : Math.atan2(x * cosRotX, z);
     const rotZ = Math.atan2(cosRotX, Math.sin(rotX) * Math.sin(rotY));
