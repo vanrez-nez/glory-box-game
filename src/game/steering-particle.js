@@ -5,8 +5,8 @@
 */
 
 const DEFAULT = {
-  maxSpeed: 2,
-  maxForce: 0.09,
+  maxSpeed: 9,
+  maxForce: 0.2,
 };
 
 const cacheVecA = new THREE.Vector3();
@@ -28,14 +28,20 @@ export default class SteeringParticle {
     const { maxSpeed, maxForce } = this.opts;
     const { position, velocity } = this;
     const desired = cacheVecA.copy(target).sub(position);
+    const d = desired.length();
     desired.normalize();
-    desired.multiplyScalar(maxSpeed);
+    if (d < 75) {
+      const m = (d / 75) * maxSpeed;
+      desired.multiplyScalar(m);
+    } else {
+      desired.multiplyScalar(maxSpeed * 2);
+    }
     const steer = cacheVecB.subVectors(desired, velocity);
     steer.clampScalar(-maxForce, maxForce);
     this.applyForce(steer);
   }
 
-  update(delta) {
+  update() {
     const { maxSpeed } = this.opts;
     const { acceleration, velocity, position } = this;
     velocity.add(acceleration);

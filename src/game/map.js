@@ -54,6 +54,8 @@ export default class GameMap {
     const collectible = new GameCollectible(xTrans, yTrans);
     collectible.body.events.on(EVENTS.CollisionBegan,
       this.onCollectibleCollisionBegan.bind(this, collectible));
+    collectible.events.on(EVENTS.CollectibleCollect,
+      this.onCollectibleCollect.bind(this, collectible));
     this.bodies.push(collectible.body);
     this.collectibles.push(collectible);
     this.group.add(collectible.group);
@@ -86,8 +88,14 @@ export default class GameMap {
     this.group.add(mesh);
   }
 
+  // Raise event for collectible pickup
   onCollectibleCollisionBegan(collectible) {
     this.events.emit(EVENTS.CollectiblePickup, collectible);
+  }
+
+  // Raise event for tracer hit
+  onCollectibleCollect(collectible) {
+    this.events.emit(EVENTS.CollectibleCollect, collectible);
   }
 
   addPlaform(x, y, width, type) {

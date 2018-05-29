@@ -14,7 +14,7 @@ export const CONFIG = {
   PositionCullingEnabled: true,
   EnableShadows: false,
   ToneMapping: THREE.NoToneMapping,
-  EnableSkyShader: true,
+  EnableSkyShader: false,
   MaterialQuality: QUALITY.Low,
 };
 
@@ -48,6 +48,7 @@ export const EVENTS = {
   CollisionBegan: 'ECollisionBegan',
   CollisionEnded: 'ECollisionEnded',
   CollectiblePickup: 'ECollectiblePickUp',
+  CollectibleCollect: 'ECollectibleCollect',
 };
 
 export const PHYSICS = {

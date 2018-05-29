@@ -26,6 +26,7 @@
 */
 import { CONFIG, GAME } from './game/const';
 import Engine from './game/engine';
+import GameState from './game/state';
 import GameTools from './game/tools';
 import GameInput from './game/input';
 import GamePhysics from './game/physics';
@@ -70,12 +71,14 @@ class Game {
       map: this.map,
       world: this.world,
     });
-
     this.playerHud = new GamePlayerHud({
       camera: this.engine.camera,
     });
-
+    this.gameState = new GameState({
+      map: this.map,
+    });
     this.sfxManager = new GameSfxManager({
+      gameState: this.gameState,
       engine: this.engine,
       player: this.player,
       map: this.map,

@@ -33,6 +33,13 @@ export default class LineTrail {
     return geo;
   }
 
+  resetPositionTo(position) {
+    const { opts, line } = this;
+    for (let i = 0; i < opts.maxPositions; i++) {
+      line.advance(position);
+    }
+  }
+
   pushPosition(position) {
     const { line } = this;
     line.advance(position);

@@ -1,6 +1,7 @@
 import { EVENTS } from './const';
 
 const DEFAULT = {
+  gameState: null,
   playerHud: null,
   engine: null,
   player: null,
@@ -16,8 +17,15 @@ export default class GameSfxManager {
   }
 
   attachEvents() {
-    const { map } = this.opts;
-    map.events.on(EVENTS.CollectiblePickup, this.onCollectiblePickup.bind(this));
+    const { gameState, playerHud } = this.opts;
+    gameState.events.on(EVENTS.CollectiblePickup, this.onCollectiblePickup.bind(this));
+    playerHud.events.on(EVENTS.CollectibleCollect, this.onCollectibleCollect.bind(this));
+  }
+
+  onCollectibleCollect(color) {
+    const { playerHud, gameState } = this.opts;
+    const tl = new TimelineMax();
+    playerHud.addPowerCollectTweens(tl, gameState.attackPower, color);
   }
 
   onCollectiblePickup(collectible) {
@@ -26,9 +34,11 @@ export default class GameSfxManager {
       this.collectiblePickTimeline.kill();
     }
     const tl = new TimelineMax({});
-    collectible.startTracerMode(() => playerHud.position);
-    collectible.itemMesh.visible = false;
+    // fire trails from collectible current position
+    const trailPositions = collectible.getTrailPositions();
+    playerHud.spawnTrailsFrom(trailPositions, collectible.color);
     world.addCylinderBurstTweens(tl, collectible.body.position, collectible.color);
+    collectible.disable();
     this.collectiblePickTimeline = tl;
   }
 }

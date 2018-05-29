@@ -1,11 +1,11 @@
 const FireballShader = {
   uniforms: {
     fissuresColor: { value: new THREE.Color(1.0, 0.5, 0.0) },
-    glowColor: { value: new THREE.Color(1.0, 1.0, 0.0) },
+    glowColor: { value: new THREE.Color(0.1, 0.1, 0.0) },
     ringColor: { value: new THREE.Color(1.0, 0.4, 0.1) },
     fissuresIntensity: { value: 1.6 }, // Range from 0.0 to 10.0
     ringTickness: { value: 0.2 }, // Range from 0.0 to 1.2
-    glowIntensity: { value: 0.3 }, // Range from 0.0 to 1.0
+    glowIntensity: { value: new THREE.Vector2(0.1, 0.5) },
     time: { value: 0 },
   },
   fragmentShader: `
@@ -80,7 +80,7 @@ const FireballShader = {
     }
   `,
   vertexShader: `
-    uniform float glowIntensity;
+    uniform vec2 glowIntensity;
     varying vec2 vUv;
     varying float vGlowIntensity;
     uniform float time;
@@ -89,10 +89,10 @@ const FireballShader = {
       vUv = uv;
       
       // http://stemkoski.github.io/Three.js/Shader-Halo.html
-      float c = clamp(glowIntensity, 0.25, 1.);
-      float pTwo = 7.0 - c * 3.0;
       vec3 vNormal = normalize( normalMatrix * normal );
-      vGlowIntensity = pow( c - dot( vNormal, vec3( 0.0, 0.0, 1.0 ) ), pTwo );
+      float c = glowIntensity.x;
+      float p = glowIntensity.y;
+      vGlowIntensity = pow( c - dot( vNormal, vec3(0.7, 0.0, 1.0 ) ), p );
 
       gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
     }
