@@ -22,6 +22,9 @@ export default class GamePlayerHud {
     this.addFireballMesh();
   }
 
+  /* 
+    Trails for collectible pickup sfx
+  */
   initTrails() {
     const { camera } = this.opts;
     this.trails = [];
@@ -39,6 +42,9 @@ export default class GamePlayerHud {
     }
   }
 
+  /* 
+    Start trails sfx copying the given positions and color.
+  */
   spawnTrailsFrom(positions, color) {
     const { camera } = this.opts;
     const { trails } = this;
@@ -49,11 +55,13 @@ export default class GamePlayerHud {
       const trail = trails[i];
       const position = positions[i];
       trail.mesh.visible = true;
+      const p = new SteeringParticle({});
+      // Give a start acceleration to particle
       const x = Math.sin(rotStep * i) * 2;
       const y = Math.cos(rotStep * i) * 2;
       const z = 1;
-      const p = new SteeringParticle({});
       p.acceleration.set(x, y, z);
+      // Translate position to local coords inside the camera
       camera.worldToLocal(position);
       p.position.copy(position);
       trail.resetPositionTo(position);
@@ -140,10 +148,5 @@ export default class GamePlayerHud {
     fireball.position.set(x, y, -GAME.HudDistanceFromCamera);
     uniforms.time.value += delta * 0.15;
     this.updateTrails();
-  }
-
-  get position() {
-    cachedVec.copy(this.fireball.position);
-    return this.opts.camera.localToWorld(cachedVec);
   }
 }
