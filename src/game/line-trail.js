@@ -33,11 +33,25 @@ export default class LineTrail {
     return geo;
   }
 
+  updateTrailPosition(idx, position) {
+    const { attributes } = this.line;
+    const arr = attributes.position.array;
+    const offset = arr.length - idx * 6;
+    arr[offset - 6] = position.x;
+    arr[offset - 5] = position.y;
+    arr[offset - 4] = position.z;
+    arr[offset - 3] = position.x;
+    arr[offset - 2] = position.y;
+    arr[offset - 1] = position.z;
+    attributes.position.needsUpdate = true;
+  }
+
   resetPositionTo(position) {
     const { opts, line } = this;
     for (let i = 0; i < opts.maxPositions; i++) {
-      line.advance(position);
+      this.updateTrailPosition(i, position);
     }
+    line.advance(position);
   }
 
   pushPosition(position) {

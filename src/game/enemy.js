@@ -5,6 +5,7 @@ import { MaterialFactoryInstance as MaterialFactory } from './materials/material
 import LineTrail from './line-trail';
 
 const DEFAULT = {
+  player: null,
   tailSize: 90,
 };
 
@@ -42,14 +43,16 @@ export default class GameEnemy {
   initHead() {
     const { head, eyes } = this;
     CartesianToCylinder(this.head.position, 0, 0, GAME.EnemyOffset);
+    const headId = 'enemy_head';
     head.material = MaterialFactory.getMaterial('EnemyHead', {
-      name: 'enemy_head',
+      name: headId,
       color: 0x131e,
-    }, 'enemy_head');
+    }, headId);
+    const eyesId = 'enemy_eyes';
     eyes.material = MaterialFactory.getMaterial('EnemyEyes', {
-      name: 'enemy_eyes',
+      name: eyesId,
       color: 0xffffff,
-    }, 'enemy_eyes');
+    }, eyesId);
   }
 
   initTail() {
@@ -164,22 +167,9 @@ export default class GameEnemy {
       const thetaOffset = (i + 1.8) * 0.05;
       this.setOrbitPosition(seg, this.theta - thetaOffset);
       seg.position.y = pos.y;
-      this.updateTrailPosition(i, seg.position);
+      this.trail.updateTrailPosition(i, seg.position);
       this.lookAtCenter(seg, Math.PI / 4 * 6);
     }
-  }
-
-  updateTrailPosition(idx, position) {
-    const { attributes } = this.trail.line;
-    const arr = attributes.position.array;
-    const offset = arr.length - idx * 6;
-    arr[offset - 6] = position.x;
-    arr[offset - 5] = position.y;
-    arr[offset - 4] = position.z;
-    arr[offset - 3] = position.x;
-    arr[offset - 2] = position.y;
-    arr[offset - 1] = position.z;
-    attributes.position.needsUpdate = true;
   }
 
   updateTrail() {
