@@ -102,11 +102,13 @@ export default class GamePlatform {
     const lightGeo = GamePlatform.GetBoxGeomery(opts.width, 0.7, GAME.PlatformZSize);
     const stepsGeo = GamePlatform.GetStepsGeometry(opts.width, 1, GAME.PlaformZSize);
     const stepsMat = MaterialFactory.getMaterial('PlatformSteps', {
+      name: 'plt_steps',
       width: opts.width,
       color: 0x0,
-    });
+    }, opts.width);
     const cacheId = opts.type;
     const lightMat = MaterialFactory.getMaterial('PlatformLight', {
+      name: this.isMovingPlatform() ? 'plt_dynamic' : 'plt_static',
       color: this.isMovingPlatform() ? 0xff0000 : 0x00ff00,
     }, cacheId);
     const meshSteps = new THREE.Mesh(stepsGeo, stepsMat);

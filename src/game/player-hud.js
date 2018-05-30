@@ -29,9 +29,10 @@ export default class GamePlayerHud {
       const trail = new LineTrail({
         maxPositions: 20,
         material: MaterialFactory.getMaterial('CollectibleTrail', {
+          name: 'ph_trail',
           color: 0xffffff,
           lineWidth: 0.5,
-        }),
+        }, 'hud-trails'),
       });
       this.trails.push(trail);
       camera.add(trail.mesh);
@@ -94,8 +95,10 @@ export default class GamePlayerHud {
   }
 
   addFireballMesh() {
-    const geo = new THREE.SphereBufferGeometry(0.6, 8, 8);
-    const mat = MaterialFactory.getMaterial('PlayerHudFireball');
+    const geo = new THREE.SphereBufferGeometry(0.6, 10, 10);
+    const mat = MaterialFactory.getMaterial('PlayerHudFireball', {
+      name: 'ph_fireball',
+    });
     const mesh = new THREE.Mesh(geo, mat);
     this.fireball = mesh;
     this.fireball.rotation.y += 1;

@@ -49,7 +49,10 @@ export default class GamePlayer {
 
   initCube() {
     const geo = new THREE.BoxBufferGeometry(1.5, 1.5, 1.5);
-    const mat = MaterialFactory.getMaterial('PlayerMaterial', { color: 0xffffff });
+    const mat = MaterialFactory.getMaterial('PlayerMaterial', {
+      name: 'player_main',
+      color: 0xffffff,
+    });
     this.mesh = new THREE.Mesh(geo, mat);
     // this.mesh.castShadow = true;
     this.group.add(this.mesh);

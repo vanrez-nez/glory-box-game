@@ -23,7 +23,9 @@ export default class GameWorld {
   addSkyCylinder() {
     if (CONFIG.EnableSkyShader) {
       const geo = new THREE.CylinderGeometry(200, 200, 250, 16, 1, true);
-      const mat = MaterialFactory.getMaterial('WorldSkyCylinder');
+      const mat = MaterialFactory.getMaterial('WorldSkyCylinder', {
+        name: 'w_skyc',
+      });
       this.skyCylinder = new THREE.Mesh(geo, mat);
       this.group.add(this.skyCylinder);
     }
@@ -31,7 +33,10 @@ export default class GameWorld {
 
   addFloor() {
     const geo = new THREE.PlaneBufferGeometry(1000, 1000);
-    const mat = MaterialFactory.getMaterial('WorldFloor', { scale: 200 });
+    const mat = MaterialFactory.getMaterial('WorldFloor', {
+      name: 'w_floor',
+      scale: 200,
+    });
     const mesh = new THREE.Mesh(geo, mat);
     this.floor = mesh;
     mesh.rotation.x = -Math.PI / 2;
@@ -45,13 +50,9 @@ export default class GameWorld {
     const radius = GAME.CilynderRadius + 0.01;
     const geo = new THREE.CylinderBufferGeometry(radius, radius,
       height, 64, 1, true, 0, Math.PI);
-    const mat = new THREE.ShaderMaterial({
-      fragmentShader: CylinderFxShader.fragmentShader,
-      vertexShader: CylinderFxShader.vertexShader,
-      uniforms: CylinderFxShader.uniforms,
-      transparent: true,
+    const mat = MaterialFactory.getMaterial('WorldFxCylinder', {
+      name: 'w_fx_cylinder',
     });
-    mat.blending = THREE.AdditiveBlending;
     this.fxCylinder = new THREE.Mesh(geo, mat);
     this.fxCylinder.rotation.y = -Math.PI / 2;
     this.fxCylinder.visible = false;
@@ -82,7 +83,11 @@ export default class GameWorld {
     const yScale = 7 * ratio;
     const geo = new THREE.CylinderBufferGeometry(GAME.CilynderRadius, GAME.CilynderRadius,
       height, 64, 1, true);
-    const mat = MaterialFactory.getMaterial('WorldCylinder', { xScale, yScale });
+    const mat = MaterialFactory.getMaterial('WorldCylinder', {
+      name: 'w_main_cylinder',
+      xScale,
+      yScale,
+    });
     this.cylinder = new THREE.Mesh(geo, mat);
     // this.cylinder.receiveShadow = true;
     this.cylinder.position.y = height * 0.5 + GAME.BoundsBottom;
@@ -97,7 +102,11 @@ export default class GameWorld {
     const yScale = 7 * ratio;
     const geo = new THREE.CylinderBufferGeometry(GAME.CilynderRadius + 0.5,
       GAME.CilynderRadius + 1.8, height, 64, 1);
-    const mat = MaterialFactory.getMaterial('WorldCylinder', { xScale, yScale });
+    const mat = MaterialFactory.getMaterial('WorldCylinder', {
+      name: 'w_base_cylinder',
+      xScale,
+      yScale,
+    });
     const mesh = new THREE.Mesh(geo, mat);
     this.cylinderBase = mesh;
     mesh.position.y = GAME.BoundsBottom + height / 2;

@@ -69,7 +69,10 @@ export default class GameMap {
       geo.merge(p.getSocketGeometry());
     }
     const buffGeo = new THREE.BufferGeometry().fromGeometry(geo);
-    const mat = MaterialFactory.getMaterial('PlatformSocket', { color: 0x030508 });
+    const mat = MaterialFactory.getMaterial('PlatformSocket', {
+      name: 'plt_socket',
+      color: 0x030508,
+    });
     const mesh = new THREE.Mesh(buffGeo, mat);
     this.group.add(mesh);
   }
@@ -82,7 +85,10 @@ export default class GameMap {
       geo.merge(c.glyph.getSocketGeometry());
     }
     const buffGeo = new THREE.BufferGeometry().fromGeometry(geo);
-    const mat = MaterialFactory.getMaterial('CollectibleSocket', { color: 0x030508 });
+    const mat = MaterialFactory.getMaterial('CollectibleSocket', {
+      name: 'cl_socket',
+      color: 0x030508,
+    });
     const mesh = new THREE.Mesh(buffGeo, mat);
     mesh.castShadow = true;
     this.group.add(mesh);

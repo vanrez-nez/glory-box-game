@@ -28,9 +28,9 @@ export default class GameCollectible {
     this.type = pick.type;
     this.particles = [];
     this.offsetItem = Math.random();
-    this.addGlyph(x, y, pick.color);
-    this.addItem(x, y, pick.color);
-    this.addTrailParticles(x, y, pick.color);
+    this.addGlyph(x, y);
+    this.addItem(x, y);
+    this.addTrailParticles(x, y);
     this.attachEvents();
   }
 
@@ -47,9 +47,12 @@ export default class GameCollectible {
     this.particlesGroup.visible = false;
   }
 
-  addItem(x, y, color) {
-    const cacheId = color;
-    const mat = MaterialFactory.getMaterial('CollectibleItem', { color }, cacheId);
+  addItem(x, y) {
+    const cacheId = this.color;
+    const mat = MaterialFactory.getMaterial('CollectibleItem', {
+      name: `collect_item_${this.type}`,
+      color: this.color,
+    }, cacheId);
     const mesh = new THREE.Mesh(ItemGeometry, mat);
     this.body = new GamePhysicsBody({
       type: PHYSICS.Collectible,
@@ -67,16 +70,16 @@ export default class GameCollectible {
     this.group.add(mesh);
   }
 
-  addGlyph(x, y, color) {
-    this.glyph = new CollectibleGlyph({ x, y, color });
+  addGlyph(x, y) {
+    this.glyph = new CollectibleGlyph({ x, y, color: this.color, type: this.type });
     this.group.add(this.glyph.group);
   }
 
-  addTrailParticles(x, y, color) {
+  addTrailParticles(x, y) {
     const g = new THREE.Group();
     for (let i = 0; i < MaxParticles; i++) {
       const phi = (Math.PI * 2 / MaxParticles) * i;
-      const particle = this.getTrailParticle(x, y, color, phi);
+      const particle = this.getTrailParticle(x, y, phi);
       this.particles.push(particle);
       g.add(particle.trail.mesh);
     }
@@ -86,11 +89,12 @@ export default class GameCollectible {
     this.group.add(g);
   }
 
-  getTrailParticle(x, y, color, phi) {
-    const cacheId = color;
+  getTrailParticle(x, y, phi) {
+    const cacheId = this.color;
     const trail = new LineTrail({
       material: MaterialFactory.getMaterial('CollectibleTrail', {
-        color,
+        name: `collect_trail_${this.type}`,
+        color: this.color,
         lineWidth: 0.3,
       }, cacheId),
     });

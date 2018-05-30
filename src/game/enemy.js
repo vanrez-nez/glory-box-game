@@ -42,14 +42,23 @@ export default class GameEnemy {
   initHead() {
     const { head, eyes } = this;
     CartesianToCylinder(this.head.position, 0, 0, GAME.EnemyOffset);
-    head.material = MaterialFactory.getMaterial('EnemyHead', { color: 0x131e });
-    eyes.material = MaterialFactory.getMaterial('EnemyEyes', { color: 0xffffff });
+    head.material = MaterialFactory.getMaterial('EnemyHead', {
+      name: 'enemy_head',
+      color: 0x131e,
+    });
+    eyes.material = MaterialFactory.getMaterial('EnemyEyes', {
+      name: 'enemy_eyes',
+      color: 0xffffff,
+    });
   }
 
   initTail() {
     const { group, tailPositions, tailSegments, tailSegment } = this;
     const { tailSize } = this.opts;
-    tailSegment.material = MaterialFactory.getMaterial('EnemyArmor', { color: 0x131e });
+    tailSegment.material = MaterialFactory.getMaterial('EnemyArmor', {
+      name: 'enemy_armor',
+      color: 0x131e,
+    });
     tailPositions.push(new THREE.Vector2());
     for (let i = 0; i < tailSize; i++) {
       const t = tailSegment.clone();
@@ -63,7 +72,8 @@ export default class GameEnemy {
     let idx = 0;
     this.trail = new LineTrail({
       maxPositions: this.opts.tailSize,
-      material: MaterialFactory.getMaterial('CollectibleTrail', {
+      material: MaterialFactory.getMaterial('EnemySpine', {
+        name: 'enemy_col_trail',
         color: 0xffff00,
         lineWidth: 2,
       }),
@@ -180,7 +190,7 @@ export default class GameEnemy {
     if (this.modelLoaded) {
       this.theta += delta * 0.3 * this.speed;
       this.time += delta * this.speed;
-      this.positionY += delta * this.speed * 0.5;
+      // this.positionY += delta * this.speed * 0.5;
       this.updateHead();
       this.updateTail();
       this.updateTrail(delta);

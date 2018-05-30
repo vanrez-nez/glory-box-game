@@ -46,6 +46,9 @@ class Game {
     this.loader = THREE.DefaultLoadingManager;
     this.loader.onProgress = (url, itemsLoaded, itemsTotal) => {
       if (itemsLoaded === itemsTotal) {
+        CONFIG.EnableTools && this.addTools();
+        CONFIG.EnableStats && this.addStats();
+        this.moodManager.resetToDefault();
         MainLoop.start();
       }
     };
@@ -95,8 +98,6 @@ class Game {
     this.engine.scene.add(this.map.group);
     this.engine.scene.add(this.world.group);
     this.engine.cameraTarget = this.player.mesh.position;
-    CONFIG.EnableTools && this.addTools();
-    CONFIG.EnableStats && this.addStats();
   }
 
   addStats() {
@@ -106,11 +107,11 @@ class Game {
 
   addTools() {
     const tools = new GameTools();
-    tools.addScreen(this.physics, 'physics');
-    tools.addScreen(this.engine, 'engine');
-    tools.addScreen(this.player, 'player');
-    tools.addScreen(this.world, 'world');
-    tools.addScreen(this.map, 'map');
+    tools.addScreen('physics', this.physics);
+    tools.addScreen('engine', this.engine);
+    tools.addScreen('player', this.player);
+    tools.addScreen('world', this.world);
+    tools.addScreen('materials');
   }
 
   attachEvents() {
