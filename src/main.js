@@ -1,10 +1,6 @@
 
 /*
   TODO:
-    - ✓ Fix: player trail erasing
-    - ✓ Fix: map offset x
-    - ✓ Fix: dynamic platform should follow players position
-    - ✓ Feat: Platform weight effect when player is grounded
     - Feat: Player falling on sides should generate friction and be able to jump
     - Feat: Shake effect
     - Feat: Desintegration and reintegration of player
@@ -12,7 +8,6 @@
     - Feat: Audio Effects on Jump
     - Feat: Initial audio atmosphere for lobby and transition to full audio when player starts
     - Feat: Player rotation when walking and jumping
-    - Feat: Collectibles
     - Feat: Game Menu with (start, audio, quality selector, logo and instructions)
     - Feat: Game HUD
     - Feat: Danger pressure from bottom
@@ -56,7 +51,6 @@ class Game {
   }
 
   init() {
-    this.clock = new THREE.Clock();
     this.gameInput = new GameInput();
     this.engine = new Engine({
       canvas: document.body.querySelector('#js-canvas'),
@@ -64,11 +58,6 @@ class Game {
     this.player = new GamePlayer({});
     this.map = new GameMap({});
     this.enemy = new GameEnemy({});
-    this.physics = new GamePhysics({
-      bounds: new THREE.Box2(
-        new THREE.Vector2(GAME.BoundsLeft, GAME.BoundsTop),
-        new THREE.Vector2(GAME.BoundsRight, GAME.BoundsBottom)),
-    });
     this.world = new GameWorld();
     this.moodManager = new GameMoodManager({
       engine: this.engine,
@@ -86,6 +75,7 @@ class Game {
     this.gameState = new GameState({
       map: this.map,
     });
+
     this.sfxManager = new GameSfxManager({
       gameState: this.gameState,
       engine: this.engine,
@@ -96,9 +86,16 @@ class Game {
       playerHud: this.playerHud,
     });
 
+    // Setup physics
+    this.physics = new GamePhysics({
+      bounds: new THREE.Box2(
+        new THREE.Vector2(GAME.BoundsLeft, GAME.BoundsTop),
+        new THREE.Vector2(GAME.BoundsRight, GAME.BoundsBottom)),
+    });
     this.physics.add(this.player.body);
     this.physics.add(this.map.bodies);
 
+    // Add all scene objects
     this.engine.scene.add(this.player.group);
     this.engine.scene.add(this.enemy.group);
     this.engine.scene.add(this.map.group);
@@ -136,7 +133,7 @@ class Game {
     const { gameInput, enemy, player, map,
       world, physics, playerHud, enemyHud } = this;
     delta /= 1000;
-    physics.updateCollisionSpace(player.body.position, 15);
+    physics.updateCollisionSpace(player.body.position, 25);
     physics.update(delta);
     player.update(delta, gameInput.state);
     enemy.update(delta);
