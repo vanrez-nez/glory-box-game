@@ -5,7 +5,7 @@ export const QUALITY = {
 };
 
 export const CONFIG = {
-  EnableTools: false,
+  EnableTools: true,
   EnableStats: true,
   EnableOrbitControls: false,
   EnableAxes: false,
@@ -49,6 +49,7 @@ export const EVENTS = {
   CollisionEnded: 'ECollisionEnded',
   CollectiblePickup: 'ECollectiblePickUp',
   CollectibleCollect: 'ECollectibleCollect',
+  SteeringTrailLanded: 'ESteeringTrailLanded',
 };
 
 export const PHYSICS = {

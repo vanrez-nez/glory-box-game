@@ -44,7 +44,7 @@ export default class GameEnemyHud {
     const { head } = this;
     if (this.modelLoaded) {
       const [x, y] = GetScreenCoords(0.95, 0.5, camera, 20);
-      this.head.position.set(x, y, -GAME.HudDistanceFromCamera);
+      head.position.set(x, y, -GAME.HudDistanceFromCamera);
     }
   }
 }

@@ -70,7 +70,7 @@ class Game {
 
     this.enemyHud = new GameEnemyHud({
       camera: this.engine.camera,
-    })
+    });
 
     this.gameState = new GameState({
       map: this.map,

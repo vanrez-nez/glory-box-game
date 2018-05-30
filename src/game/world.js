@@ -1,7 +1,6 @@
 import { GAME, CONFIG } from './const';
 import GameLobby from './lobby';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
-import CylinderFxShader from '../shaders/cylinder-fx';
 
 export default class GameWorld {
   constructor() {
