@@ -45,11 +45,11 @@ export default class GameEnemy {
     head.material = MaterialFactory.getMaterial('EnemyHead', {
       name: 'enemy_head',
       color: 0x131e,
-    });
+    }, 'enemy_head');
     eyes.material = MaterialFactory.getMaterial('EnemyEyes', {
       name: 'enemy_eyes',
       color: 0xffffff,
-    });
+    }, 'enemy_eyes');
   }
 
   initTail() {

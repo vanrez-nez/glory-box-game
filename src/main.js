@@ -37,6 +37,7 @@ import GameSfxManager from './game/sfx-manager';
 import GameMoodManager from './game/mood-manager';
 import GameEnemy from './game/enemy';
 import GamePlayerHud from './game/player-hud';
+import GameEnemyHud from './game/enemy-hud';
 
 class Game {
   constructor() {
@@ -77,6 +78,11 @@ class Game {
     this.playerHud = new GamePlayerHud({
       camera: this.engine.camera,
     });
+
+    this.enemyHud = new GameEnemyHud({
+      camera: this.engine.camera,
+    })
+
     this.gameState = new GameState({
       map: this.map,
     });
@@ -127,7 +133,8 @@ class Game {
   }
 
   onUpdate(delta) {
-    const { gameInput, enemy, player, map, world, physics, playerHud } = this;
+    const { gameInput, enemy, player, map,
+      world, physics, playerHud, enemyHud } = this;
     delta /= 1000;
     physics.updateCollisionSpace(player.body.position, 15);
     physics.update(delta);
@@ -135,6 +142,7 @@ class Game {
     enemy.update(delta);
     map.update(delta);
     playerHud.update(delta);
+    enemyHud.update(delta);
     world.update(delta, player.mesh.position);
   }
 
