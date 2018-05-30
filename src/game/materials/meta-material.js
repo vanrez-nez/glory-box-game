@@ -1,6 +1,7 @@
 import { QUALITY } from '../const';
 
 const DEFAULTS = {
+  nodeName: '',
   low: {
     type: 'MeshBasicMaterial',
     args: {},
@@ -54,7 +55,7 @@ export default class GameMetaMaterial {
     }
   }
 
-  solveArgumentDefers(args) {
+  solvePropDefers(args) {
     const keys = Object.keys(args);
     keys.forEach((k) => {
       if (typeof args[k] === 'function') {
@@ -67,7 +68,13 @@ export default class GameMetaMaterial {
     let mat = null;
     if (profile.type) {
       const mType = profile.type;
-      this.solveArgumentDefers(profile.args);
+      /*
+        Some props come in the form of functions,
+        that means the property is being lazy loaded.
+        All materials use this form to handle texture loading
+        by using the utility function GetTextureRepeatDefer
+      */
+      this.solvePropDefers(profile.args);
       if (THREE[mType]) {
         mat = new THREE[mType](profile.args);
       } else if (window[mType]) {
@@ -78,7 +85,14 @@ export default class GameMetaMaterial {
         */
         mat = new window[mType](profile.args);
       }
+      mat.userData = {
+        nodeId: this.opts.nodeName,
+      };
     }
     return mat;
+  }
+
+  get activeMaterial() {
+    return this.low || this.medium || this.high;
   }
 }

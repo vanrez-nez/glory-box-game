@@ -7,6 +7,7 @@ export default class WorldFloorMaterial extends GameMetaMaterial {
   constructor(opts) {
     const scale = opts.scale;
     super({
+      nodeName: opts.name,
       low: {
         type: 'MeshBasicMaterial',
         args: {

@@ -7,6 +7,7 @@ export default class PlatformStepsMaterial extends GameMetaMaterial {
   constructor(opts) {
     const width = opts.width * 0.15;
     super({
+      nodeName: opts.name,
       low: {
         type: 'MeshBasicMaterial',
         args: {

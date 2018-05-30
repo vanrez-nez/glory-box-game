@@ -9,6 +9,7 @@ export default class CollectibleGlyphMaterial extends GameMetaMaterial {
   constructor(opts) {
     const { xOffset, yOffset, emissiveColor } = opts;
     super({
+      nodeName: opts.name,
       low: {
         type: 'MeshLambertMaterial',
         args: {

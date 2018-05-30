@@ -7,6 +7,7 @@ export default class WorldCylinderMaterial extends GameMetaMaterial {
   constructor(opts) {
     const { xScale, yScale } = opts;
     super({
+      nodeName: opts.name,
       low: {
         type: 'MeshBasicMaterial',
         args: {

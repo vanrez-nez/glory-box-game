@@ -1,6 +1,6 @@
 import GameMetaMaterial from './meta-material';
 
-export default class CollectibleTrailMaterial extends GameMetaMaterial {
+export default class EnemySpineMaterial extends GameMetaMaterial {
   constructor(opts) {
     super({
       nodeName: opts.name,

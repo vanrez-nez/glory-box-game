@@ -4,6 +4,7 @@ import { StaticInstance as Skybox } from '../skybox';
 export default class EnemyHeadMaterial extends GameMetaMaterial {
   constructor(opts) {
     super({
+      nodeName: opts.name,
       low: {
         type: 'MeshBasicMaterial',
         args: {

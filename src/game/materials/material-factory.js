@@ -1,7 +1,9 @@
 import { CONFIG } from '../const';
+import { GroupBy } from '../utils';
 import WorldFloorMaterial from './world-floor-material';
 import WorldCylinderMaterial from './world-cylinder-material';
 import WorldSkyCylinderMaterial from './world-sky-cylinder-material';
+import WorldFxCylinderMaterial from './world-fx-cylinder-material';
 import PlatformSocketMaterial from './platform-socket-material';
 import PlatformLightMaterial from './platform-light-material';
 import PlatformStepsMaterial from './platform-steps-material';
@@ -13,6 +15,7 @@ import EnemyHeadMaterial from './enemy-head-material';
 import EnemyArmorMaterial from './enemy-armor-material';
 import EnemyEyesMaterial from './enemy-eyes-material';
 import GenericColorMaterial from './generic-color-material';
+import EnemySpineMaterial from './enemy-spine-material';
 import PlayerMaterial from './player-material';
 import PlayerHudFireballMaterial from './player-hud-fireball-material';
 
@@ -21,6 +24,7 @@ const MATERIALS = {
   WorldCylinder: WorldCylinderMaterial,
   WorldFloor: WorldFloorMaterial,
   WorldSkyCylinder: WorldSkyCylinderMaterial,
+  WorldFxCylinder: WorldFxCylinderMaterial,
   PlatformLight: PlatformLightMaterial,
   PlatformSteps: PlatformStepsMaterial,
   PlatformSocket: PlatformSocketMaterial,
@@ -31,6 +35,7 @@ const MATERIALS = {
   EnemyHead: EnemyHeadMaterial,
   EnemyArmor: EnemyArmorMaterial,
   EnemyEyes: EnemyEyesMaterial,
+  EnemySpine: EnemySpineMaterial,
   GenericColor: GenericColorMaterial,
   PlayerMaterial,
   PlayerHudFireball: PlayerHudFireballMaterial,
@@ -38,8 +43,9 @@ const MATERIALS = {
 
 export default class GameMaterialFactory {
   constructor(opts) {
-    this.materialsCache = {};
     this.opts = { ...DEFAULT, ...opts };
+    this.materialsCache = {};
+    this.instances = [];
   }
 
   getMaterial(materialName, params, cacheId = null) {
@@ -54,6 +60,7 @@ export default class GameMaterialFactory {
       }
       if (!material) {
         material = new MATERIALS[materialName](params);
+        this.instances.push(material);
         if (useCache) {
           materialsCache[cacheHash] = material;
         }
@@ -62,6 +69,14 @@ export default class GameMaterialFactory {
     } else {
       return new THREE.MeshBasicMaterial();
     }
+  }
+
+  getMaterialsByNodeName() {
+    return GroupBy(this.instances, obj => obj.opts.nodeName);
+  }
+
+  getMaterialsByMaterialType() {
+    return GroupBy(this.instances, obj => obj.constructor.name);
   }
 }
 

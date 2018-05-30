@@ -2,8 +2,9 @@ import GameMetaMaterial from './meta-material';
 import NebulaShader from '../../shaders/nebula';
 
 export default class WorldSkyCylinderMaterial extends GameMetaMaterial {
-  constructor() {
+  constructor(opts) {
     super({
+      nodeName: opts.name,
       low: {
         type: 'ShaderMaterial',
         args: {
