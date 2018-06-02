@@ -1,12 +1,13 @@
 import { GAME } from './const';
 import { MODEL_ASSETS } from './assets';
-import { CartesianToCylinder } from './utils';
+import { CartesianToCylinder, EaseExpoIn, EaseExpoOut } from './utils';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
+import GameEnemyRaySfx from './sfx/enemy-ray-sfx';
 import LineTrail from './line-trail';
 
 const DEFAULT = {
-  player: null,
   tailSize: 90,
+  maxRays: 1,
 };
 
 export default class GameEnemy {
@@ -14,15 +15,17 @@ export default class GameEnemy {
     this.opts = { ...DEFAULT, ...opts };
     this.group = new THREE.Group();
     this.group.name = 'GameEnemy';
-    this.speed = 3;
-    this.time = 0;
+    this.modelLoaded = false;
+    this.positionY = 0;
     this.headAmp = 3;
+    this.speed = 3;
+    this.theta = 0;
+    this.time = 0;
+    this.rays = [];
     this.tailPositions = [];
     this.tailSegments = [];
-    this.modelLoaded = false;
-    this.theta = 0;
-    this.positionY = 0;
     this.loadModel();
+    this.initRays();
   }
 
   loadModel() {
@@ -38,6 +41,18 @@ export default class GameEnemy {
       this.initTrail();
       this.modelLoaded = true;
     });
+  }
+
+  initRays() {
+    const { rays, opts } = this;
+    for (let i = 0; i < opts.maxRays; i++) {
+      const sfx = new GameEnemyRaySfx({});
+      sfx.mesh.scale.y = 70;
+      rays.push({
+        sfx,
+      });
+      this.group.add(sfx.mesh);
+    }
   }
 
   initHead() {
@@ -82,7 +97,7 @@ export default class GameEnemy {
       }),
       sizeFn: () => {
         const i = idx++ % this.opts.tailSize;
-        return this.easeExpoOut(i / this.opts.tailSize);
+        return EaseExpoOut(i / this.opts.tailSize);
       },
     });
     this.trail.line.geometry.boundingSphere.radius = 100;
@@ -148,21 +163,13 @@ export default class GameEnemy {
     }
   }
 
-  easeExpoIn(t) {
-    return t === 0 ? 0 : 1024 ** (t - 1);
-  }
-
-  easeExpoOut(t) {
-    return t === 1 ? 1 : 1 - (2 ** (-10 * t));
-  }
-
   updateTail() {
     const { tailSegments } = this;
     const len = tailSegments.length;
     for (let i = 0; i < len; i++) {
       const seg = tailSegments[i];
       const pos = this.getSegmentPosition(i);
-      const scale = Math.max(0.05, 1.4 - this.easeExpoIn(i / len));
+      const scale = Math.max(0.05, 1.4 - EaseExpoIn(i / len));
       seg.scale.set(scale, scale, scale);
       const thetaOffset = (i + 1.8) * 0.05;
       this.setOrbitPosition(seg, this.theta - thetaOffset);
@@ -176,7 +183,16 @@ export default class GameEnemy {
     this.trail.pushPosition(this.head.position);
   }
 
-  update(delta) {
+  updateRays(delta, camera, playerPosition) {
+    const { rays } = this;
+    for (let i = 0; i < rays.length; i++) {
+      const { sfx } = rays[i];
+      sfx.mesh.lookAt(camera.position);
+      sfx.update(delta, playerPosition.y);
+    }
+  }
+
+  update(delta, camera, playerPosition) {
     if (this.modelLoaded) {
       this.theta += delta * 0.3 * this.speed;
       this.time += delta * this.speed;
@@ -185,5 +201,6 @@ export default class GameEnemy {
       this.updateTail();
       this.updateTrail(delta);
     }
+    this.updateRays(delta, camera, playerPosition);
   }
 }

@@ -16,6 +16,7 @@ import EnemyArmorMaterial from './enemy-armor-material';
 import EnemyEyesMaterial from './enemy-eyes-material';
 import GenericColorMaterial from './generic-color-material';
 import EnemySpineMaterial from './enemy-spine-material';
+import EnemyRayMaterial from './enemy-ray-material';
 import PlayerMaterial from './player-material';
 import PlayerHudFireballMaterial from './player-hud-fireball-material';
 
@@ -32,6 +33,7 @@ const MATERIALS = {
   CollectibleGlyph: CollectibleGlyphMaterial,
   CollectibleItem: CollectibleItemMaterial,
   CollectibleTrail: CollectibleTrailMaterial,
+  EnemyRay: EnemyRayMaterial,
   EnemyHead: EnemyHeadMaterial,
   EnemyArmor: EnemyArmorMaterial,
   EnemyEyes: EnemyEyesMaterial,

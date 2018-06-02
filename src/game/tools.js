@@ -121,6 +121,30 @@ export default class GameTools {
     folder.add(u.ringTickness, 'value', 0, 1.2).name('Ring Tickness');
   }
 
+  addEnemyRayMaterial(folder, mat) {
+    const u = mat.uniforms;
+    const rayFolder = folder.addFolder('Ray');
+    this.addColorField(rayFolder, u.rayColor, 'value', 'Ray Color');
+    rayFolder.add(u.rayLevels.value, 'x', 0.0, 1.0).name('Inner Glow');
+    rayFolder.add(u.rayLevels.value, 'y', 0.0, 1.0).name('Outer Glow');
+    rayFolder.add(u.rayLevels.value, 'z', 0.0, 1.0).name('Intensity');
+    rayFolder.add(u.rayLevels.value, 'w', 0.0, 1.0).name('Inner Fade');
+
+    const d1Folder = folder.addFolder('Thin Debris');
+    this.addColorField(d1Folder, u.thinDebrisColor, 'value', 'Color');
+    d1Folder.add(u.thinDebrisLevels.value, 'x', 0.0, 1.0).name('Speed');
+    d1Folder.add(u.thinDebrisLevels.value, 'y', 0.0, 1.0).name('Density');
+    d1Folder.add(u.thinDebrisLevels.value, 'z', 0.0, 1.0).name('Width');
+    d1Folder.add(u.thinDebrisLevels.value, 'w', 0.0, 1.0).name('Intensity');
+
+    const d2Folder = folder.addFolder('Fat Debris');
+    this.addColorField(d2Folder, u.fatDebrisColor, 'value', 'Color');
+    d2Folder.add(u.fatDebrisLevels.value, 'x', 0.0, 1.0).name('Speed');
+    d2Folder.add(u.fatDebrisLevels.value, 'y', 0.0, 1.0).name('Density');
+    d2Folder.add(u.fatDebrisLevels.value, 'z', 0.0, 1.0).name('Width');
+    d2Folder.add(u.fatDebrisLevels.value, 'w', 0.0, 1.0).name('Intensity');
+  }
+
   addSkyShaderMaterial(folder, mat) {
     const u = mat.uniforms;
     this.addColorField(folder, u.color, 'value', 'Color');
@@ -165,6 +189,13 @@ export default class GameTools {
     };
   }
 
+  getMeshEnemyRayProps(mat) {
+    const u = mat.uniforms;
+    return {
+      rayColor: u.rayColor.value,
+    };
+  }
+
   getMaterialProps(mat) {
     const result = {};
     const exportedProps = [
@@ -205,6 +236,9 @@ export default class GameTools {
           case 'CollectibleTrailMaterial':
           case 'EnemySpineMaterial':
             result[id] = this.getMeshLineProps(mat);
+            break;
+          case 'EnemyRayMaterial':
+            result[id] = this.getMeshEnemyRayProps(mat);
             break;
           default:
             result[id] = this.getMaterialProps(mat);
@@ -251,6 +285,9 @@ export default class GameTools {
         case 'CollectibleTrailMaterial':
         case 'EnemySpineMaterial':
           this.addMeshLineMaterial(f, mat);
+          break;
+        case 'EnemyRayMaterial':
+          this.addEnemyRayMaterial(f, mat);
           break;
         default:
           this.addMaterialFields(f, mat);
