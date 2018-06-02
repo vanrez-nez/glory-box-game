@@ -130,17 +130,17 @@ class Game {
   }
 
   onUpdate(delta) {
-    const { gameInput, enemy, player, map,
+    const { engine, gameInput, enemy, player, map,
       world, physics, playerHud, enemyHud } = this;
     delta /= 1000;
     physics.updateCollisionSpace(player.body.position, 25);
     physics.update(delta);
+    enemy.update(delta, engine.camera, player.mesh.position);
     player.update(delta, gameInput.state);
-    enemy.update(delta);
-    map.update(delta);
+    world.update(delta, player.mesh.position);
     playerHud.update(delta);
     enemyHud.update(delta);
-    world.update(delta, player.mesh.position);
+    map.update(delta);
   }
 
   onDraw() {

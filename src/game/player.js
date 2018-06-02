@@ -27,19 +27,9 @@ export default class GamePlayer {
     this.groundedTime = 0;
     this.group = new THREE.Group();
     this.group.name = 'GamePlayer';
-    this.initCube();
+    this.mesh = this.getPlayerMesh();
+    this.body = this.getBody();
     this.initLights();
-    this.body = new GamePhysicsBody({
-      type: PHYSICS.Player,
-      mesh: this.mesh,
-      mass: 0.26,
-      friction: 0.12,
-      label: 'player',
-      scale: new THREE.Vector2(1.5, 1.5),
-      gravity: new THREE.Vector2(0, opts.gravity),
-      maxVelocity: new THREE.Vector2(0.3, 1.7),
-      distance: GAME.PlayerOffset,
-    });
     this.attachEvents();
   }
 
@@ -47,15 +37,16 @@ export default class GamePlayer {
     this.body.events.on(EVENTS.CollisionBegan, this.onCollisionBegan.bind(this));
   }
 
-  initCube() {
+  getPlayerMesh() {
     const geo = new THREE.BoxBufferGeometry(1.5, 1.5, 1.5);
     const mat = MaterialFactory.getMaterial('PlayerMaterial', {
       name: 'player_main',
       color: 0xffffff,
     });
-    this.mesh = new THREE.Mesh(geo, mat);
-    // this.mesh.castShadow = true;
-    this.group.add(this.mesh);
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.castShadow = true;
+    this.group.add(mesh);
+    return mesh;
   }
 
   initLights() {
@@ -99,6 +90,21 @@ export default class GamePlayer {
       tl.to(pos, 0.1, { y: -hitForce, ease: Power2.easeOut }, 0);
       tl.to(pos, 0.15, { y: 0, ease: Power2.easeOut });
     }
+  }
+
+  getBody() {
+    const { opts } = this;
+    return new GamePhysicsBody({
+      type: PHYSICS.Player,
+      mesh: this.mesh,
+      mass: 0.26,
+      friction: 0.12,
+      label: 'player',
+      scale: new THREE.Vector2(1.5, 1.5),
+      gravity: new THREE.Vector2(0, opts.gravity),
+      maxVelocity: new THREE.Vector2(0.3, 1.7),
+      distance: GAME.PlayerOffset,
+    });
   }
 
   getJumpForce(inputs) {

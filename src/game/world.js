@@ -66,6 +66,7 @@ export default class GameWorld {
     uniforms.borderSoftness.value = 0;
     uniforms.tint.value.set(color);
     fxCylinder.position.y = position.y;
+    // Find cylinder rotation so the center matches the position
     const defaultRot = (-Math.PI / 2);
     this.fxCylinder.rotation.y = defaultRot + (Math.PI / 2) * ((position.x * 1.08) / 64);
     tl.addCallback(() => { fxCylinder.visible = true; });

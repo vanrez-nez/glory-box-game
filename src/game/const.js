@@ -21,10 +21,10 @@ export const CONFIG = {
 export const GAME = {
   CilynderRadius: 35,
   HudDistanceFromCamera: 20,
-  PlatformOffset: 2.25,
+  PlatformOffset: 2.45,
   CollectibleSocketOffset: 0,
   CollectibleItemOffset: 1.9,
-  PlayerOffset: 2.25,
+  PlayerOffset: 2.45,
   EnemyOffset: 4,
   CameraDistance: 50,
   ZoomCameraDistance: 150,
@@ -55,6 +55,7 @@ export const EVENTS = {
 export const PHYSICS = {
   CollisionBias: 0.001,
   Player: 'PHYSICS.Player',
+  EnemyRay: 'PHYSICS.EnemyRay',
   WorldBounds: 'WorldBounds',
   StaticPlatform: 'PHYSICS.StaticPlatform',
   MovingPlatform: 'PHYSICS.MovingPlatform',
