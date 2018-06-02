@@ -13,7 +13,6 @@ export default class GameEnemyRaySfx {
     this.mesh = this.getMesh();
     this.body = this.getBody();
     this.positionX = 0;
-    this.power = 0.2;
     this.running = true;
     this.attachEvents();
     this.initTimeline();
@@ -57,29 +56,41 @@ export default class GameEnemyRaySfx {
     const { mesh } = this;
     const { uniforms: u } = mesh.material;
     const tl = new TimelineMax({ paused: true });
-    // tl.set(u.thinDebrisIntensity, { value: 0 });
-    // tl.to(u.thinDebrisIntensity, 4, { value: 1.0 });
-    // tl.to(u.rayIntensity, 1, { value: 0.1, ease: Power2.easeOut }, 0.3);
-    // tl.to(u.rayIntensity, 3, { value: 1.0, ease: Power2.easeIn }, '+=0');
-    tl.to(u.rayColor.value, 3, {
-      r: 1.0,
-      g: 1.0,
-      b: 1.0,
-      ease: Expo.easeIn,
-    }, 0.3);
-    // tl.to(u.rayIntensity, 1, { value: 0.0, ease: Power2.easeIn }, '-=0.2');
-    tl.to(u.rayColor.value, 3, {
-      r: 0.0,
-      g: 0.0,
-      b: 0.0,
-    });
+    /*
+      Ray Levels - [x] InnerGlow, [y]: OuterGlow, [z]: Intensity, [w]: InnerFade
+      Debris Levels - [x]: Speed, [y]: Density, [z]: Width, [w]: Intensity
+    */
+    
+    tl.set(u.rayLevels.value, { x: 0, y: 0.5, z: 0.0, w: 0.0 });
+    tl.set(u.thinDebrisLevels.value, { x: 0.5, y: 0.1, w: 0 });
+    tl.set(u.fatDebrisLevels.value, { x: 0, y: 0, z: 0, w: 0 });
+    
+    tl.add('warning')
+    tl.to(u.rayLevels.value, 0.5, { z: 0.4 }, 'warning');
+    tl.to(u.thinDebrisLevels.value, 0.5, { z: 0.5, w: 0.5 }, 'warning');
+
+    tl.add('fire', 2.0);
+    tl.to(u.rayLevels.value, 1, { x: 0.6, y: 1.0, z: 1.0, ease: Power4.easeOut }, 'fire');
+    tl.to(u.thinDebrisLevels.value, 1, { y: 0.5, z: 1.0, w: 1.0, ease: Power2.easeOut }, 'fire');
+    tl.to(u.fatDebrisLevels.value, 1, { y: 0.6, z: 1.0, w: 1.0, ease: Power2.easeOut }, 'fire');
+
+    tl.add('full', 3.0);
+    tl.to(u.rayLevels.value, 1, { x: 1.0, ease: Power4.easeIn }, 'full');
+    tl.to(u.thinDebrisLevels.value, 1, { x: 0.4, y: 1.0 }, 'full');
+    tl.to(u.fatDebrisLevels.value, 1, { x: 1.0, y: 1.0 }, 'full');
+
+    tl.add('down', 4.0);
+    tl.to(u.rayLevels.value, 1.0, { w: 1.0, ease: Power4.easeOut }, 'down');
+    tl.to(u.thinDebrisLevels.value, 1.6, { z: 0.0, y: 0.5, w: 0, ease: Power2.easeOut }, 'down');
+    tl.to(u.fatDebrisLevels.value, 0.1, { y: 0, w: 0.0, ease: Power2.easeOut }, 'down');
+
     this.timeline = tl;
   }
 
-  fire(x, power) {
-    this.power = power;
+  fire(x) {
     this.positionX = x;
     this.running = true;
+    this.timeline.progress(0);
   }
 
   update(delta, offsetY) {
@@ -100,6 +111,7 @@ export default class GameEnemyRaySfx {
       const yRes = mesh.scale.y;
       uniforms.resolution.value.set(xRes, yRes);
       tl.time(tl.time() + delta);
+      this.running = tl.progress() < 1;
     }
   }
 }

@@ -51,6 +51,9 @@ export default class GameEnemy {
       rays.push({
         sfx,
       });
+      setInterval(() => {
+        sfx.fire(0);
+      }, 10000);
       this.group.add(sfx.mesh);
     }
   }

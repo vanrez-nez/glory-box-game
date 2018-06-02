@@ -85,10 +85,11 @@ const EnemyRayShader = {
       float rIntensity = rayLevels[2];
       float rInnerFade = rayLevels[3];
       float t = abs(rInnerGlow / (uv.x * (32.0 - 30.0 * rInnerGlow)));
-      t += smoothstep(0.0, abs(uv.x), 0.1 * rOuterGlow) * 0.5;
-      color += rayColor * t * rIntensity;
-      color = clamp(color, vec3(0.0), vec3(1.0));
-      color -= smoothstep(0.0, abs(uv.x), 0.25 * rInnerFade) * 1.0;
+      t += smoothstep(0.0, abs(uv.x), 0.1 * rOuterGlow) * 0.7;
+      vec3 ray = rayColor * t * rIntensity;
+      ray = clamp(ray, vec3(0.0), vec3(1.0));
+      ray -= smoothstep(0.0, abs(uv.x), 0.25 * rInnerFade) * 1.0;
+      color += ray;
 
       gl_FragColor = vec4(color, 1.0);
     }
