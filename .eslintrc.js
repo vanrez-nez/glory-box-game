@@ -76,6 +76,7 @@ module.exports = {
     "no-else-return": 0,
     "consistent-return ": 0,
     "default-case": 0,
+    "no-continue": 0,
     // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
   }
