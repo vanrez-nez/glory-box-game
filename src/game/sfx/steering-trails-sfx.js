@@ -1,6 +1,6 @@
 import { EVENTS } from '../const';
 import { MaterialFactoryInstance as MaterialFactory } from '../materials/material-factory';
-import SteeringParticle from '../steering-particle';
+import SteeringParticle from './common/steering-particle';
 import LineTrail from '../line-trail';
 
 const cachedVec = new THREE.Vector3();
