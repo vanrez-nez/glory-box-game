@@ -1,6 +1,6 @@
 
-import { EVENTS, PHYSICS, CONFIG, GAME } from './const';
-import { Clamp, CartesianToCylinder } from './utils';
+import { EVENTS, PHYSICS } from './const';
+import { Clamp } from './utils';
 import CollisionEdges from './collision-edges';
 
 const DEFAULT = {

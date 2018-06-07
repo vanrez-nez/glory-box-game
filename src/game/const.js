@@ -11,7 +11,6 @@ export const CONFIG = {
   EnableAxes: false,
   DebugCollisions: false,
   UsePostProcessing: false,
-  PositionCullingEnabled: true,
   EnableShadows: false,
   ToneMapping: THREE.NoToneMapping,
   EnableSkyShader: false,
@@ -50,16 +49,20 @@ export const EVENTS = {
   CollectiblePickup: 'ECollectiblePickUp',
   CollectibleCollect: 'ECollectibleCollect',
   SteeringTrailLanded: 'ESteeringTrailLanded',
+  EnemyRayHit: 'EEnemyRayHit',
+  PlayerDeath: 'EPlayerDeath',
 };
 
 export const PHYSICS = {
   CollisionBias: 0.001,
-  Player: 'PHYSICS.Player',
-  EnemyRay: 'PHYSICS.EnemyRay',
-  WorldBounds: 'WorldBounds',
-  StaticPlatform: 'PHYSICS.StaticPlatform',
-  MovingPlatform: 'PHYSICS.MovingPlatform',
-  Collectible: 'PHYSICS.Collectible',
+  Generic: 0,
+  Player: 1,
+  EnemyRay: 2,
+  WorldBounds: 3,
+  StaticPlatform: 4,
+  MovingPlatform: 5,
+  Collectible: 6,
+  Particle: 7,
 };
 
 export const DIRECTIONS = {
