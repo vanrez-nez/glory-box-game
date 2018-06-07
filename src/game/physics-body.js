@@ -6,12 +6,15 @@ import CollisionEdges from './collision-edges';
 const DEFAULT = {
   label: 'body',
   mass: 0.1,
-  mesh: null,
   friction: 0.1,
   isStatic: false,
   isSensor: false,
+  syncLookAt: true,
+  type: PHYSICS.Generic,
   maxVelocity: new THREE.Vector2(1, 1),
-  distance: GAME.CilynderRadius,
+  distance: 0,
+  onUpdate: () => {},
+  collisionTargets: [],
 };
 
 export default class GamePhysicsBody {
@@ -20,6 +23,7 @@ export default class GamePhysicsBody {
     this.opts = { ...DEFAULT, ...opts };
     this.enabled = true;
     this.box = new THREE.Box2();
+    this.events = new EventEmitter3();
     this.scale = this.opts.scale || new THREE.Vector2();
     this.position = new THREE.Vector2();
     this.meshPositionOffset = new THREE.Vector2();
@@ -27,14 +31,21 @@ export default class GamePhysicsBody {
     this.prevPosition = new THREE.Vector2();
     this.acceleration = new THREE.Vector2();
     this.velocity = new THREE.Vector2();
-    this.events = new EventEmitter3();
     this.prevCollisions = new CollisionEdges();
     this.collidingEdges = new CollisionEdges();
     this.isWorldBounds = this.opts.type === PHYSICS.WorldBounds;
     this.isMovingPlatform = this.opts.type === PHYSICS.MovingPlatform;
     this.isStaticPlatform = this.opts.type === PHYSICS.StaticPlatform;
     this.isPlatform = this.isStaticPlatform || this.isMovingPlatform;
-    this.sync(true);
+    this.updateScale();
+    this.updateCollisionMask();
+  }
+
+  updateCollisionMask() {
+    const { collisionTargets } = this.opts;
+    collisionTargets.forEach((target) => {
+      this.mask |= 1 << target | 0;
+    });
   }
 
   applyForce(vecForce) {
@@ -59,7 +70,7 @@ export default class GamePhysicsBody {
 
   update(delta, timeScale) {
     const { velocity, acceleration, position } = this;
-    const { friction, maxVelocity } = this.opts;
+    const { friction, maxVelocity, onUpdate } = this.opts;
     velocity.add(acceleration);
     velocity.x = Clamp(velocity.x, -maxVelocity.x, maxVelocity.x);
     velocity.y = Clamp(velocity.y, -maxVelocity.y, maxVelocity.y);
@@ -70,35 +81,12 @@ export default class GamePhysicsBody {
       position.x += velocity.x * dt;
       position.y += velocity.y * dt;
     }
-    this.sync(this.isStaticPlatform === false);
+    this.updateScale();
+    onUpdate(this);
   }
 
-  sync(updateLookAt) {
-    const { opts,
-      position: pos,
-      collidingEdges: cE,
-      meshPositionOffset: pOffset,
-      meshScaleOffset: sOffset,
-    } = this;
-    const { mesh } = opts;
-    this.updateScale();
-    if (mesh) {
-      if (CONFIG.DebugCollisions && mesh.material) {
-        mesh.material.wireframe = cE.isColliding();
-      }
-      CartesianToCylinder(
-        mesh.position,
-        pos.x + pOffset.x,
-        pos.y + pOffset.y,
-        opts.distance,
-      );
-      if (updateLookAt) {
-        mesh.lookAt(0, pos.y, 0);
-      }
-      mesh.scale.x = 1 + sOffset.x;
-      mesh.scale.y = 1 + sOffset.y;
-      mesh.scale.z = 1 + sOffset.z;
-    }
+  canCollideWith(bodyType) {
+    return (this.mask & (1 << bodyType | 0)) !== 0;
   }
 
   updateScale() {

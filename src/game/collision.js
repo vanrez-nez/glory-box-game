@@ -1,7 +1,7 @@
 import { PHYSICS } from './const';
 
 // https://github.com/kittykatattack/bump/blob/master/src/bump.js
-export default function SolveRectangleCollision(b1, b2) {
+export default function SolveRectangleCollision(b1, b2, solve = true) {
   const { collidingEdges: ceb1 } = b1;
   const { collidingEdges: ceb2 } = b2;
   const vx = b1.position.x - b2.position.x;
@@ -20,20 +20,22 @@ export default function SolveRectangleCollision(b1, b2) {
         const yDir = vy > 0 ? 1 : -1;
         if (yDir === -1) (ceb1.top = b2) && (ceb2.bottom = b1);
         if (yDir === 1) (ceb1.bottom = b2) && (ceb2.top = b1);
-
-        // correct position of colliding object
-        b1.position.y += overlapY * yDir;
-
-        // ensure they are always colliding to avoid event looping
-        b1.position.y -= PHYSICS.CollisionBias * yDir;
+        if (solve) {
+          // correct position of colliding object
+          b1.position.y += overlapY * yDir;
+          // ensure they are always colliding to avoid event looping
+          b1.position.y -= PHYSICS.CollisionBias * yDir;
+        }
 
       // y axis collision
       } else {
         const xDir = vx > 0 ? 1 : -1;
         if (xDir === 1) (ceb1.left = b2) && (ceb2.right = b1);
         if (xDir === -1) (ceb1.right = b2) && (ceb2.left = b1);
-        b1.position.x += overlapX * xDir;
-        b1.position.x -= PHYSICS.CollisionBias * xDir;
+        if (solve) {
+          b1.position.x += overlapX * xDir;
+          b1.position.x -= PHYSICS.CollisionBias * xDir;
+        }
       }
     }
   }

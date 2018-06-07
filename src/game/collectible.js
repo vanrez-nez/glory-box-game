@@ -1,4 +1,5 @@
 import { GAME, PHYSICS, EVENTS, COLLECTIBLE } from './const';
+import { SyncBodyPhysicsMesh } from './utils';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 import CollectibleGlyph from './collectible-glyph';
 import LineTrail from './line-trail';
@@ -60,8 +61,10 @@ export default class GameCollectible {
       isStatic: true,
       isSensor: true,
       label: 'collectible',
+      onUpdate: SyncBodyPhysicsMesh.bind(this, mesh),
       distance: GAME.CollectibleItemOffset,
       scale: new THREE.Vector3(1.5, 1.5),
+      collisionTargets: [PHYSICS.Player],
     });
     mesh.position.y = y;
     this.body.position.set(x, y);

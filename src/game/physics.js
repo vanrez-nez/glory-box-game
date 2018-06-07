@@ -116,6 +116,9 @@ export default class GamePhysics {
       const b1 = bodies[i];
       for (let j = i + 1; j < bodies.length; j++) {
         const b2 = bodies[j];
+        if (b1.canCollideWith(b2.opts.type) === false) {
+          continue;
+        }
         boxA.copy(b1.box).translate(b1.position);
         boxB.copy(b2.box).translate(b2.position);
         const isColliding = boxA.intersectsBox(boxB);
@@ -147,12 +150,9 @@ export default class GamePhysics {
         const [b1, b2] = collisions[i];
 
         // Solve collision only when any of the two bodies are not sensors
-        const isSensorCollision = b1.opts.isSensor || b2.opts.isSensor;
-        if (!isSensorCollision) {
-          SolveRectangleCollision(b1, b2);
-        } else {
-          b2.collidingEdges.set(b1, b1, b1, b1);
-        }
+        const solve = b1.opts.isSensor === false &&
+          b2.opts.isSensor === false;
+        SolveRectangleCollision(b1, b2, solve);
 
         // if object is colliding with moving platform move b1 along with it
         if (b2.opts.type === PHYSICS.MovingPlatform) {
@@ -172,8 +172,8 @@ export default class GamePhysics {
       const b = allBodies[i];
       const { opts } = b;
       if (b.enabled) {
-        // skip grounded objects from apply gravity
-        if (!opts.isStatic && !b.collidingEdges.bottom) {
+        // skip static, sensors and grounded objects from apply gravity
+        if (!opts.isStatic && !opts.isSensor && !b.collidingEdges.bottom) {
           const g = opts.gravity !== undefined ? opts.gravity : gravity;
           b.velocity.x += opts.mass * g.x;
           b.velocity.y += opts.mass * g.y;

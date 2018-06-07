@@ -5,9 +5,10 @@
 // https://kotaku.com/5420545/lets-talk-about-jumping
 
 import { PHYSICS, EVENTS, GAME } from './const';
-import { Clamp, CartesianToCylinder } from './utils';
+import { Clamp, CartesianToCylinder, SyncBodyPhysicsMesh } from './utils';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 import GamePhysicsBody from './physics-body';
+import BoxDisintegrateSfx from './sfx/box-disintegrate-sfx';
 
 const DEFAULT = {
   jumpTolerance: 50,
@@ -24,17 +25,19 @@ export default class GamePlayer {
     this.jumpLocked = false;
     this.jumpDefer = 0;
     this.stateBuff = [];
+    this.bodies = [];
     this.groundedTime = 0;
     this.group = new THREE.Group();
     this.group.name = 'GamePlayer';
     this.mesh = this.getPlayerMesh();
-    this.body = this.getBody();
+    this.initPlayerBody();
+    this.initDisintegrateSfx();
     this.initLights();
     this.attachEvents();
   }
 
   attachEvents() {
-    this.body.events.on(EVENTS.CollisionBegan, this.onCollisionBegan.bind(this));
+    this.playerBody.events.on(EVENTS.CollisionBegan, this.onCollisionBegan.bind(this));
   }
 
   getPlayerMesh() {
@@ -49,6 +52,14 @@ export default class GamePlayer {
     return mesh;
   }
 
+  initDisintegrateSfx() {
+    this.disintegrateSfx = new BoxDisintegrateSfx({
+      target: this.mesh,
+      parent: this.group,
+    });
+    this.bodies = this.bodies.concat(this.disintegrateSfx.bodies);
+  }
+
   initLights() {
     this.light = new THREE.PointLight(0xffffff, 7, 20);
     this.light.castShadow = true;
@@ -58,15 +69,15 @@ export default class GamePlayer {
   }
 
   get descending() {
-    return !this.grounded && this.body.velocity.y < 0;
+    return !this.grounded && this.playerBody.velocity.y < 0;
   }
 
   get ascending() {
-    return !this.grounded && this.body.velocity.y > 0;
+    return !this.grounded && this.playerBody.velocity.y > 0;
   }
 
   get grounded() {
-    const cE = this.body.collidingEdges;
+    const cE = this.playerBody.collidingEdges;
     return Boolean(cE.bottom) && (cE.bottom.isPlatform ||
       cE.bottom.opts.type === PHYSICS.WorldBounds);
   }
@@ -78,12 +89,12 @@ export default class GamePlayer {
   }
 
   onCollisionBegan(edges) {
-    const { body } = this;
+    const { playerBody } = this;
     if (edges.bottom && (edges.bottom.isPlatform || edges.bottom.isWorldBounds)) {
       const tl = new TimelineMax();
-      const pos = body.meshPositionOffset;
-      const scale = body.meshScaleOffset;
-      const hitHard = body.velocity.y < -0.8;
+      const pos = playerBody.meshPositionOffset;
+      const scale = playerBody.meshScaleOffset;
+      const hitHard = playerBody.velocity.y < -0.8;
       const hitForce = hitHard ? 0.4 : 0.2;
       tl.to(scale, 0.1, { x: hitForce, y: -hitForce, ease: Power2.easeOut });
       tl.to(scale, 0.15, { x: 0, y: 0, ease: Power2.easeOut });
@@ -92,19 +103,32 @@ export default class GamePlayer {
     }
   }
 
-  getBody() {
+  startDesintegrateSfx(tl) {
+    this.mesh.material.color.set(0x00ff00);
+  }
+
+  initPlayerBody() {
     const { opts } = this;
-    return new GamePhysicsBody({
+    const body = new GamePhysicsBody({
       type: PHYSICS.Player,
       mesh: this.mesh,
       mass: 0.26,
       friction: 0.12,
       label: 'player',
+      onUpdate: SyncBodyPhysicsMesh.bind(this, this.mesh),
       scale: new THREE.Vector2(1.5, 1.5),
       gravity: new THREE.Vector2(0, opts.gravity),
       maxVelocity: new THREE.Vector2(0.3, 1.7),
       distance: GAME.PlayerOffset,
+      collisionTargets: [
+        PHYSICS.WorldBounds,
+        PHYSICS.StaticPlatform,
+        PHYSICS.MovingPlatform,
+        PHYSICS.EnemyRay,
+      ],
     });
+    this.playerBody = body;
+    this.bodies.push(body);
   }
 
   getJumpForce(inputs) {
@@ -135,7 +159,7 @@ export default class GamePlayer {
         } else if (this.canDoubleJump) {
           this.jumpLocked = true;
           this.canDoubleJump = false;
-          this.body.velocity.y = 0;
+          this.playerBody.velocity.y = 0;
           return opts.jumpForce * 0.5;
         } else {
           this.jumpDefer = time;
@@ -160,44 +184,44 @@ export default class GamePlayer {
   }
 
   processInputs(inputs) {
-    const { body } = this;
+    const { playerBody } = this;
     let [xForce, yForce] = [0, 0];
     yForce = this.getJumpForce(inputs);
     xForce = this.getWalkingForce(inputs);
     if (xForce === 0) {
-      this.body.velocity.x = 0;
+      playerBody.velocity.x = 0;
     }
     if (xForce !== 0 || yForce !== 0) {
-      body.applyForce(new THREE.Vector2(xForce, yForce));
+      playerBody.applyForce(new THREE.Vector2(xForce, yForce));
     }
   }
 
   updateTransforms() {
-    const { opts, body, grounded, descending } = this;
+    const { opts, playerBody, grounded, descending } = this;
     if (descending) {
-      body.opts.gravity.set(0, opts.descentGravity);
+      playerBody.opts.gravity.set(0, opts.descentGravity);
     } else {
-      body.opts.gravity.set(0, opts.gravity);
+      playerBody.opts.gravity.set(0, opts.gravity);
     }
     if (!grounded) {
       // Modify height mass with velocity
-      body.meshScaleOffset.y = Clamp(body.velocity.y * 0.5, -0.1, 0.9);
+      playerBody.meshScaleOffset.y = Clamp(playerBody.velocity.y * 0.5, -0.1, 0.9);
       // Modity width mass with velocity
-      body.meshScaleOffset.x = Clamp(body.velocity.y * -0.2, -0.4, 0.15);
-      body.meshScaleOffset.z = body.meshScaleOffset.x;
-      // body.meshPositionOffset.multiplyScalar(0.99);
+      playerBody.meshScaleOffset.x = Clamp(playerBody.velocity.y * -0.2, -0.4, 0.15);
+      playerBody.meshScaleOffset.z = playerBody.meshScaleOffset.x;
     }
   }
 
   updateLights() {
-    const { light, body } = this;
-    CartesianToCylinder(light.position, body.position.x, body.position.y, GAME.PlayerDistance);
+    const { light, playerBody } = this;
+    CartesianToCylinder(light.position, playerBody.position.x, playerBody.position.y,
+      GAME.PlayerDistance);
     light.position.addScalar(0.15);
   }
 
   update(delta, inputState) {
     this.processInputs(inputState);
     this.updateTransforms();
-    // this.updateLights();
+    this.updateLights();
   }
 }

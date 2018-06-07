@@ -1,6 +1,6 @@
 
 import { PHYSICS, MAP, EVENTS, GAME } from './const';
-import { CartesianToCylinder } from './utils';
+import { CartesianToCylinder, SyncBodyPhysicsMesh } from './utils';
 import GamePhysicsBody from './physics-body';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 
@@ -21,7 +21,6 @@ export default class GamePlatform {
     this.body = this.getBody();
     this.oscillator = Math.random();
     this.body.position.set(this.opts.x, this.opts.y);
-    this.body.sync(true);
     this.startPosition = this.body.position.clone();
     this.body.events.on(EVENTS.CollisionBegan, this.onCollisionBegan.bind(this));
   }
@@ -142,8 +141,10 @@ export default class GamePlatform {
       mass: 0.01,
       friction: 0.05,
       isStatic: true,
+      onUpdate: SyncBodyPhysicsMesh.bind(this, mesh),
       scale: new THREE.Vector2(opts.width, 1),
       distance: GAME.PlatformOffset,
+      collisionTargets: [PHYSICS.Player],
     });
   }
 
