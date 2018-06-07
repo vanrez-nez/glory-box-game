@@ -24,6 +24,16 @@ export default class CollisionEdges {
     return cE.edges.every((v, i) => this.edges[i] === v);
   }
 
+  hasType(type) {
+    const { edges: cE } = this;
+    return (
+      (cE[0] && cE[0].opts.type === type) ||
+      (cE[1] && cE[1].opts.type === type) ||
+      (cE[2] && cE[2].opts.type === type) ||
+      (cE[3] && cE[3].opts.type === type)
+    );
+  }
+
   set(top, right, bottom, left) {
     this.edges[0] = top;
     this.edges[1] = right;
