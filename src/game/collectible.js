@@ -55,6 +55,7 @@ export default class GameCollectible {
       color: this.color,
     }, cacheId);
     const mesh = new THREE.Mesh(ItemGeometry, mat);
+    mesh.positionOffset = new THREE.Vector2();
     this.body = new GamePhysicsBody({
       type: PHYSICS.Collectible,
       mesh,
@@ -136,7 +137,7 @@ export default class GameCollectible {
     this.offsetItem += delta * 3;
     itemMesh.rotation.x += delta * 0.5;
     itemMesh.rotation.y += delta * 0.5;
-    body.meshPositionOffset.y = Math.sin(this.offsetItem) * 0.5;
+    itemMesh.positionOffset.y = Math.sin(this.offsetItem) * 0.5;
     this.glyph.update(delta);
     this.updateTrails(delta);
   }

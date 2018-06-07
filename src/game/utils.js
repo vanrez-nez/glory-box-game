@@ -97,22 +97,27 @@ export function EaseExpoOut(t) {
   return t === 1 ? 1 : 1 - (2 ** (-10 * t));
 }
 
+const vPositionZero = new THREE.Vector2();
+const vScaleZero = new THREE.Vector3();
 export function SyncBodyPhysicsMesh(mesh, body) {
   if (mesh) {
     if (CONFIG.DebugCollisions && mesh.material) {
       mesh.material.wireframe = body.collidingEdges.isColliding();
     }
+    const positionOffset = mesh.positionOffset || vPositionZero;
+    const scaleOffset = mesh.scaleOffset || vScaleZero;
+
     CartesianToCylinder(
       mesh.position,
-      body.position.x + body.meshPositionOffset.x,
-      body.position.y + body.meshPositionOffset.y,
+      body.position.x + positionOffset.x,
+      body.position.y + positionOffset.y,
       body.opts.distance,
     );
     if (body.opts.syncLookAt) {
       mesh.lookAt(0, body.position.y, 0);
     }
-    mesh.scale.x = 1 + body.meshScaleOffset.x;
-    mesh.scale.y = 1 + body.meshScaleOffset.y;
-    mesh.scale.z = 1 + body.meshScaleOffset.z;
+    mesh.scale.x = 1 + scaleOffset.x;
+    mesh.scale.y = 1 + scaleOffset.y;
+    mesh.scale.z = 1 + scaleOffset.z;
   }
 }

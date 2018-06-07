@@ -135,9 +135,9 @@ export default class GamePlatform {
     */
     const physicsType = this.isMovingPlatform() ?
       PHYSICS.MovingPlatform : PHYSICS.StaticPlatform;
+    mesh.positionOffset = new THREE.Vector2();
     return new GamePhysicsBody({
       type: physicsType,
-      mesh,
       mass: 0.01,
       friction: 0.05,
       isStatic: true,
@@ -151,7 +151,7 @@ export default class GamePlatform {
   onCollisionBegan(edges) {
     if (edges.top && edges.top.opts.type === PHYSICS.Player) {
       const tl = new TimelineMax();
-      const pos = this.body.meshPositionOffset;
+      const pos = this.mesh.positionOffset;
       tl.to(pos, 0.12, { y: -0.7, ease: Power2.easeOut });
       tl.to(pos, 0.15, { y: 0, ease: Power2.easeOut });
     }

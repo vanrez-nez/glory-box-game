@@ -47,6 +47,8 @@ export default class GamePlayer {
       color: 0xffffff,
     });
     const mesh = new THREE.Mesh(geo, mat);
+    mesh.positionOffset = new THREE.Vector2();
+    mesh.scaleOffset = new THREE.Vector3();
     mesh.castShadow = true;
     this.group.add(mesh);
     return mesh;
@@ -89,11 +91,11 @@ export default class GamePlayer {
   }
 
   onCollisionBegan(edges) {
-    const { playerBody } = this;
+    const { playerBody, mesh } = this;
     if (edges.bottom && (edges.bottom.isPlatform || edges.bottom.isWorldBounds)) {
       const tl = new TimelineMax();
-      const pos = playerBody.meshPositionOffset;
-      const scale = playerBody.meshScaleOffset;
+      const pos = mesh.positionOffset;
+      const scale = mesh.scaleOffset;
       const hitHard = playerBody.velocity.y < -0.8;
       const hitForce = hitHard ? 0.4 : 0.2;
       tl.to(scale, 0.1, { x: hitForce, y: -hitForce, ease: Power2.easeOut });
@@ -105,6 +107,7 @@ export default class GamePlayer {
 
   startDesintegrateSfx(tl) {
     this.mesh.material.color.set(0x00ff00);
+    this.disintegrateSfx.disintegrate(this.playerBody.position);
   }
 
   initPlayerBody() {
@@ -197,7 +200,7 @@ export default class GamePlayer {
   }
 
   updateTransforms() {
-    const { opts, playerBody, grounded, descending } = this;
+    const { opts, mesh, playerBody, grounded, descending } = this;
     if (descending) {
       playerBody.opts.gravity.set(0, opts.descentGravity);
     } else {
@@ -205,10 +208,10 @@ export default class GamePlayer {
     }
     if (!grounded) {
       // Modify height mass with velocity
-      playerBody.meshScaleOffset.y = Clamp(playerBody.velocity.y * 0.5, -0.1, 0.9);
+      mesh.scaleOffset.y = Clamp(playerBody.velocity.y * 0.5, -0.1, 0.9);
       // Modity width mass with velocity
-      playerBody.meshScaleOffset.x = Clamp(playerBody.velocity.y * -0.2, -0.4, 0.15);
-      playerBody.meshScaleOffset.z = playerBody.meshScaleOffset.x;
+      mesh.scaleOffset.x = Clamp(playerBody.velocity.y * -0.2, -0.4, 0.15);
+      mesh.scaleOffset.z = mesh.scaleOffset.x;
     }
   }
 

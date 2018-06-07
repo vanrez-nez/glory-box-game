@@ -26,8 +26,6 @@ export default class GamePhysicsBody {
     this.events = new EventEmitter3();
     this.scale = this.opts.scale || new THREE.Vector2();
     this.position = new THREE.Vector2();
-    this.meshPositionOffset = new THREE.Vector2();
-    this.meshScaleOffset = new THREE.Vector3();
     this.prevPosition = new THREE.Vector2();
     this.acceleration = new THREE.Vector2();
     this.velocity = new THREE.Vector2();
