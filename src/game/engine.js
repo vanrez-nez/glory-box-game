@@ -1,7 +1,6 @@
 
 import { CONFIG, GAME } from './const';
 import { CartesianToCylinder } from './utils';
-import ObjectCulling from './object-culling';
 
 const DEFAULT = {};
 
@@ -10,11 +9,6 @@ export default class Engine {
     this.opts = { ...DEFAULT, ...opts };
     this.width = 0;
     this.height = 0;
-    this.objectCulling = new ObjectCulling({
-      maxDistance: GAME.CullingMaxDistance,
-      maxVisibleNodes: GAME.CullingMaxNodes,
-      updateRate: GAME.CullingUpdateRate,
-    });
     this.rebuildCulling = true;
     this.initWorld();
     this.initLights();
@@ -118,16 +112,6 @@ export default class Engine {
     camera.position.lerp(cameraVector, 0.05);
   }
 
-  resetObjectCulling() {
-    const { objectCulling, scene } = this;
-    objectCulling.add(scene);
-    objectCulling.rebuild();
-  }
-
-  updateObjectCulling(position) {
-    this.objectCulling.updateVisibilityFrom(position);
-  }
-
   render() {
     const { renderer, scene, camera, composer } = this;
     if (CONFIG.EnableOrbitControls) {
@@ -135,10 +119,6 @@ export default class Engine {
       this.orbitControls.target = this.cameraTarget;
     } else {
       this.followTarget();
-    }
-    if (this.rebuildCulling && CONFIG.PositionCullingEnabled) {
-      this.resetObjectCulling();
-      this.rebuildCulling = false;
     }
     if (CONFIG.UsePostProcessing) {
       composer.render();
