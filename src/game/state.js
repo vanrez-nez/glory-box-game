@@ -13,8 +13,14 @@ export default class GameState {
   }
 
   attachEvents() {
-    const { map } = this.opts;
+    const { map, enemy } = this.opts;
     map.events.on(EVENTS.CollectiblePickup, this.onCollectiblePickup.bind(this));
+    enemy.events.on(EVENTS.EnemyRayHit, this.onEnemyRayHit.bind(this));
+  }
+
+  onEnemyRayHit() {
+    this.deaths += 1;
+    this.events.emit(EVENTS.PlayerDeath);
   }
 
   onCollectiblePickup(collectible) {
@@ -27,6 +33,7 @@ export default class GameState {
   }
 
   reset() {
+    this.deaths = 0;
     this.attackPower = 0;
     this.collectHistory = [];
   }

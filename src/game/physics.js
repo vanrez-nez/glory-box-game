@@ -178,9 +178,7 @@ export default class GamePhysics {
           b.velocity.x += opts.mass * g.x;
           b.velocity.y += opts.mass * g.y;
         }
-
         b.update(delta, timeScale);
-        
       }
       b.resetCollisionEdges();
       this.constrainToBoundaries(b, bounds);

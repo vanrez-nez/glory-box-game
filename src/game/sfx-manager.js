@@ -19,7 +19,14 @@ export default class GameSfxManager {
   attachEvents() {
     const { gameState, playerHud } = this.opts;
     gameState.events.on(EVENTS.CollectiblePickup, this.onCollectiblePickup.bind(this));
+    gameState.events.on(EVENTS.PlayerDeath, this.onPlayerDeath.bind(this));
     playerHud.events.on(EVENTS.CollectibleCollect, this.onCollectibleCollect.bind(this));
+  }
+
+  onPlayerDeath() {
+    const { player } = this.opts;
+    const tl = new TimelineMax();
+    player.startExplodeSfx(tl);
   }
 
   onCollectibleCollect(color) {

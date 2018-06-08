@@ -8,7 +8,7 @@ import { PHYSICS, EVENTS, GAME } from './const';
 import { Clamp, CartesianToCylinder, SyncBodyPhysicsMesh } from './utils';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 import GamePhysicsBody from './physics-body';
-import BoxDisintegrateSfx from './sfx/box-disintegrate-sfx';
+import PlayerExplosionSfx from './sfx/player-explosion-sfx';
 
 const DEFAULT = {
   jumpTolerance: 50,
@@ -31,7 +31,7 @@ export default class GamePlayer {
     this.group.name = 'GamePlayer';
     this.mesh = this.getPlayerMesh();
     this.initPlayerBody();
-    this.initDisintegrateSfx();
+    this.initExplosionSfx();
     this.initLights();
     this.attachEvents();
   }
@@ -54,12 +54,12 @@ export default class GamePlayer {
     return mesh;
   }
 
-  initDisintegrateSfx() {
-    this.disintegrateSfx = new BoxDisintegrateSfx({
+  initExplosionSfx() {
+    this.explosionSfx = new PlayerExplosionSfx({
       target: this.mesh,
       parent: this.group,
     });
-    this.bodies = this.bodies.concat(this.disintegrateSfx.bodies);
+    this.bodies = this.bodies.concat(this.explosionSfx.bodies);
   }
 
   initLights() {
@@ -105,9 +105,9 @@ export default class GamePlayer {
     }
   }
 
-  startDesintegrateSfx(tl) {
+  startExplodeSfx(tl) {
     this.mesh.material.color.set(0x00ff00);
-    this.disintegrateSfx.disintegrate(this.playerBody.position);
+    this.explosionSfx.explode(this.playerBody.position);
   }
 
   initPlayerBody() {

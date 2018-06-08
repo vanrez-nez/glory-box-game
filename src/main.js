@@ -74,6 +74,8 @@ class Game {
 
     this.gameState = new GameState({
       map: this.map,
+      enemy: this.enemy,
+      player: this.player,
     });
 
     this.sfxManager = new GameSfxManager({
@@ -92,8 +94,9 @@ class Game {
         new THREE.Vector2(GAME.BoundsLeft, GAME.BoundsTop),
         new THREE.Vector2(GAME.BoundsRight, GAME.BoundsBottom)),
     });
-    this.physics.add(this.player.body);
+    this.physics.add(this.player.bodies);
     this.physics.add(this.map.bodies);
+    this.physics.add(this.enemy.bodies);
 
     // Add all scene objects
     this.engine.scene.add(this.player.group);
@@ -133,7 +136,7 @@ class Game {
     const { engine, gameInput, enemy, player, map,
       world, physics, playerHud, enemyHud } = this;
     delta /= 1000;
-    physics.updateCollisionSpace(player.body.position, 25);
+    physics.updateCollisionSpace(player.playerBody.position, 25);
     physics.update(delta);
     enemy.update(delta, engine.camera, player.mesh.position);
     player.update(delta, gameInput.state);
@@ -146,7 +149,6 @@ class Game {
   onDraw() {
     const { stats, engine, player } = this;
     stats && stats.begin();
-    engine.updateObjectCulling(player.body.position);
     engine.render();
     stats && stats.end();
   }

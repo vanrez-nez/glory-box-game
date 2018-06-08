@@ -15,7 +15,7 @@ const EnemyRayShader = {
   uniforms: {
     resolution: { value: new THREE.Vector2(1, 1) },
     rayLevels: { value: new THREE.Vector4(0.5, 0.5, 0.2, 0.0) },
-    rayColor: { value: new THREE.Color(0.133, 0.745, 1.0) },
+    rayColor: { value: new THREE.Color(0.180, 0.352, 0.764) },
     thinDebrisLevels: { value: new THREE.Vector4(0.5, 1.0, 1.0, 0.5) },
     thinDebrisColor: { value: new THREE.Color(0.121, 0.470, 0.784) },
     fatDebrisLevels: { value: new THREE.Vector4(0.5, 1.0, 0.4, 0.5) },

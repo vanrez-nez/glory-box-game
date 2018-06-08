@@ -38,13 +38,13 @@ export default class GameTools {
     const { gui } = this;
     const f1 = gui.addFolder('Player');
 
-    gui.remember(obj.body.opts);
-    f1.add(obj.body.opts, 'mass', 0.01, 0.3).name('Mass');
-    f1.add(obj.body.opts, 'friction', 0.01, 0.3).name('Friction');
+    gui.remember(obj.playerBody.opts);
+    f1.add(obj.playerBody.opts, 'mass', 0.01, 0.3).name('Mass');
+    f1.add(obj.playerBody.opts, 'friction', 0.01, 0.3).name('Friction');
 
-    gui.remember(obj.body.opts.maxVelocity);
-    f1.add(obj.body.opts.maxVelocity, 'x', 0.1, 2).name('Max Velocity X');
-    f1.add(obj.body.opts.maxVelocity, 'y', 0.1, 2).name('Max Velocity Y');
+    gui.remember(obj.playerBody.opts.maxVelocity);
+    f1.add(obj.playerBody.opts.maxVelocity, 'x', 0.1, 2).name('Max Velocity X');
+    f1.add(obj.playerBody.opts.maxVelocity, 'y', 0.1, 2).name('Max Velocity Y');
 
     gui.remember(obj.opts);
     f1.add(obj.opts, 'gravity', -1, -0.01).name('Ascend Gravity');

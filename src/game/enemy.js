@@ -1,4 +1,4 @@
-import { GAME } from './const';
+import { GAME, EVENTS } from './const';
 import { MODEL_ASSETS } from './assets';
 import { CartesianToCylinder, EaseExpoIn, EaseExpoOut } from './utils';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
@@ -15,6 +15,7 @@ export default class GameEnemy {
     this.opts = { ...DEFAULT, ...opts };
     this.group = new THREE.Group();
     this.group.name = 'GameEnemy';
+    this.events = new EventEmitter3();
     this.modelLoaded = false;
     this.positionY = 0;
     this.headAmp = 3;
@@ -22,10 +23,18 @@ export default class GameEnemy {
     this.theta = 0;
     this.time = 0;
     this.rays = [];
+    this.bodies = [];
     this.tailPositions = [];
     this.tailSegments = [];
     this.loadModel();
     this.initRays();
+    this.attachEvents();
+  }
+
+  attachEvents() {
+    const { rays } = this;
+    rays.forEach(r => r.body.events.on(EVENTS.CollisionBegan,
+      this.onEnemyRayCollision.bind(this, r)));
   }
 
   loadModel() {
@@ -43,19 +52,24 @@ export default class GameEnemy {
     });
   }
 
+  onEnemyRayCollision(ray) {
+    ray.body.enabled = false;
+    this.events.emit(EVENTS.EnemyRayHit);
+  }
+
   initRays() {
-    const { rays, opts } = this;
+    const { group, bodies, rays, opts } = this;
     for (let i = 0; i < opts.maxRays; i++) {
       const sfx = new GameEnemyRaySfx({});
       sfx.mesh.scale.y = 70;
-      rays.push({
-        sfx,
-      });
-      setInterval(() => {
-        sfx.fire(0);
-      }, 10000);
-      this.group.add(sfx.mesh);
+      rays.push(sfx);
+      bodies.push(sfx.body);
+      group.add(sfx.mesh);
     }
+
+    setInterval(() => {
+      rays[0].fire(0);
+    }, 5000);
   }
 
   initHead() {
@@ -93,7 +107,7 @@ export default class GameEnemy {
     let idx = 0;
     this.trail = new LineTrail({
       maxPositions: this.opts.tailSize,
-      material: MaterialFactory.getMaterial('EnemySpine', {
+      material: MaterialFactory.getMaterial('GenericTrail', {
         name: 'enemy_col_trail',
         color: 0xffff00,
         lineWidth: 2,
@@ -189,10 +203,14 @@ export default class GameEnemy {
   updateRays(delta, camera, playerPosition) {
     const { rays } = this;
     for (let i = 0; i < rays.length; i++) {
-      const { sfx } = rays[i];
-      sfx.mesh.lookAt(camera.position);
-      sfx.update(delta, playerPosition.y);
+      const ray = rays[i];
+      ray.mesh.lookAt(camera.position);
+      ray.update(delta, playerPosition.y);
     }
+  }
+
+  fireRays(playerPosition) {
+
   }
 
   update(delta, camera, playerPosition) {
@@ -205,5 +223,6 @@ export default class GameEnemy {
       this.updateTrail(delta);
     }
     this.updateRays(delta, camera, playerPosition);
+    this.fireRays();
   }
 }

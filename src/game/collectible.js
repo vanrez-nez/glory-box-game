@@ -133,7 +133,7 @@ export default class GameCollectible {
   }
 
   update(delta) {
-    const { itemMesh, body } = this;
+    const { itemMesh } = this;
     this.offsetItem += delta * 3;
     itemMesh.rotation.x += delta * 0.5;
     itemMesh.rotation.y += delta * 0.5;
