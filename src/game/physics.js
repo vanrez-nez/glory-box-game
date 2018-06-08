@@ -50,7 +50,7 @@ export default class GamePhysics {
 
   constrainToBoundaries(body, bounds) {
     const { boundsBody } = this;
-    if (body.opts.isStatic === false) {
+    if (body.enabled && body.canCollideWith(boundsBody.opts.type)) {
       const {
         box,
         position: pos,
@@ -180,9 +180,10 @@ export default class GamePhysics {
         }
 
         b.update(delta, timeScale);
-        b.resetCollisionEdges();
-        this.constrainToBoundaries(b, bounds);
+        
       }
+      b.resetCollisionEdges();
+      this.constrainToBoundaries(b, bounds);
     }
     const cBodies = this.getBodiesWithinCollisionSpace();
     const collisionPairs = this.getCollisions(cBodies);

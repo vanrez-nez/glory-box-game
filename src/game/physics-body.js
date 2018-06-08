@@ -61,8 +61,12 @@ export default class GamePhysicsBody {
   updateCollisionEvents() {
     const { prevCollisions, collidingEdges } = this;
     if (!prevCollisions.equals(collidingEdges)) {
-      const diff = collidingEdges.diff(prevCollisions);
-      this.events.emit(EVENTS.CollisionBegan, diff);
+      if (collidingEdges.isEmpty()) {
+        this.events.emit(EVENTS.CollisionEnded, collidingEdges);
+      } else {
+        const diff = collidingEdges.diff(prevCollisions);
+        this.events.emit(EVENTS.CollisionBegan, diff);
+      }
     }
   }
 
