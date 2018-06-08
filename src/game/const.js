@@ -32,9 +32,6 @@ export const GAME = {
   BoundsRight: 128,
   BoundsBottom: -16,
   BoundsTop: Infinity,
-  CullingMaxDistance: 50,
-  CullingMaxNodes: 100,
-  CullingUpdateRate: 20,
 };
 
 export const KEYBOARD_BINDINGS = {
