@@ -34,6 +34,11 @@ export default class CollisionEdges {
     );
   }
 
+  isEmpty() {
+    const { edges: cE } = this;
+    return !(cE[0] || cE[1] || cE[2] || cE[3]);
+  }
+
   set(top, right, bottom, left) {
     this.edges[0] = top;
     this.edges[1] = right;
