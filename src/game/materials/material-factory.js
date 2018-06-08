@@ -10,12 +10,11 @@ import PlatformStepsMaterial from './platform-steps-material';
 import CollectibleSocketMaterial from './collectible-socket-material';
 import CollectibleGlyphMaterial from './collectible-glyph-material';
 import CollectibleItemMaterial from './collectible-item-material';
-import CollectibleTrailMaterial from './collectible-trail-material';
 import EnemyHeadMaterial from './enemy-head-material';
 import EnemyArmorMaterial from './enemy-armor-material';
 import EnemyEyesMaterial from './enemy-eyes-material';
 import GenericColorMaterial from './generic-color-material';
-import EnemySpineMaterial from './enemy-spine-material';
+import GenericTrailMaterial from './generic-trail-material';
 import EnemyRayMaterial from './enemy-ray-material';
 import PlayerMaterial from './player-material';
 import PlayerHudFireballMaterial from './player-hud-fireball-material';
@@ -32,12 +31,11 @@ const MATERIALS = {
   CollectibleSocket: CollectibleSocketMaterial,
   CollectibleGlyph: CollectibleGlyphMaterial,
   CollectibleItem: CollectibleItemMaterial,
-  CollectibleTrail: CollectibleTrailMaterial,
   EnemyRay: EnemyRayMaterial,
   EnemyHead: EnemyHeadMaterial,
   EnemyArmor: EnemyArmorMaterial,
   EnemyEyes: EnemyEyesMaterial,
-  EnemySpine: EnemySpineMaterial,
+  GenericTrail: GenericTrailMaterial,
   GenericColor: GenericColorMaterial,
   PlayerMaterial,
   PlayerHudFireball: PlayerHudFireballMaterial,
