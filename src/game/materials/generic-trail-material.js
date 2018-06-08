@@ -1,6 +1,6 @@
 import GameMetaMaterial from './meta-material';
 
-export default class EnemySpineMaterial extends GameMetaMaterial {
+export default class GenericTrailMaterial extends GameMetaMaterial {
   constructor(opts) {
     super({
       nodeName: opts.name,
@@ -8,6 +8,8 @@ export default class EnemySpineMaterial extends GameMetaMaterial {
         type: 'MeshLineMaterial',
         args: {
           color: new THREE.Color(opts.color),
+          opacity: opts.opacity || 1,
+          transparent: opts.transparent || false,
           side: THREE.DoubleSide,
           sizeAttenuation: true,
           lineWidth: opts.lineWidth,

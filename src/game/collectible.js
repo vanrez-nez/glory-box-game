@@ -96,7 +96,7 @@ export default class GameCollectible {
   getTrailParticle(x, y, phi) {
     const cacheId = this.color;
     const trail = new LineTrail({
-      material: MaterialFactory.getMaterial('CollectibleTrail', {
+      material: MaterialFactory.getMaterial('GenericTrail', {
         name: `collect_trail_${this.type}`,
         color: this.color,
         lineWidth: 0.3,

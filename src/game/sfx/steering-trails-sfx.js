@@ -30,7 +30,7 @@ export default class GameSteeringTrailsSfx {
     for (let i = 0; i < 5; i++) {
       const trail = new LineTrail({
         maxPositions: 20,
-        material: MaterialFactory.getMaterial('CollectibleTrail', {
+        material: MaterialFactory.getMaterial('GenericTrail', {
           name: 'ph_trail',
           color: 0xffffff,
           lineWidth: 0.5,
