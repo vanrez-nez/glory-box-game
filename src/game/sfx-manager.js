@@ -23,10 +23,22 @@ export default class GameSfxManager {
     playerHud.events.on(EVENTS.CollectibleCollect, this.onCollectibleCollect.bind(this));
   }
 
+  shakeCamera(force) {
+    const { cameraOffset } = this.opts.engine;
+    const tl = new TimelineMax();
+    tl.to(cameraOffset, 0.05, {
+      x: THREE.Math.randFloatSpread(force),
+      y: THREE.Math.randFloatSpread(force),
+      z: THREE.Math.randFloatSpread(force),
+    });
+    tl.to(cameraOffset, 0.05, { x: 0, y: 0, z: 0});
+  }
+
   onPlayerDeath() {
     const { player } = this.opts;
     const tl = new TimelineMax();
     player.startExplodeSfx(tl);
+    this.shakeCamera(4);
   }
 
   onCollectibleCollect(color) {

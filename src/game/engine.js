@@ -10,6 +10,7 @@ export default class Engine {
     this.width = 0;
     this.height = 0;
     this.rebuildCulling = true;
+    this.cameraOffset = new THREE.Vector3();
     this.initWorld();
     this.initLights();
     if (CONFIG.UsePostProcessing) {
@@ -100,7 +101,8 @@ export default class Engine {
   }
 
   followTarget() {
-    const { cameraVector, cameraTargetTo, cameraTarget, camera } = this;
+    const { cameraVector, cameraTargetTo, cameraTarget,
+      camera, cameraOffset } = this;
     CartesianToCylinder(
       cameraVector.copy(cameraTarget),
       cameraTarget.x * (Math.PI / 2),
@@ -110,6 +112,7 @@ export default class Engine {
     cameraTargetTo.lerp(cameraTarget, 0.1);
     camera.lookAt(cameraTargetTo);
     camera.position.lerp(cameraVector, 0.05);
+    camera.position.add(cameraOffset);
   }
 
   render() {
