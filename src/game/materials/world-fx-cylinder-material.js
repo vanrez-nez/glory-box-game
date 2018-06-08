@@ -13,6 +13,7 @@ export default class WorldFxCylinderMaterial extends GameMetaMaterial {
           uniforms: CylinderFxShader.uniforms,
           blending: THREE.AdditiveBlending,
           transparent: true,
+          depthWrite: false,
         },
       },
     });

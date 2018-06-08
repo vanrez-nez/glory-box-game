@@ -7,7 +7,11 @@ export default class GenericColorMaterial extends GameMetaMaterial {
       low: {
         type: 'MeshBasicMaterial',
         args: {
+          transparent: opts.transparent || false,
+          opacity: opts.opacity || 1,
           color: opts.color,
+          depthWrite: false,
+          blending: opts.blending || THREE.NormalBlending,
         },
       },
     });

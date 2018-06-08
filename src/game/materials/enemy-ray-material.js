@@ -13,6 +13,7 @@ export default class EnemyRayMaterial extends GameMetaMaterial {
           uniforms: EnemyRayShader.uniforms,
           blending: THREE.AdditiveBlending,
           transparent: true,
+          depthWrite: false,
         },
       },
     });
