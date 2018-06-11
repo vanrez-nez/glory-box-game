@@ -13,7 +13,8 @@ export default class GameEnemyRaySfx {
     this.mesh = this.getMesh();
     this.body = this.getBody();
     this.positionX = 0;
-    this.running = true;
+    this.running = false;
+    this.body.enabled = false;
     this.initTimeline();
   }
 
@@ -64,12 +65,14 @@ export default class GameEnemyRaySfx {
     tl.to(u.rayLevels.value, 0.25, { z: 0.4 }, 'warning');
     tl.to(u.rayLevels.value, 0.35, { x: 0.2, ease: Power2.easeOut }, 'warning');
     tl.to(u.thinDebrisLevels.value, 1, { z: 0.5, w: 0.5 }, 'warning');
-    tl.to(u.fatDebrisLevels.value, 0.6, { x: 0.5, y: 1.0, z: 0.4, w: 0.2 });
+    tl.to(u.fatDebrisLevels.value, 0.6, { x: 0.5, y: 1.0, z: 0.4, w: 0.2 }, 'warning');
 
-    tl.add('fire', 1.65);
+    tl.add('fire', 1.45);
+    tl.set(body.scale, { x: 0.1 }, 'fire');
     tl.add(() => {
       body.enabled = true;
     });
+    tl.to(body.scale, 0.35, { x: 7, ease: Power2.easeOut }, 'fire');
     tl.to(u.rayLevels.value, 0.35, { x: 1.0, y: 0.2, z: 1.0, ease: Power2.easeOut }, 'fire');
     tl.to(u.thinDebrisLevels.value, 0.35, { y: 0.5, z: 1.0, w: 1.0, ease: Power2.easeOut }, 'fire');
     tl.to(u.fatDebrisLevels.value, 0.35, { y: 0.6, z: 1.0, w: 1.0, ease: Power2.easeOut }, 'fire');
@@ -81,7 +84,7 @@ export default class GameEnemyRaySfx {
     tl.to(u.rayLevels.value, 0.3, { w: 1.0, ease: Power4.easeOut }, 'cool');
     tl.add(() => {
       body.enabled = false;
-    });
+    }, 'cool');
     tl.to(u.thinDebrisLevels.value, 0.8, { z: 0.0, y: 0.5, w: 0, ease: Power2.easeOut }, 'cool');
 
     this.timeline = tl;
@@ -89,9 +92,10 @@ export default class GameEnemyRaySfx {
 
   fire(x) {
     this.positionX = x;
+    this.timeline.progress(0);
+    this.timeline.invalidate();
     this.running = true;
     this.body.enabled = false;
-    this.timeline.progress(0);
   }
 
   update(delta, offsetY) {
@@ -100,15 +104,15 @@ export default class GameEnemyRaySfx {
     const { position: mPos } = mesh;
     mesh.visible = this.running;
     if (this.running === true) {
-      mesh.position.y = offsetY;
+      mPos.y = offsetY;
       mesh.rotation.x = 0;
       mesh.rotation.z = 0;
       mesh.rotation.y += Math.PI;
-      body.scale.copy(mesh.scale);
-      body.position.set(positionX, mesh.position.y);
+      body.position.x = positionX;
+      body.position.y = mesh.position.y;
       const project = GAME.PlayerOffset;
-      CartesianToCylinder(mesh.position, positionX, mesh.position.y, project);
-      mesh.material.uniforms.time.value += delta;
+      CartesianToCylinder(mPos, positionX, mPos.y, project);
+      uniforms.time.value += delta;
       uniforms.offsetY.value = offsetY;
       const xRes = Math.sqrt(mPos.x * mPos.x + mPos.z * mPos.z);
       const yRes = mesh.scale.y;

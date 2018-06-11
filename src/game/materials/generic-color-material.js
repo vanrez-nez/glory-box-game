@@ -10,7 +10,7 @@ export default class GenericColorMaterial extends GameMetaMaterial {
           transparent: opts.transparent || false,
           opacity: opts.opacity || 1,
           color: opts.color,
-          depthWrite: false,
+          depthWrite: opts.depthWrite || true,
           blending: opts.blending || THREE.NormalBlending,
         },
       },

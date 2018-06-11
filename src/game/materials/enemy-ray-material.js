@@ -10,7 +10,7 @@ export default class EnemyRayMaterial extends GameMetaMaterial {
         args: {
           fragmentShader: EnemyRayShader.fragmentShader,
           vertexShader: EnemyRayShader.vertexShader,
-          uniforms: EnemyRayShader.uniforms,
+          uniforms: THREE.UniformsUtils.clone(EnemyRayShader.uniforms),
           blending: THREE.AdditiveBlending,
           transparent: true,
           depthWrite: false,

@@ -15,7 +15,7 @@ export default class GameState {
   attachEvents() {
     const { map, enemy } = this.opts;
     map.events.on(EVENTS.CollectiblePickup, this.onCollectiblePickup.bind(this));
-    enemy.events.on(EVENTS.EnemyRayHit, this.onEnemyRayHit.bind(this));
+    enemy.rayEvents.on(EVENTS.EnemyRayHit, this.onEnemyRayHit.bind(this));
   }
 
   onEnemyRayHit() {
