@@ -21,7 +21,7 @@ export default class PlayerExplosionSfx {
   }
 
   initRing() {
-    const mat = MaterialFactory.getMaterial('GenericColor', { 
+    const mat = MaterialFactory.getMaterial('GenericColor', {
       transparent: true,
       color: 0xffffff,
     });
@@ -106,6 +106,7 @@ export default class PlayerExplosionSfx {
     tl.to(this, 0.5, { ringRotationZ: Math.PI / 4, ease: Power2.easeOut });
     tl.to(ring.material, 0.5, { opacity: 0, ease: Power2.easeOut }, 0);
     tl.to(ring.scale, 0.8, { x: 40, y: 40, ease: Power2.easeOut }, 0);
+    tl.set(ring.scale, { x: 0.1, y: 0.1 });
   }
 
   explode(position) {
