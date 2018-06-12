@@ -64,7 +64,7 @@ export default class GameEnemyDragon {
     for (let i = 0; i < tailSize; i++) {
       const t = tailSegment.clone();
       tailSegments.push(t);
-      tailPositions.push(new THREE.Vector2(-100, 0, 0));
+      tailPositions.push(new THREE.Vector2(-100, 0));
       opts.parent.add(t);
     }
   }
@@ -129,6 +129,15 @@ export default class GameEnemyDragon {
       }
       return pos;
     }
+  }
+
+  restart() {
+    this.positionY = 0;
+    this.time = 0;
+    this.theta = 0;
+    this.tailPositions.forEach((p) => {
+      p.x = -200;
+    });
   }
 
   updateHead() {

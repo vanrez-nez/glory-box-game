@@ -17,6 +17,11 @@ export default class GameEnemy {
     this.rays.update(delta, camera, playerPosition);
   }
 
+  restart() {
+    this.dragon.restart();
+    this.rays.restart();
+  }
+
   get rayEvents() {
     return this.rays.events;
   }

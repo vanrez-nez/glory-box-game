@@ -72,6 +72,13 @@ export default class GameEnemyRays {
     }
   }
 
+  restart() {
+    this.lastRayTime = 0;
+    this.clock.start();
+    this.scheduler.empty();
+    this.rays.forEach(r => r.hide());
+  }
+
   update(delta, camera, playerPosition) {
     this.updateRays(delta, camera, playerPosition);
     this.fireRays(playerPosition);

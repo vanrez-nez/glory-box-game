@@ -75,7 +75,7 @@ export default class GameSfxManager {
   }
 
   onPlayerDeath() {
-    const { player } = this.opts;
+    const { player, enemy } = this.opts;
     const tl = new TimelineMax();
     tl.add(() => {
       player.hide();
@@ -84,6 +84,7 @@ export default class GameSfxManager {
     this.shakeCamera(tl, 4);
     this.fadeOut(tl, 1);
     tl.add(() => {
+      enemy.restart();
       player.restore();
     });
     this.fadeIn(tl, 0.2);

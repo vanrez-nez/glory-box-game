@@ -77,7 +77,7 @@ export default class GameEnemyRaySfx {
     tl.to(u.thinDebrisLevels.value, 0.35, { y: 0.5, z: 1.0, w: 1.0, ease: Power2.easeOut }, 'fire');
     tl.to(u.fatDebrisLevels.value, 0.35, { y: 0.6, z: 1.0, w: 1.0, ease: Power2.easeOut }, 'fire');
 
-    tl.add('cool', 2.0);
+    tl.add('cool', 1.8);
     tl.set(u.thinDebrisLevels.value, { x: 0.4, y: 1.0 }, 'cool');
     tl.set(u.fatDebrisLevels.value, { x: 1.0, y: 1.0 }, 'cool');
     tl.to(u.fatDebrisLevels.value, 0.1, { y: 0, w: 0.0, ease: Power2.easeOut }, 'cool');
@@ -98,6 +98,12 @@ export default class GameEnemyRaySfx {
     this.body.enabled = false;
   }
 
+  hide() {
+    this.running = false;
+    this.body.enabled = false;
+    this.mesh.visible = false;
+  }
+
   update(delta, offsetY) {
     const { mesh, body, positionX, timeline: tl } = this;
     const { uniforms } = mesh.material;
@@ -105,11 +111,8 @@ export default class GameEnemyRaySfx {
     mesh.visible = this.running;
     if (this.running === true) {
       mPos.y = offsetY;
-      mesh.rotation.x = 0;
-      mesh.rotation.z = 0;
-      mesh.rotation.y += Math.PI;
-      body.position.x = positionX;
-      body.position.y = mesh.position.y;
+      mesh.rotation.set(0, mesh.rotation.y + Math.PI, 0);
+      body.position.set(positionX, mPos.y);
       const project = GAME.PlayerOffset;
       CartesianToCylinder(mPos, positionX, mPos.y, project);
       uniforms.time.value += delta;

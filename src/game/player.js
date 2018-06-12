@@ -27,6 +27,7 @@ export default class GamePlayer {
     this.stateBuff = [];
     this.bodies = [];
     this.groundedTime = 0;
+    this.locked = false;
     this.group = new THREE.Group();
     this.group.name = 'GamePlayer';
     this.mesh = this.getPlayerMesh();
@@ -105,16 +106,28 @@ export default class GamePlayer {
     }
   }
 
-  startExplodeSfx(tl) {
-    this.mesh.material.color.set(0x00ff00);
+  startExplodeSfx() {
     this.explosionSfx.explode(this.playerBody.position);
+  }
+
+  hide() {
+    this.playerBody.enabled = false;
+    this.mesh.visible = false;
+    this.locked = true;
+  }
+
+  restore() {
+    const { playerBody, mesh } = this;
+    playerBody.position.set(0, 0, 0);
+    playerBody.enabled = true;
+    mesh.visible = true;
+    this.locked = false;
   }
 
   initPlayerBody() {
     const { opts } = this;
     const body = new GamePhysicsBody({
       type: PHYSICS.Player,
-      mesh: this.mesh,
       mass: 0.26,
       friction: 0.12,
       label: 'player',
@@ -187,15 +200,17 @@ export default class GamePlayer {
   }
 
   processInputs(inputs) {
-    const { playerBody } = this;
+    const { playerBody, locked } = this;
     let [xForce, yForce] = [0, 0];
-    yForce = this.getJumpForce(inputs);
-    xForce = this.getWalkingForce(inputs);
-    if (xForce === 0) {
-      playerBody.velocity.x = 0;
-    }
-    if (xForce !== 0 || yForce !== 0) {
-      playerBody.applyForce(new THREE.Vector2(xForce, yForce));
+    if (this.locked === false) {
+      yForce = this.getJumpForce(inputs);
+      xForce = this.getWalkingForce(inputs);
+      if (xForce === 0) {
+        playerBody.velocity.x = 0;
+      }
+      if (xForce !== 0 || yForce !== 0) {
+        playerBody.applyForce(new THREE.Vector2(xForce, yForce));
+      }
     }
   }
 

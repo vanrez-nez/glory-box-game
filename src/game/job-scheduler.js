@@ -12,6 +12,10 @@ export default class JobScheduler {
     });
   }
 
+  empty() {
+    this.jobs = [];
+  }
+
   jobExists(id) {
     return this.jobs.some((j) => j.id === id);
   }
