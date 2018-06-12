@@ -1,4 +1,4 @@
-import { GAME, EVENTS } from './const';
+import { GAME } from './const';
 import { MODEL_ASSETS } from './assets';
 import { GetScreenCoords } from './utils';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';

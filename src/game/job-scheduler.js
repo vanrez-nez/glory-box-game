@@ -17,7 +17,7 @@ export default class JobScheduler {
   }
 
   jobExists(id) {
-    return this.jobs.some((j) => j.id === id);
+    return this.jobs.some(j => j.id === id);
   }
 
   update(delta) {

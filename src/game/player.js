@@ -202,7 +202,7 @@ export default class GamePlayer {
   processInputs(inputs) {
     const { playerBody, locked } = this;
     let [xForce, yForce] = [0, 0];
-    if (this.locked === false) {
+    if (locked === false) {
       yForce = this.getJumpForce(inputs);
       xForce = this.getWalkingForce(inputs);
       if (xForce === 0) {
