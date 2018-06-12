@@ -138,7 +138,7 @@ class Game {
     delta /= 1000;
     physics.updateCollisionSpace(player.playerBody.position, 25);
     physics.update(delta);
-    enemy.update(delta, engine.camera, player.mesh.position);
+    enemy.update(delta, engine.camera, player.playerBody.position);
     player.update(delta, gameInput.state);
     world.update(delta, player.mesh.position);
     playerHud.update(delta);
@@ -147,7 +147,7 @@ class Game {
   }
 
   onDraw() {
-    const { stats, engine, player } = this;
+    const { stats, engine } = this;
     stats && stats.begin();
     engine.render();
     stats && stats.end();
