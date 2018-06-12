@@ -33,7 +33,10 @@ export default class PlayerExplosionSfx {
 
   initParticles() {
     const { parent } = this.opts;
-    const mat = MaterialFactory.getMaterial('PlayerParticle');
+    const mat = MaterialFactory.getMaterial('GenericColor', {
+      name: 'player_particle',
+      color: 0xffffff,
+    });
     const geoCone = new THREE.ConeBufferGeometry(1, 1, 3);
     const geoBox = new THREE.BoxBufferGeometry();
     let trailsCount = this.opts.maxTrails;
