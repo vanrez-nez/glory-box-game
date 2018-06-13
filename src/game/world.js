@@ -76,8 +76,8 @@ export default class GameWorld {
     tl.addCallback(() => { fxCylinder.visible = false; });
   }
 
-  addMainCylinder() {
-    const height = 550;
+  getCylinder() {
+    const height = 64;
     const ratio = height / (GAME.CilynderRadius * Math.PI * 2);
     const xScale = 7;
     const yScale = 7 * ratio;
@@ -88,11 +88,18 @@ export default class GameWorld {
       xScale,
       yScale,
     });
-    this.cylinder = new THREE.Mesh(geo, mat);
-    // this.cylinder.receiveShadow = true;
-    this.cylinder.position.y = height * 0.5 + GAME.BoundsBottom;
-    this.cylinder.rotation.y = Math.PI / 8;
-    this.group.add(this.cylinder);
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.receiveShadow = true;
+    mesh.position.y = height * 0.5 + GAME.BoundsBottom;
+    mesh.rotation.y = Math.PI / 8;
+    return mesh;
+  }
+
+  addMainCylinder() {
+    const c1 = this.getCylinder();
+    const c2 = c1.clone();
+    this.mainCylinder = { c1, c2 };
+    this.group.add(c1, c2);
   }
 
   addCylinderBase() {
@@ -113,10 +120,37 @@ export default class GameWorld {
     this.group.add(mesh);
   }
 
+  /*
+    Adjust (y) position from both cylinders so there are tiled one
+    in top of the another, so they are always covering the
+    view height from current player's position.
+  */
+  updateMainCylindersTiling(playerPosition) {
+    const { c1, c2 } = this.mainCylinder;
+    const { y } = playerPosition;
+    const q = Math.round(y / 64);
+
+    // get middle, top and bottom snapped positions
+    const qM = q * 64;
+    const qT = (q + 1) * 64;
+    const qB = (q - 1) * 64;
+
+    // get distances from top and bottom
+    const dstTop = Math.abs(y - qT);
+    const dstBottom = Math.abs(y - qB);
+
+    // use closest as next
+    const qNext = dstBottom > dstTop ? qT : qB;
+
+    c1.position.y = qM;
+    c2.position.y = qNext;
+  }
+
   update(delta, playerPosition) {
     if (CONFIG.EnableSkyShader) {
       this.skyCylinder.material.uniforms.time.value += delta * 0.35;
       this.skyCylinder.position.y = playerPosition.y;
     }
+    this.updateMainCylindersTiling(playerPosition);
   }
 }
