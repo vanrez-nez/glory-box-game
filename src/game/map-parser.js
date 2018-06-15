@@ -1,18 +1,23 @@
 import { MAP, DIRECTIONS } from './const';
 
+const DEFAULT = {
+  mapId: '',
+  onParse: () => {},
+};
+
 const MAP_PARSE_COLORS = {
-  '0,0,0': MAP.Empty,
   '255,0,0': MAP.StaticPlatform,
   '0,0,255': MAP.MovingPlatform,
   '0,255,0': MAP.Glyph,
 };
 
 export default class GameMapParser {
-  constructor(mapId) {
+  constructor(opts) {
+    this.opts = { ...DEFAULT, ...opts };
     this.width = 0;
     this.height = 0;
     this.tiles = [];
-    this.mapImageData = this.getImageData(mapId);
+    this.mapImageData = this.getImageData(opts.mapId);
     this.parseMap();
   }
 
@@ -42,12 +47,6 @@ export default class GameMapParser {
     return [xTo, yTo];
   }
 
-  getMapPixelRGB(x, y) {
-    const { mapImageData: data, width } = this;
-    const idx = (x + width * y) * 4;
-    return [data[idx + 0], data[idx + 1], data[idx + 2]];
-  }
-
   getIndexFromCoords(x, y) {
     return y * this.width + x;
   }
@@ -68,11 +67,33 @@ export default class GameMapParser {
   }
 
   parseMap() {
-    for (let y = 0; y < this.height; y++) {
-      for (let x = 0; x < this.width; x++) {
-        const [r, g, b] = this.getMapPixelRGB(x, y);
-        this.tiles.push(MAP_PARSE_COLORS[`${r},${g},${b}`]);
+    const t = thread.spawn( (input, done) => {
+      const result = [];
+      const { mapData: data, width, height, Colors, EmptyType } = input;
+      function getMapPixelRGB(x, y) {
+        const idx = (x + width * y) * 4;
+        return [data[idx + 0], data[idx + 1], data[idx + 2]];
       }
-    }
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const color = getMapPixelRGB(x, y);
+          // eslint-disable-next-line
+          const key = color[0] + ',' + color[1] + ',' + color[2];
+          const type = Colors[key] || EmptyType;
+          result.push(type);
+        }
+      }
+      done({ tiles: result });
+    });
+    t.send({ 
+      mapData: this.mapImageData,
+      width: this.width,
+      height: this.height,
+      Colors: MAP_PARSE_COLORS,
+      EmptyType: MAP.Empty,
+    }).on('message', (output) => {
+      this.tiles = output.tiles;
+      this.opts.onParse();
+    });
   }
 }
