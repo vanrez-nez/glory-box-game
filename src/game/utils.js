@@ -121,3 +121,16 @@ export function SyncBodyPhysicsMesh(mesh, body) {
     mesh.scale.z = 1 + scaleOffset.z;
   }
 }
+
+// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+export function ShuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]]; // eslint-disable-line no-param-reassign
+  }
+}
+
+// https://stackoverflow.com/questions/36947847/how-to-generate-range-of-numbers-from-0-to-n-in-es2015-only
+export function ArrayRange(start, end) {
+  return [...Array(1 + end - start).keys()].map(v => start + v);
+}
