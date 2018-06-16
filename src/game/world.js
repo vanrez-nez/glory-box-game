@@ -2,6 +2,8 @@ import { GAME, CONFIG } from './const';
 import GameLobby from './lobby';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 
+const CYLINDER_HEIGHT = 128;
+
 export default class GameWorld {
   constructor() {
     this.group = new THREE.Group();
@@ -77,12 +79,11 @@ export default class GameWorld {
   }
 
   getCylinder() {
-    const height = 64;
-    const ratio = height / (GAME.CilynderRadius * Math.PI * 2);
+    const ratio = CYLINDER_HEIGHT / (GAME.CilynderRadius * Math.PI * 2);
     const xScale = 7;
     const yScale = 7 * ratio;
     const geo = new THREE.CylinderBufferGeometry(GAME.CilynderRadius, GAME.CilynderRadius,
-      height, 64, 1, true);
+      CYLINDER_HEIGHT, 128, 1, true);
     const mat = MaterialFactory.getMaterial('WorldCylinder', {
       name: 'w_main_cylinder',
       xScale,
@@ -90,15 +91,20 @@ export default class GameWorld {
     });
     const mesh = new THREE.Mesh(geo, mat);
     mesh.receiveShadow = true;
-    mesh.position.y = height * 0.5 + GAME.BoundsBottom;
+    mesh.position.y = CYLINDER_HEIGHT * 0.5 + GAME.BoundsBottom;
     mesh.rotation.y = Math.PI / 8;
     return mesh;
+  }
+
+  getLightDivision() {
+
   }
 
   addMainCylinder() {
     const c1 = this.getCylinder();
     const c2 = c1.clone();
-    this.mainCylinder = { c1, c2 };
+    const div = this.getLightDivision();
+    this.mainCylinder = { c1, c2, div };
     this.group.add(c1, c2);
   }
 
@@ -128,12 +134,13 @@ export default class GameWorld {
   updateMainCylindersTiling(playerPosition) {
     const { c1, c2 } = this.mainCylinder;
     const { y } = playerPosition;
-    const q = Math.round(y / 64);
+    const h = CYLINDER_HEIGHT;
+    const q = Math.round(y / h);
 
     // get middle, top and bottom snapped positions
-    const qM = q * 64;
-    const qT = (q + 1) * 64;
-    const qB = (q - 1) * 64;
+    const qM = q * h;
+    const qT = (q + 1) * h;
+    const qB = (q - 1) * h;
 
     // get distances from top and bottom
     const dstTop = Math.abs(y - qT);
@@ -141,7 +148,6 @@ export default class GameWorld {
 
     // use closest as next
     const qNext = dstBottom > dstTop ? qT : qB;
-
     c1.position.y = qM;
     c2.position.y = qNext;
   }
