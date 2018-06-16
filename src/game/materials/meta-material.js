@@ -1,4 +1,6 @@
 import { QUALITY } from '../const';
+import { GetTextureRepeat } from '../utils';
+
 
 const DEFAULTS = {
   nodeName: '',
@@ -10,12 +12,24 @@ const DEFAULTS = {
   high: {},
 };
 
+const CACHED_TEXTURES = {};
+
 export default class GameMetaMaterial {
   constructor(opts) {
     this.opts = { ...DEFAULTS, ...opts };
     this.high = null;
     this.medium = null;
     this.low = null;
+  }
+
+  static GetTexture(url, repeatX, repeatY, offsetX, offsetY) {
+    const id = `${[...arguments]}`;
+    return () => {
+      if (!CACHED_TEXTURES[id]) {
+        CACHED_TEXTURES[id] = GetTextureRepeat(...arguments);
+      }
+      return CACHED_TEXTURES[id];
+    };
   }
 
   getMaterial(quality) {

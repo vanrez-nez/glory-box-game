@@ -15,10 +15,6 @@ export function GetTextureRepeat(url, repeatX, repeatY, offsetX = 0, offsetY = 0
   return tex;
 }
 
-export function GetTextureRepeatDefer(url, repeatX, repeatY, offsetX, offsetY) {
-  return () => GetTextureRepeat(url, repeatX, repeatY, offsetX, offsetY);
-}
-
 /*
   Returns the width and height units to cover the entire
   screen with the given distance (usually z position) from
