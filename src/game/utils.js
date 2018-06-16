@@ -6,15 +6,6 @@ export function Clamp(val, min, max) {
   return Math.min(Math.max(val, min), max);
 }
 
-export function GroupBy(arr, keyFunction) {
-  return arr.reduce((result, item) => {
-    const key = keyFunction(item);
-    result[key] = result[key] || [];
-    result[key].push(item);
-    return result;
-  }, {});
-}
-
 export function GetTextureRepeat(url, repeatX, repeatY, offsetX = 0, offsetY = 0) {
   const tex = new THREE.TextureLoader().load(url);
   tex.wrapS = THREE.RepeatWrapping;
@@ -120,6 +111,15 @@ export function SyncBodyPhysicsMesh(mesh, body) {
     mesh.scale.y = 1 + scaleOffset.y;
     mesh.scale.z = 1 + scaleOffset.z;
   }
+}
+
+export function GroupBy(arr, keyFunction) {
+  return arr.reduce((result, item) => {
+    const key = keyFunction(item);
+    result[key] = result[key] || [];
+    result[key].push(item);
+    return result;
+  }, {});
 }
 
 // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
