@@ -34,15 +34,36 @@ export default class GamePhysics {
       if (body.opts.isStatic) {
         staticBodies.push(body);
         const box = testBoxA.copy(body.box).translate(body.position);
-        rTree.insert({
+        body.rTreeItem = {
           minX: box.min.x,
           minY: box.min.y,
           maxX: box.max.x,
           maxY: box.max.y,
           body,
-        });
+        };
+        rTree.insert(body.rTreeItem);
       } else {
         dynamicBodies.push(body);
+      }
+    });
+    this.allBodies = dynamicBodies.concat(staticBodies);
+  }
+
+  remove(bodies) {
+    const { rTree, staticBodies, dynamicBodies } = this;
+    [].concat(bodies).forEach((body) => {
+      if (body.opts.isStatic) {
+        const idx = staticBodies.indexOf(body);
+        if (idx !== -1) {
+          staticBodies.splice(idx, 1);
+          rTree.remove(body.rTreeItem);
+          body.rTreeItem = null;
+        }
+      } else {
+        const idx = dynamicBodies.indexOf(body);
+        if (idx > -1) {
+          dynamicBodies.splice(idx, 1);
+        }
       }
     });
     this.allBodies = dynamicBodies.concat(staticBodies);
