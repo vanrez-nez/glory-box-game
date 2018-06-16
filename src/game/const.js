@@ -10,7 +10,7 @@ export const CONFIG = {
   EnableOrbitControls: false,
   EnableAxes: false,
   DebugCollisions: false,
-  UsePostProcessing: true,
+  UsePostProcessing: false,
   EnableShadows: false,
   ToneMapping: THREE.NoToneMapping,
   EnableSkyShader: false,
@@ -41,6 +41,8 @@ export const KEYBOARD_BINDINGS = {
 };
 
 export const EVENTS = {
+  MapChunkLoaded: 'EMapChunkLoaded',
+  MapChunkUnloaded: 'EMapChunkUnloaded',
   CollisionBegan: 'ECollisionBegan',
   CollisionEnded: 'ECollisionEnded',
   CollectiblePickup: 'ECollectiblePickUp',
@@ -60,6 +62,12 @@ export const PHYSICS = {
   MovingPlatform: 5,
   Collectible: 6,
   Particle: 7,
+};
+
+export const LEVELS = {
+  Easy: 0,
+  Medium: 1,
+  Hard: 2,
 };
 
 export const DIRECTIONS = {
