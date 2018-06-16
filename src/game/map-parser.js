@@ -67,7 +67,7 @@ export default class GameMapParser {
   }
 
   parseMap() {
-    const t = thread.spawn( (input, done) => {
+    const t = thread.spawn((input, done) => {
       const result = [];
       const { mapData: data, width, height, Colors, EmptyType } = input;
       function getMapPixelRGB(x, y) {
@@ -85,7 +85,7 @@ export default class GameMapParser {
       }
       done({ tiles: result });
     });
-    t.send({ 
+    t.send({
       mapData: this.mapImageData,
       width: this.width,
       height: this.height,
