@@ -106,7 +106,6 @@ export default class GameSfxManager {
     const trailPositions = collectible.getTrailPositions();
     playerHud.spawnTrailsFrom(trailPositions, collectible.color);
     world.addCylinderBurstTweens(tl, collectible.body.position, collectible.color);
-    collectible.disable();
     this.collectiblePickTimeline = tl;
   }
 }

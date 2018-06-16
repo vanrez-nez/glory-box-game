@@ -28,35 +28,37 @@ export default class GameMapChunk {
   load() {
     if (!this.isRoot && this.loaded === false) {
       this.onBeforeLoad(this);
-      this.loaded = true;
       this.translateObjects();
+      this.loaded = true;
       this.events.emit(EVENTS.MapChunkLoaded, this);
     }
+  }
+
+  getPhysicsObjects() {
+    const { platforms, collectibles } = this.opts;
+    return [].concat(platforms, collectibles);
   }
 
   saveStartPositions() {
     const { positions } = this;
     const { platforms, collectibles } = this.opts;
-    platforms.forEach((p) => {
-      positions[p.body.id] = p.body.position.clone();
-    });
-    collectibles.forEach((c) => {
-      positions[c.body.id] = c.body.position.clone();
+    this.getPhysicsObjects().forEach((o) => {
+      positions[o.body.id] = o.body.position.clone();
     });
   }
 
   translateObjects() {
     const { positions, offsetY } = this;
-    const { platforms, sockets } = this.opts;
-    for (let i = 0; i < platforms.length; i++) {
-      const { body } = platforms[i];
-      const initialPosition = positions[body.id];
-      body.position.y = initialPosition.y + offsetY;
-    }
-    for (let i = 0; i < sockets.length; i++) {
-      const socket = sockets[i];
-      socket.position.y = offsetY;
-    }
+    const { platforms, collectibles, sockets } = this.opts;
+    const vec2 = new THREE.Vector2();
+    this.getPhysicsObjects().forEach((obj) => {
+      vec2.copy(positions[obj.body.id]);
+      vec2.y += offsetY;
+      obj.setPosition(vec2);
+    });
+    sockets.forEach((s) => {
+      s.position.y = offsetY;
+    });
   }
 
   unloadInstances() {

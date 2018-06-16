@@ -27,9 +27,9 @@ const DEFAULT = {
 export default class CollectibleGlyph {
   constructor(opts) {
     this.opts = { ...DEFAULT, ...opts };
+    this.enabled = true;
     this.noise = new Simple1DNoise();
     this.noiseIdx = Math.random();
-    this.group = new THREE.Object3D();
     const offsets = Offsets[idxCount++ % Offsets.length];
     this.addGlyphMesh(offsets);
   }
@@ -84,7 +84,7 @@ export default class CollectibleGlyph {
       emissiveColor: color,
       xOffset: offsets.x,
       yOffset: offsets.y,
-    }, cacheId);
+    });
     const mesh = new THREE.Mesh(geo, mat);
     CartesianToCylinder(mesh.position, x, y, GAME.CollectibleSocketOffset);
     mesh.positionCulled = true;
@@ -92,7 +92,7 @@ export default class CollectibleGlyph {
     mesh.updateMatrix();
     mesh.matrixAutoUpdate = false;
     this.glypMaterial = mat;
-    this.group.add(mesh);
+    this.mesh = mesh;
   }
 
   getSocketGeometry() {
@@ -113,8 +113,11 @@ export default class CollectibleGlyph {
   }
 
   update(delta) {
-    const { noise, glypMaterial } = this;
-    glypMaterial.emissiveIntensity = 0.3 + noise.getVal(this.noiseIdx) * 10;
+    const { enabled, noise, glypMaterial } = this;
+    const color = enabled ? this.opts.color : 0x212121;
+    const mult = enabled ? 10 : 0.25;
+    glypMaterial.emissive.setHex(color);
+    glypMaterial.emissiveIntensity = 0.3 + noise.getVal(this.noiseIdx) * mult;
     this.noiseIdx += delta * 4;
   }
 }

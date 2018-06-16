@@ -75,16 +75,23 @@ export default class GameMap {
         if (currTile === MAP.Empty) {
           platformWidth = 0;
         } else if (currTile === MAP.Glyph) {
-          // this.addCollectible(x, y);
+          const c = this.createCollectible({
+            x: x - map.width / 2,
+            y: yEnd - y,
+          });
+          collectibles.push(c);
         } else {
           if (currTile === MAP.StaticPlatform ||
             currTile === MAP.MovingPlatform) {
             platformWidth += 1;
           }
           if (nextTile !== currTile && platformWidth > 0) {
-            const xTrans = x - platformWidth / 2 - map.width / 2 + 1;
-            const yTrans = yEnd - y;
-            const p = this.createPlaform(xTrans, yTrans, platformWidth, currTile);
+            const p = this.createPlatform({
+              x: x - platformWidth / 2 - map.width / 2 + 1,
+              y: yEnd - y,
+              width: platformWidth,
+              type: currTile,
+            });
             platforms.push(p);
             platformWidth = 0;
           }
@@ -92,6 +99,19 @@ export default class GameMap {
       }
     }
     return { platforms, collectibles };
+  }
+  
+  createPlatform(opts) {
+    return new GamePlatform(opts);
+  }
+
+  createCollectible(opts) {
+    const collectible = new GameCollectible(opts);
+    collectible.body.events.on(EVENTS.CollisionBegan,
+      this.onCollectibleCollisionBegan.bind(this, collectible));
+    collectible.events.on(EVENTS.CollectibleCollect,
+      this.onCollectibleCollect.bind(this, collectible));
+    return collectible;
   }
 
   updateChunks(positionY) {
@@ -198,20 +218,6 @@ export default class GameMap {
     }
   }
 
-  addCollectible(x, y) {
-    const { mapParser: map } = this;
-    const xTrans = x - map.width / 2;
-    const yTrans = map.height - y + MAP_OFFSET_Y;
-    const collectible = new GameCollectible(xTrans, yTrans);
-    collectible.body.events.on(EVENTS.CollisionBegan,
-      this.onCollectibleCollisionBegan.bind(this, collectible));
-    collectible.events.on(EVENTS.CollectibleCollect,
-      this.onCollectibleCollect.bind(this, collectible));
-    this.bodies.push(collectible.body);
-    this.collectibles.push(collectible);
-    this.group.add(collectible.group);
-  }
-
   mergePlatformSockets(platforms) {
     const geo = new THREE.Geometry();
     for (let i = 0; i < platforms.length; i++) {
@@ -251,11 +257,6 @@ export default class GameMap {
   // Forward event
   onCollectibleCollect(collectible) {
     this.events.emit(EVENTS.CollectibleCollect, collectible);
-  }
-
-  createPlaform(x, y, width, type) {
-    const platform = new GamePlatform({ x, y, width, type });
-    return platform;
   }
 
   update(delta, playerPosition) {

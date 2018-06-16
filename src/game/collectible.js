@@ -5,6 +5,11 @@ import CollectibleGlyph from './collectible-glyph';
 import LineTrail from './line-trail';
 import GamePhysicsBody from './physics-body';
 
+const DEFAULT = {
+  x: 0,
+  y: 0,
+};
+
 const MaxParticles = 5;
 const Collectibles = [
   { type: COLLECTIBLE.Honor, color: 0xff4f4f },
@@ -20,7 +25,8 @@ const Collectibles = [
 const ItemGeometry = new THREE.IcosahedronGeometry(0.8);
 
 export default class GameCollectible {
-  constructor(x, y) {
+  constructor(opts) {
+    this.opts = { ...DEFAULT, ...opts };
     this.group = new THREE.Group();
     this.events = new EventEmitter3();
     this.group.name = 'GameCollectible';
@@ -29,9 +35,10 @@ export default class GameCollectible {
     this.type = pick.type;
     this.particles = [];
     this.offsetItem = Math.random();
-    this.addGlyph(x, y);
-    this.addItem(x, y);
-    this.addTrailParticles(x, y);
+    this.consumed = false;
+    this.addGlyph();
+    this.addItem();
+    this.addTrailParticles();
     this.attachEvents();
   }
 
@@ -39,16 +46,18 @@ export default class GameCollectible {
     this.body.events.on(EVENTS.CollisionBegan, this.onCollisionBegan.bind(this));
   }
 
+  setPosition(position) {
+    this.body.position.copy(position);
+    this.glyph.mesh.position.y = position.y;
+    this.glyph.mesh.updateMatrix();
+  }
+
   onCollisionBegan() {
-    this.body.enabled = false;
+    this.consumed = true;
   }
 
-  disable() {
-    this.itemMesh.visible = false;
-    this.particlesGroup.visible = false;
-  }
-
-  addItem(x, y) {
+  addItem() {
+    const { x, y } = this.opts;
     const cacheId = this.color;
     const mat = MaterialFactory.getMaterial('CollectibleItem', {
       name: `collect_item_${this.type}`,
@@ -58,7 +67,6 @@ export default class GameCollectible {
     mesh.positionOffset = new THREE.Vector2();
     this.body = new GamePhysicsBody({
       type: PHYSICS.Collectible,
-      mesh,
       isStatic: true,
       isSensor: true,
       label: 'collectible',
@@ -69,17 +77,18 @@ export default class GameCollectible {
     });
     mesh.position.y = y;
     this.body.position.set(x, y);
-    mesh.positionCulled = true;
     this.itemMesh = mesh;
     this.group.add(mesh);
   }
 
-  addGlyph(x, y) {
+  addGlyph() {
+    const { x, y } = this.opts;
     this.glyph = new CollectibleGlyph({ x, y, color: this.color, type: this.type });
-    this.group.add(this.glyph.group);
+    this.group.add(this.glyph.mesh);
   }
 
-  addTrailParticles(x, y) {
+  addTrailParticles() {
+    const { x, y } = this.opts;
     const g = new THREE.Group();
     for (let i = 0; i < MaxParticles; i++) {
       const phi = (Math.PI * 2 / MaxParticles) * i;
@@ -87,9 +96,8 @@ export default class GameCollectible {
       this.particles.push(particle);
       g.add(particle.trail.mesh);
     }
-    g.positionCulled = true;
     g.position.y = y;
-    this.particlesGroup = g;
+    this.trailsGroup = g;
     this.group.add(g);
   }
 
@@ -112,15 +120,15 @@ export default class GameCollectible {
     return this.particles.map((p) => {
       const pos = p.trail.line.geometry.attributes.position.array;
       const vPos = new THREE.Vector3(pos[0], pos[1], pos[2]);
-      this.particlesGroup.localToWorld(vPos);
+      this.trailsGroup.localToWorld(vPos);
       return vPos;
     });
   }
 
   updateTrails(delta) {
-    const { particles, particlesGroup } = this;
+    const { particles, trailsGroup } = this;
     const pos = new THREE.Vector3();
-    particlesGroup.position.copy(this.itemMesh.position);
+    trailsGroup.position.copy(this.itemMesh.position);
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
       const { trail, phi, r } = p;
@@ -133,17 +141,19 @@ export default class GameCollectible {
   }
 
   update(delta) {
-    const { itemMesh } = this;
-    this.offsetItem += delta * 3;
-    itemMesh.rotation.x += delta * 0.5;
-    itemMesh.rotation.y += delta * 0.5;
-    itemMesh.positionOffset.y = Math.sin(this.offsetItem) * 0.5;
+    const { consumed, glyph, itemMesh, trailsGroup, body } = this;
+    const visible = !consumed;
+    itemMesh.visible = visible;
+    trailsGroup.visible = visible;
+    body.enabled = visible;
+    glyph.enabled = visible;
+    if (visible) {
+      this.offsetItem += delta * 3;
+      itemMesh.rotation.x += delta * 0.5;
+      itemMesh.rotation.y += delta * 0.5;
+      itemMesh.positionOffset.y = Math.sin(this.offsetItem) * 0.5;
+      this.updateTrails(delta);
+    }
     this.glyph.update(delta);
-    this.updateTrails(delta);
-  }
-
-  get visible() {
-    return (this.itemMesh.visible || this.particlesGroup.visible)
-      && this.itemMesh.parent !== null;
   }
 }

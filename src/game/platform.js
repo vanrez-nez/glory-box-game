@@ -25,6 +25,10 @@ export default class GamePlatform {
     this.body.events.on(EVENTS.CollisionBegan, this.onCollisionBegan.bind(this));
   }
 
+  setPosition(position) {
+    this.body.position.copy(position);
+  }
+
   static GetBoxGeomery(width, height, depth) {
     const hash = `box_${width},${height},${depth}`;
     if (!CACHED_GEOMETRIES[hash]) {
