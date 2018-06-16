@@ -55,8 +55,17 @@ class Game {
     this.engine = new Engine({
       canvas: document.body.querySelector('#js-canvas'),
     });
+
+    this.physics = new GamePhysics({
+      bounds: new THREE.Box2(
+        new THREE.Vector2(GAME.BoundsLeft, GAME.BoundsTop),
+        new THREE.Vector2(GAME.BoundsRight, GAME.BoundsBottom)),
+    });
+
     this.player = new GamePlayer({});
-    this.map = new GameMap({});
+    this.map = new GameMap({
+      physics: this.physics,
+    });
     this.enemy = new GameEnemy({});
     this.world = new GameWorld();
     this.moodManager = new GameMoodManager({
@@ -88,19 +97,12 @@ class Game {
       playerHud: this.playerHud,
     });
 
-    // Setup physics
-    this.physics = new GamePhysics({
-      bounds: new THREE.Box2(
-        new THREE.Vector2(GAME.BoundsLeft, GAME.BoundsTop),
-        new THREE.Vector2(GAME.BoundsRight, GAME.BoundsBottom)),
-    });
     this.physics.add(this.player.bodies);
-    this.physics.add(this.map.bodies);
     this.physics.add(this.enemy.bodies);
 
     // Add all scene objects
     this.engine.scene.add(this.player.group);
-    this.engine.scene.add(this.enemy.group);
+    // this.engine.scene.add(this.enemy.group);
     this.engine.scene.add(this.map.group);
     this.engine.scene.add(this.world.group);
     this.engine.cameraTarget = this.player.mesh.position;
@@ -136,14 +138,18 @@ class Game {
     const { engine, gameInput, enemy, player, map,
       world, physics, playerHud, enemyHud } = this;
     delta /= 1000;
-    physics.updateCollisionSpace(player.playerBody.position, 25);
+
+    const { position: bodyPosition } = player.playerBody;
+    const { position: meshPosition } = player.mesh;
+
+    physics.updateCollisionSpace(bodyPosition, 50);
     physics.update(delta);
-    enemy.update(delta, engine.camera, player.playerBody.position);
+    // enemy.update(delta, engine.camera, bodyPosition);
     player.update(delta, gameInput.state);
-    world.update(delta, player.mesh.position);
+    world.update(delta, meshPosition);
     playerHud.update(delta);
     enemyHud.update(delta);
-    map.update(delta);
+    map.update(delta, bodyPosition);
   }
 
   onDraw() {
