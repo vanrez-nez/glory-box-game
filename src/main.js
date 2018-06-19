@@ -102,7 +102,7 @@ class Game {
 
     // Add all scene objects
     this.engine.scene.add(this.player.group);
-    // this.engine.scene.add(this.enemy.group);
+    this.engine.scene.add(this.enemy.group);
     this.engine.scene.add(this.map.group);
     this.engine.scene.add(this.world.group);
     this.engine.cameraTarget = this.player.mesh.position;
@@ -144,7 +144,7 @@ class Game {
 
     physics.updateCollisionSpace(bodyPosition, 50);
     physics.update(delta);
-    // enemy.update(delta, engine.camera, bodyPosition);
+    enemy.update(delta, engine.camera, bodyPosition);
     player.update(delta, gameInput.state);
     world.update(delta, meshPosition);
     playerHud.update(delta);

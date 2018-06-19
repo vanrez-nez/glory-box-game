@@ -25,7 +25,7 @@ export const GAME = {
   CollectibleItemOffset: 1.9,
   PlayerOffset: 2.45,
   EnemyOffset: 4,
-  CameraDistance: 50,
+  CameraDistance: 25,
   ZoomCameraDistance: 150,
   PlatformZSize: 2,
   BoundsLeft: -128,

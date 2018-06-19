@@ -30,7 +30,7 @@ export default class GameEnemyRays {
     const { bodies, rays, opts } = this;
     for (let i = 0; i < opts.maxRays; i++) {
       const sfx = new GameEnemyRaySfx({});
-      sfx.mesh.scale.y = 70;
+      sfx.mesh.scale.y = 100;
       rays.push(sfx);
       bodies.push(sfx.body);
       opts.parent.add(sfx.mesh);
