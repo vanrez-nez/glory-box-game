@@ -42,7 +42,7 @@ export default class Engine {
     this.scene = new THREE.Scene();
     this.scene.matrixAutoUpdate = false;
     this.scene.fog = new THREE.FogExp2(0x000000, 0.015);
-    this.camera = new THREE.PerspectiveCamera(45, 1, 1, 300);
+    this.camera = new THREE.PerspectiveCamera(75, 1, 1, 300);
     this.camera.position.z = GAME.ZoomCameraDistance;
     this.scene.add(this.camera);
   }
