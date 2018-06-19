@@ -136,15 +136,13 @@ export default class GameMap {
     const { mapChunks } = this;
     for (let i = 0; i < mapChunks.length; i++) {
       const chunk = mapChunks[i];
-      if (chunk !== undefined) {
-        const halfChunk = MAP_CHUNK_SIZE / 2;
-        const cY = i * MAP_CHUNK_SIZE;
-        const active = Math.abs(positionY - cY - halfChunk) < MAP_CHUNK_SIZE;
-        if (active) {
-          chunk.load();
-        } else {
-          chunk.unload();
-        }
+      const halfChunk = MAP_CHUNK_SIZE / 2;
+      const cY = i * MAP_CHUNK_SIZE;
+      const active = Math.abs(positionY - cY - halfChunk) < MAP_CHUNK_SIZE;
+      if (active) {
+        chunk.load();
+      } else {
+        chunk.unload();
       }
     }
   }
@@ -177,6 +175,13 @@ export default class GameMap {
       return LEVELS.Medium;
     } else {
       return LEVELS.Hard;
+    }
+  }
+
+  restart() {
+    const { mapChunks } = this;
+    for (let i = 0; i < mapChunks.length; i++) {
+      mapChunks[i].loadDefaults();
     }
   }
 

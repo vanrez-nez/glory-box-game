@@ -53,6 +53,16 @@ export default class GameMapChunk {
     });
   }
 
+  loadDefaults() {
+    const { states, defaultStates } = this;
+    this.getObjects().forEach((o) => {
+      if (o.state) {
+        o.state.write(defaultStates[o.state.id]);
+        states[o.state.id] = o.state.read();
+      }
+    });
+  }
+
   loadObjectsStates() {
     const { states, defaultStates } = this;
     this.getObjects().forEach((o) => {
