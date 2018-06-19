@@ -4,6 +4,7 @@ import { MaterialFactoryInstance as MaterialFactory } from './materials/material
 import CollectibleGlyph from './collectible-glyph';
 import LineTrail from './line-trail';
 import GamePhysicsBody from './physics-body';
+import GameObjectState from './object-state';
 
 const DEFAULT = {
   x: 0,
@@ -30,6 +31,10 @@ export default class GameCollectible {
     this.group = new THREE.Group();
     this.events = new EventEmitter3();
     this.group.name = 'GameCollectible';
+    this.state = new GameObjectState({
+      getStateFn: this.getState.bind(this),
+      setStateFn: this.setState.bind(this),
+    });
     const pick = Collectibles[~~(Math.random() * Collectibles.length)];
     this.color = pick.color;
     this.type = pick.type;
@@ -50,6 +55,16 @@ export default class GameCollectible {
     this.body.position.copy(position);
     this.glyph.mesh.position.y = position.y;
     this.glyph.mesh.updateMatrix();
+  }
+
+  getState() {
+    return {
+      consumed: this.consumed,
+    };
+  }
+
+  setState(state) {
+    this.consumed = state.consumed;
   }
 
   onCollisionBegan() {

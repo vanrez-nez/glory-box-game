@@ -10,7 +10,7 @@ import GameMapChunk from './map-chunk';
 const MAP_OFFSET_Y = -10;
 const MAP_CHUNK_SIZE = 128;
 const CHUNK_LEVELS = {
-  [LEVELS.Easy]:   [0, 2],
+  [LEVELS.Easy]:   [0, 4],
   [LEVELS.Medium]: [5, 9],
   [LEVELS.Hard]:   [10, 14],
 };
@@ -30,7 +30,6 @@ export default class GameMap {
       onParse: this.initChunks.bind(this),
     });
     this.initialized = false;
-    this.prevIndex = -1;
     this.prevPicks = [];
     this.masterChunks = {};
     this.mapChunks = [];
@@ -54,7 +53,7 @@ export default class GameMap {
           this.mergeCollectibleSockets(collectibles),
         ],
       });
-      chunk.saveStartPositions();
+      chunk.saveDefaults();
       chunk.isRoot = true;
       masterChunks[idx] = chunk;
     }
@@ -100,7 +99,7 @@ export default class GameMap {
     }
     return { platforms, collectibles };
   }
-  
+
   createPlatform(opts) {
     return new GamePlatform(opts);
   }
@@ -117,7 +116,7 @@ export default class GameMap {
   updateChunks(positionY) {
     const idx = Math.round(positionY / MAP_CHUNK_SIZE);
     this.allocateChunkInstance(idx);
-    this.updateChunkVisibility(idx);
+    this.updateChunkVisibility(idx, positionY);
   }
 
   allocateChunkInstance(idx) {
@@ -133,20 +132,18 @@ export default class GameMap {
     }
   }
 
-  updateChunkVisibility(idx) {
+  updateChunkVisibility(idx, positionY) {
     const { mapChunks } = this;
-    const requiresUpdate = idx !== this.prevIndex;
-    this.prevIndex = idx;
-    if (requiresUpdate) {
-      for (let i = 0; i < mapChunks.length; i++) {
-        const chunk = mapChunks[i];
-        if (chunk !== undefined) {
-          const active = Math.abs(i - idx) <= 1;
-          if (active) {
-            chunk.load();
-          } else {
-            chunk.unload();
-          }
+    for (let i = 0; i < mapChunks.length; i++) {
+      const chunk = mapChunks[i];
+      if (chunk !== undefined) {
+        const halfChunk = MAP_CHUNK_SIZE / 2;
+        const cY = i * MAP_CHUNK_SIZE;
+        const active = Math.abs(positionY - cY - halfChunk) < MAP_CHUNK_SIZE;
+        if (active) {
+          chunk.load();
+        } else {
+          chunk.unload();
         }
       }
     }
@@ -184,13 +181,11 @@ export default class GameMap {
   }
 
   onChunkUnloaded(chunk) {
-    console.log('CHUNK UNLOADED:', chunk.opts.index);
     this.toggleChunk(chunk, false);
   }
 
   onChunkLoaded(chunk) {
     this.toggleChunk(chunk, true);
-    console.log('CHUNK LOADED:', chunk.opts.index);
   }
 
   toggleChunk(chunk, enable) {

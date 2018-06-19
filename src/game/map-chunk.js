@@ -14,13 +14,16 @@ export default class GameMapChunk {
     this.loaded = false;
     this.isRoot = false;
     this.instances = [];
-    this.positions = {};
+    this.defaultPositions = {};
+    this.defaultStates = {};
+    this.states = {};
     this.offsetY = 0;
   }
 
   unload() {
     if (!this.isRoot && this.loaded === true) {
       this.loaded = false;
+      this.saveObjectsStates();
       this.events.emit(EVENTS.MapChunkUnloaded, this);
     }
   }
@@ -29,30 +32,52 @@ export default class GameMapChunk {
     if (!this.isRoot && this.loaded === false) {
       this.onBeforeLoad(this);
       this.translateObjects();
+      this.loadObjectsStates();
       this.loaded = true;
       this.events.emit(EVENTS.MapChunkLoaded, this);
     }
   }
 
-  getPhysicsObjects() {
+  getObjects() {
     const { platforms, collectibles } = this.opts;
     return [].concat(platforms, collectibles);
   }
 
-  saveStartPositions() {
-    const { positions } = this;
-    const { platforms, collectibles } = this.opts;
-    this.getPhysicsObjects().forEach((o) => {
-      positions[o.body.id] = o.body.position.clone();
+  saveDefaults() {
+    const { defaultPositions, defaultStates } = this;
+    this.getObjects().forEach((o) => {
+      defaultPositions[o.body.id] = o.body.position.clone();
+      if (o.state) {
+        defaultStates[o.state.id] = o.state.read();
+      }
+    });
+  }
+
+  loadObjectsStates() {
+    const { states, defaultStates } = this;
+    this.getObjects().forEach((o) => {
+      if (o.state) {
+        const id = o.state.id;
+        const state = this.states[id] || defaultStates[id];
+        o.state.write(state);
+      }
+    });
+  }
+
+  saveObjectsStates() {
+    this.getObjects().forEach((o) => {
+      if (o.state) {
+        this.states[o.state.id] = o.state.read();
+      }
     });
   }
 
   translateObjects() {
-    const { positions, offsetY } = this;
+    const { defaultPositions, offsetY } = this;
     const { platforms, collectibles, sockets } = this.opts;
     const vec2 = new THREE.Vector2();
-    this.getPhysicsObjects().forEach((obj) => {
-      vec2.copy(positions[obj.body.id]);
+    this.getObjects().forEach((obj) => {
+      vec2.copy(defaultPositions[obj.body.id]);
       vec2.y += offsetY;
       obj.setPosition(vec2);
     });
@@ -75,7 +100,8 @@ export default class GameMapChunk {
       chunk = new GameMapChunk(this.opts);
       chunk.loaded = false;
       chunk.offsetY = offsetY;
-      chunk.positions = this.positions;
+      chunk.defaultPositions = this.defaultPositions;
+      chunk.defaultStates = this.defaultStates;
       chunk.onBeforeLoad = this.unloadInstances.bind(this);
       this.instances.push(chunk);
     }
