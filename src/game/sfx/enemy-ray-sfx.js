@@ -75,7 +75,7 @@ export default class GameEnemyRaySfx {
     tl.to(body.scale, 0.35, { x: 7, ease: Power2.easeOut }, 'fire');
     tl.to(u.rayLevels.value, 0.35, { x: 1.0, y: 0.2, z: 1.0, ease: Power2.easeOut }, 'fire');
     tl.to(u.thinDebrisLevels.value, 0.35, { y: 0.5, z: 1.0, w: 1.0, ease: Power2.easeOut }, 'fire');
-    tl.to(u.fatDebrisLevels.value, 0.35, { y: 0.6, z: 1.0, w: 1.0, ease: Power2.easeOut }, 'fire');
+    tl.to(u.fatDebrisLevels.value, 0.35, { y: 0.9, z: 1.0, w: 1.0, ease: Power2.easeOut }, 'fire');
 
     tl.add('cool', 1.8);
     tl.set(u.thinDebrisLevels.value, { x: 0.4, y: 1.0 }, 'cool');
