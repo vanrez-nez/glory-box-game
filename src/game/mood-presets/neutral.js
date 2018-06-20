@@ -17,14 +17,7 @@ const NeutralMood = deepmerge(DefaultMood, {
       Intensity: 1,
     },
   },
-  World: {
-    CylinderMaterial: {
-      Color: 0xc5ddff,
-      Emissive: 0xb3ceff,
-    },
-    Skytube: {
-      Color: 0xffffff,
-    },
+  Materials: {
   },
 });
 

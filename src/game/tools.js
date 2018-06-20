@@ -118,7 +118,7 @@ export default class GameTools {
     folder.add(u.glowIntensity.value, 'x', 0.0, 10.0).name('Glow X (c)');
     folder.add(u.glowIntensity.value, 'y', 0.0, 10.0).name('Glow Y (p)');
     this.addColorField(folder, u.ringColor, 'value', 'Ring Color');
-    folder.add(u.ringTickness, 'value', 0, 1.2).name('Ring Tickness');
+    folder.add(u.ringThickness, 'value', 0, 1.2).name('Ring Thickness');
   }
 
   addEnemyRayMaterial(folder, mat) {
@@ -193,6 +193,8 @@ export default class GameTools {
     const u = mat.uniforms;
     return {
       rayColor: u.rayColor.value,
+      thinDebrisColor: u.thinDebrisColor.value,
+      fatDebrisColor: u.fatDebrisColor.value,
     };
   }
 
@@ -233,8 +235,7 @@ export default class GameTools {
           case 'PlayerHudFireballMaterial':
             result[id] = this.getFireballShaderProps(mat);
             break;
-          case 'CollectibleTrailMaterial':
-          case 'EnemySpineMaterial':
+          case 'GenericTrailMaterial':
             result[id] = this.getMeshLineProps(mat);
             break;
           case 'EnemyRayMaterial':
@@ -282,8 +283,7 @@ export default class GameTools {
         case 'PlayerHudFireballMaterial':
           this.addFireballShaderMaterial(f, mat);
           break;
-        case 'CollectibleTrailMaterial':
-        case 'EnemySpineMaterial':
+        case 'GenericTrailMaterial':
           this.addMeshLineMaterial(f, mat);
           break;
         case 'EnemyRayMaterial':

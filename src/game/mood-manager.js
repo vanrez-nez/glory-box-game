@@ -20,20 +20,24 @@ export default class GameMoodManager {
   }
 
   getPropertyType(prop) {
-    return {
-      isNumber: typeof prop === 'number',
-      isColor: typeof prop === 'object' && prop.isColor,
-    };
+    if (typeof prop === 'number') {
+      return 'Number';
+    } else if (typeof prop === 'object') {
+      return prop.constructor.name;
+    }
   }
 
   materialPropEquals(prop, value) {
     const pType = this.getPropertyType(prop);
-    if (pType.isNumber) {
-      return prop === value;
-    } else if (pType.isColor) {
-      return prop.getHex() === value;
-    } else {
-      return false;
+    switch(pType) {  
+      case 'Color':
+        return prop.getHex() === value;
+      case 'Vector2':
+      case 'Vector3':
+      case 'Vector4':
+        return prop.equals(value);
+      default:
+        return prop === value;
     }
   }
 
@@ -52,13 +56,32 @@ export default class GameMoodManager {
     });
   }
 
+  getVectorTween(target, time, propName, targetVal) {
+    let targetProps = { x: targetVal.x, y: targetVal.y };
+    if (targetVal.w) {
+      targetProps.w = targetVal.w;
+    }
+    if (targetVal.z) {
+      targetProps.z = targetVal.z
+    }
+    return TweenMax.to(target[propName], time, targetProps);
+  }
+
   addPropertyTween(tl, target, time, propName, targetVal) {
-    const propType = this.getPropertyType(target[propName]);
+    const pType = this.getPropertyType(target[propName]);
     if (!this.materialPropEquals(target[propName], targetVal)) {
-      if (propType.isColor) {
-        tl.add(this.getColorTween(target, time, propName, targetVal));
-      } else if (propType.isNumber) {
-        tl.add(this.getValueTween(target, time, propName, targetVal));
+      switch(pType) {
+        case 'Color':
+          tl.add(this.getColorTween(target, time, propName, targetVal));
+          break;
+        case 'Vector2':
+        case 'Vector3':
+        case 'Vector4':
+          tl.add(this.getVectorTween(target, time, propName, targetVal));
+          break;
+        case 'Number':
+          tl.add(this.getValueTween(target, time, propName, targetVal));
+          break;
       }
     }
   }
@@ -98,17 +121,45 @@ export default class GameMoodManager {
   //   tl.to(stUniforms.transverseSpeed, time, { value: Skytube.Transverse });
   // }
 
-  transitionMaterialsGroup(tl, instances, config, time) {
+  transitionDefaultMaterial(params) {
+    const { tl, mat, time, config } = params;
     const propNames = Object.keys(config);
+    propNames.forEach((propName) => {
+      const targetValue = config[propName];
+      const matProp = mat[propName];
+      if (matProp) {
+        this.addPropertyTween(tl, mat, time, propName, targetValue);
+      }
+    });
+  }
+
+  transitionShaderMaterial(params) {
+    const { tl, mat, time, config } = params;
+    const propNames = Object.keys(config);
+    const target = mat.uniforms;
+    propNames.forEach((propName) => {
+      const targetValue = config[propName];
+      if (target[propName]) {
+        this.addPropertyTween(tl, target[propName], time, 'value', targetValue);
+      }
+    });
+  }
+
+  transitionMaterialsGroup(tl, instances, config, time) {
     instances.forEach((instance) => {
       const mat = instance.activeMaterial;
-      propNames.forEach((propName) => {
-        const targetValue = config[propName];
-        const matProp = mat[propName];
-        if (matProp) {
-          this.addPropertyTween(tl, mat, time, propName, targetValue);
-        }
-      });
+      const type = instance.constructor.name;
+      const tntParams = { tl, mat, time, config };
+      switch (type) {
+        case 'EnemyRayMaterial':
+        case 'PlayerHudFireballMaterial':
+        case 'GenericTrailMaterial':
+          this.transitionShaderMaterial(tntParams);
+          break;
+        default:
+          this.transitionDefaultMaterial(tntParams);
+          break; 
+      }
     });
   }
 
