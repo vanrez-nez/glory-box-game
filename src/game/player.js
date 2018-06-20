@@ -57,7 +57,6 @@ export default class GamePlayer {
 
   initExplosionSfx() {
     this.explosionSfx = new PlayerExplosionSfx({
-      target: this.mesh,
       parent: this.group,
     });
     this.bodies = this.bodies.concat(this.explosionSfx.bodies);

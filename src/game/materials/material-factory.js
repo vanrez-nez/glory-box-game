@@ -16,6 +16,7 @@ import EnemyEyesMaterial from './enemy-eyes-material';
 import GenericColorMaterial from './generic-color-material';
 import GenericTrailMaterial from './generic-trail-material';
 import EnemyRayMaterial from './enemy-ray-material';
+import PlayerHitFxMaterial from './player-hit-fx-material';
 import PlayerMaterial from './player-material';
 import PlayerHudFireballMaterial from './player-hud-fireball-material';
 
@@ -38,6 +39,7 @@ const MATERIALS = {
   GenericTrail: GenericTrailMaterial,
   GenericColor: GenericColorMaterial,
   PlayerMaterial,
+  PlayerHitFx: PlayerHitFxMaterial,
   PlayerHudFireball: PlayerHudFireballMaterial,
 };
 
