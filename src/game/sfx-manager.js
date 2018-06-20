@@ -89,7 +89,7 @@ export default class GameSfxManager {
     tl.add(() => {
       player.hide();
     });
-    this.fadeOut(tl, 2);
+    this.fadeOut(tl, 1.5);
     tl.add(() => {
       map.restart();
       enemy.restart();
