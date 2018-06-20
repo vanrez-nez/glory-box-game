@@ -12,20 +12,20 @@ export const CONFIG = {
   DebugCollisions: false,
   UsePostProcessing: false,
   EnableShadows: false,
-  ToneMapping: THREE.NoToneMapping,
+  ToneMapping: THREE.LinearToneMapping,
   EnableSkyShader: false,
   MaterialQuality: QUALITY.Low,
 };
 
 export const GAME = {
   CilynderRadius: 35,
-  HudDistanceFromCamera: 20,
+  HudDistanceFromCamera: 10,
   PlatformOffset: 2.45,
   CollectibleSocketOffset: 0,
   CollectibleItemOffset: 1.9,
   PlayerOffset: 2.45,
   EnemyOffset: 4,
-  CameraDistance: 25,
+  CameraDistance: 35,
   ZoomCameraDistance: 150,
   PlatformZSize: 2,
   BoundsLeft: -128,
