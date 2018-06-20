@@ -8,7 +8,6 @@ export default class PlayerHudFireballMaterial extends GameMetaMaterial {
       low: {
         type: 'ShaderMaterial',
         args: {
-          side: THREE.BackSide,
           fragmentShader: FireballShader.fragmentShader,
           vertexShader: FireballShader.vertexShader,
           uniforms: FireballShader.uniforms,
