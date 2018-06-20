@@ -32,13 +32,13 @@ export default class GamePlayerHud {
   loadModel() {}
 
   addFireballMesh() {
-    const geo = new THREE.SphereBufferGeometry(0.6, 10, 10);
+    const geo = new THREE.SphereBufferGeometry(0.4, 10, 10);
     const mat = MaterialFactory.getMaterial('PlayerHudFireball', {
       name: 'ph_fireball',
     });
     const mesh = new THREE.Mesh(geo, mat);
     this.fireball = mesh;
-    this.fireball.rotation.y += 1;
+    this.fireball.rotation.y = Math.PI;
     this.opts.camera.add(mesh);
   }
 
@@ -77,7 +77,7 @@ export default class GamePlayerHud {
     const { camera } = this.opts;
     const { fireball } = this;
     const { uniforms } = fireball.material;
-    const [x, y] = GetScreenCoords(0.03, 0.5, camera, 20);
+    const [x, y] = GetScreenCoords(0.5, 0.95, camera, GAME.HudDistanceFromCamera);
     fireball.position.set(x, y, -GAME.HudDistanceFromCamera);
     uniforms.time.value += delta * 0.15;
     this.trailsSfx.update(fireball.position);

@@ -29,11 +29,11 @@ export default class GameSteeringTrailsSfx {
     this.trails = [];
     for (let i = 0; i < 5; i++) {
       const trail = new LineTrail({
-        maxPositions: 20,
+        maxPositions: 15,
         material: MaterialFactory.getMaterial('GenericTrail', {
           name: 'ph_trail',
           color: 0xffffff,
-          lineWidth: 0.5,
+          lineWidth: 0.2,
         }, 'hud-trails'),
       });
       this.trails.push(trail);
@@ -56,8 +56,8 @@ export default class GameSteeringTrailsSfx {
       trail.mesh.visible = true;
       const p = new SteeringParticle({});
       // Give a start acceleration to particle
-      const x = Math.sin(rotStep * i) * 2;
-      const y = Math.cos(rotStep * i) * 2;
+      const x = Math.sin(rotStep * i + 2) * THREE.Math.randFloat(2, 5);
+      const y = Math.cos(rotStep * i + 2) * THREE.Math.randFloat(2, 5);
       const z = 1;
       p.acceleration.set(x, y, z);
       // Translate position to local coords inside the parent

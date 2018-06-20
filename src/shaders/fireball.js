@@ -4,7 +4,7 @@ const FireballShader = {
     glowColor: { value: new THREE.Color(0.1, 0.1, 0.0) },
     ringColor: { value: new THREE.Color(1.0, 0.4, 0.1) },
     fissuresIntensity: { value: 1.6 }, // Range from 0.0 to 10.0
-    ringTickness: { value: 0.2 }, // Range from 0.0 to 1.2
+    ringThickness: { value: 0.2 }, // Range from 0.0 to 1.2
     glowIntensity: { value: new THREE.Vector2(0.1, 0.5) },
     time: { value: 0 },
   },
@@ -15,7 +15,7 @@ const FireballShader = {
     uniform vec3 ringColor;
     uniform float time;
     uniform float fissuresIntensity;
-    uniform float ringTickness;
+    uniform float ringThickness;
     varying float vGlowIntensity;
     varying vec2 vUv;
 
@@ -63,10 +63,10 @@ const FireballShader = {
       // http://glslsandbox.com/e#46950.0
       uv *= 2. - 1.0;
       float energyDisp = mod(time * 10., 2.5) + 0.3;
-      float tickness = 220. - (200. * ringTickness);
+      float tickness = 220. - (200. * ringThickness);
       float energy = abs((10.0) / ((uv.y - energyDisp + fbm(uv + time * 10.)) * tickness));
-      // enable ring only if ringTickness > 0
-      float ringCol = step(max(sign(0.01 - ringTickness), 0.0), 1.0) * energy;
+      // enable ring only if ringThickness > 0
+      float ringCol = step(max(sign(0.01 - ringThickness), 0.0), 1.0) * energy;
       vec3 ring = vec3(ringCol) * ringColor;
       
       // inner glow

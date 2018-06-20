@@ -5,8 +5,8 @@
 */
 
 const DEFAULT = {
-  maxSpeed: 9,
-  maxForce: 0.2,
+  maxSpeed: 6,
+  maxForce: 0.6,
 };
 
 const cacheVecA = new THREE.Vector3();
@@ -30,8 +30,8 @@ export default class SteeringParticle {
     const desired = cacheVecA.copy(target).sub(position);
     const d = desired.length();
     desired.normalize();
-    if (d < 75) {
-      const m = (d / 75) * maxSpeed;
+    if (d < 35) {
+      const m = (d / 35) * maxSpeed;
       desired.multiplyScalar(m);
     } else {
       desired.multiplyScalar(maxSpeed * 2);
