@@ -81,7 +81,7 @@ const DefaultMood = {
         lineWidth: 2,
       },
       plt_steps: {
-        color: 724244,
+        color: 986907,
         reflectivity: 1,
       },
       plt_static: {
