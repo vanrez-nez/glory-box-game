@@ -228,7 +228,7 @@ export default class GameMap {
     const mat = MaterialFactory.getMaterial('PlatformSocket', {
       name: 'plt_socket',
       color: 0x030508,
-    });
+    }, 'plt_socket');
     const mesh = new THREE.Mesh(buffGeo, mat);
     return mesh;
   }
@@ -243,7 +243,7 @@ export default class GameMap {
     const mat = MaterialFactory.getMaterial('CollectibleSocket', {
       name: 'cl_socket',
       color: 0x030508,
-    });
+    }, 'cl_socket');
     const mesh = new THREE.Mesh(buffGeo, mat);
     mesh.castShadow = true;
     return mesh;
