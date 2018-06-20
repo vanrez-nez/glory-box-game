@@ -63,8 +63,8 @@ const FireballShader = {
       // http://glslsandbox.com/e#46950.0
       uv *= 2. - 1.0;
       float energyDisp = mod(time * 10., 2.5) + 0.3;
-      float tickness = 220. - (200. * ringThickness);
-      float energy = abs((10.0) / ((uv.y - energyDisp + fbm(uv + time * 10.)) * tickness));
+      float thickness = 220. - (200. * ringThickness);
+      float energy = abs((10.0) / ((uv.y - energyDisp + fbm(uv + time * 10.)) * thickness));
       // enable ring only if ringThickness > 0
       float ringCol = step(max(sign(0.01 - ringThickness), 0.0), 1.0) * energy;
       vec3 ring = vec3(ringCol) * ringColor;
