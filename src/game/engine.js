@@ -9,7 +9,6 @@ export default class Engine {
     this.opts = { ...DEFAULT, ...opts };
     this.width = 0;
     this.height = 0;
-    this.rebuildCulling = true;
     this.cameraOffset = new THREE.Vector3();
     this.initWorld();
     this.initLights();
@@ -35,14 +34,14 @@ export default class Engine {
     this.renderer.shadowMap.enabled = CONFIG.EnableShadows;
     this.renderer.gammaInput = true;
     this.renderer.gammaOutput = true;
-    this.renderer.gammaFactor = 2.3;
+    this.renderer.gammaFactor = 0.8;
     this.renderer.sortObjects = false;
     this.renderer.toneMapping = CONFIG.ToneMapping;
     this.renderer.toneMappingExposure = 1.5;
     this.scene = new THREE.Scene();
     this.scene.matrixAutoUpdate = false;
     this.scene.fog = new THREE.FogExp2(0x000000, 0.015);
-    this.camera = new THREE.PerspectiveCamera(75, 1, 1, 300);
+    this.camera = new THREE.PerspectiveCamera(65, 1, 1, 300);
     this.camera.position.z = GAME.ZoomCameraDistance;
     this.scene.add(this.camera);
   }
@@ -117,7 +116,7 @@ export default class Engine {
 
   render() {
     const { renderer, scene, camera, composer } = this;
-    if (CONFIG.EnableOrbitControls) {
+  if (CONFIG.EnableOrbitControls) {
       this.orbitControls.update();
       this.orbitControls.target = this.cameraTarget;
     } else {
