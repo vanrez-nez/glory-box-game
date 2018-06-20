@@ -9,13 +9,13 @@ export default class Engine {
     this.opts = { ...DEFAULT, ...opts };
     this.width = 0;
     this.height = 0;
-    this.cameraOffset = new THREE.Vector3();
     this.initWorld();
     this.initLights();
     if (CONFIG.UsePostProcessing) {
       this.initComposer();
       this.setupPostProcessing();
     }
+    this.cameraOffset = new THREE.Vector3();
     this.cameraTarget = this.scene.position;
     this.cameraTargetTo = new THREE.Vector3();
     // vector to handle camera positions
@@ -108,10 +108,11 @@ export default class Engine {
       cameraTarget.y + 5,
       GAME.CameraDistance,
     );
+    cameraVector.add(cameraOffset);
     cameraTargetTo.lerp(cameraTarget, 0.1);
     camera.lookAt(cameraTargetTo);
     camera.position.lerp(cameraVector, 0.05);
-    camera.position.add(cameraOffset);
+    cameraOffset.set(0, 0, 0);
   }
 
   render() {

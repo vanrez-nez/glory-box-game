@@ -30,19 +30,25 @@ export default class GameSfxManager {
     const geo = new THREE.PlaneBufferGeometry();
     const mat = MaterialFactory.getMaterial('GenericColor', {
       color: 0x0,
+      depthWrite: false,
       transparent: true,
     });
     this.fadeMesh = new THREE.Mesh(geo, mat);
   }
 
   shakeCamera(tl, force) {
+    const { noise } = this;
     const { cameraOffset } = this.opts.engine;
-    tl.to(cameraOffset, 0.05, {
-      x: THREE.Math.randFloatSpread(force),
-      y: THREE.Math.randFloatSpread(force),
-      z: THREE.Math.randFloatSpread(force),
+    const tween = tl.to({}, 0.1, {
+      onUpdate: () => {
+        const intensity = 1 - tween.totalProgress();
+        const x = Math.random() - 0.5 * 2;
+        const y = Math.random() - 0.5 * 2;
+        const z = Math.random() - 0.5 * 2;
+        cameraOffset.set(x * intensity, y * intensity, z * intensity);
+        cameraOffset.multiplyScalar(force);
+      },
     });
-    tl.to(cameraOffset, 0.05, { x: 0, y: 0, z: 0 });
   }
 
   fadeOut(tl, delay = 0) {
@@ -54,10 +60,9 @@ export default class GameSfxManager {
       camera.add(fadeMesh);
       fadeMesh.scale.set(w, h, 1.1);
       fadeMesh.position.z = -1.1;
-    });
+    }, delay);
     tl.to(fadeMesh.material, 0.15, {
       opacity: 1,
-      delay,
     });
   }
 
@@ -78,11 +83,13 @@ export default class GameSfxManager {
     const { player, enemy, map } = this.opts;
     const tl = new TimelineMax();
     tl.add(() => {
-      player.hide();
       player.startExplodeSfx();
     });
-    this.shakeCamera(tl, 4);
-    this.fadeOut(tl, 1);
+    this.shakeCamera(tl, 40);
+    tl.add(() => {
+      player.hide();
+    });
+    this.fadeOut(tl, 2);
     tl.add(() => {
       map.restart();
       enemy.restart();
