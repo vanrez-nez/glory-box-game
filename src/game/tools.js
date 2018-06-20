@@ -177,7 +177,7 @@ export default class GameTools {
       glowColor: u.glowColor.value,
       glowIntensity: u.glowIntensity.value,
       ringColor: u.ringColor.value,
-      ringThickness: u.ringTickness.value,
+      ringThickness: u.ringThickness.value,
     };
   }
 
