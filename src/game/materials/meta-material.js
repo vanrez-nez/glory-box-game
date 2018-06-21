@@ -23,10 +23,11 @@ export default class GameMetaMaterial {
   }
 
   static GetTexture(url, repeatX, repeatY, offsetX, offsetY) {
-    const id = `${[...arguments]}`;
+    const args = [...arguments];
+    const id = `${[...args]}`;
     return () => {
       if (!CACHED_TEXTURES[id]) {
-        CACHED_TEXTURES[id] = GetTextureRepeat(...arguments);
+        CACHED_TEXTURES[id] = GetTextureRepeat(...args);
       }
       return CACHED_TEXTURES[id];
     };

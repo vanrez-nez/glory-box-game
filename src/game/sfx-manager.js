@@ -37,7 +37,6 @@ export default class GameSfxManager {
   }
 
   shakeCamera(tl, force) {
-    const { noise } = this;
     const { cameraOffset } = this.opts.engine;
     const tween = tl.to({}, 0.1, {
       onUpdate: () => {

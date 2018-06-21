@@ -11,10 +11,11 @@ export const CONFIG = {
   EnableAxes: false,
   DebugCollisions: false,
   UsePostProcessing: false,
-  EnableShadows: false,
+  EnableShadows: true,
   ToneMapping: THREE.LinearToneMapping,
   EnableSkyShader: false,
   MaterialQuality: QUALITY.Low,
+  SceneQuality: QUALITY.Medium,
 };
 
 export const GAME = {

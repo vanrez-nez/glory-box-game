@@ -20,7 +20,7 @@ export default class GameState {
 
   onEnemyRayHit() {
     this.deaths += 1;
-    this.events.emit(EVENTS.PlayerDeath);
+    //this.events.emit(EVENTS.PlayerDeath);
   }
 
   onCollectiblePickup(collectible) {

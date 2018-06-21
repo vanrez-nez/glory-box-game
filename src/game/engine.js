@@ -117,7 +117,7 @@ export default class Engine {
 
   render() {
     const { renderer, scene, camera, composer } = this;
-  if (CONFIG.EnableOrbitControls) {
+    if (CONFIG.EnableOrbitControls) {
       this.orbitControls.update();
       this.orbitControls.target = this.cameraTarget;
     } else {

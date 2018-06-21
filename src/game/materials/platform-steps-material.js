@@ -14,6 +14,14 @@ export default class PlatformStepsMaterial extends GameMetaMaterial {
           // map: GetTextureRepeatDefer(IMAGE_ASSETS.ImpFloorBase, width, 0.5),
         },
       },
+      medium: {
+        type: 'MeshLambertMaterial',
+        args: {
+          envMap: Skybox.textureCube,
+          reflectivity: 0.35,
+          color: opts.color,
+        },
+      },
       high: {
         type: 'MeshStandardMaterial',
         args: {

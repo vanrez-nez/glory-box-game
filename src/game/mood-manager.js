@@ -1,6 +1,6 @@
-import { CONFIG } from './const';
+import { CONFIG, QUALITY } from './const';
 import DefaultMood from './mood-presets/default';
-import NeutralMood from './mood-presets/neutral';
+// import NeutralMood from './mood-presets/neutral';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 
 const DEFAULT = {
@@ -20,16 +20,18 @@ export default class GameMoodManager {
   }
 
   getPropertyType(prop) {
+    let type;
     if (typeof prop === 'number') {
-      return 'Number';
+      type = 'Number';
     } else if (typeof prop === 'object') {
-      return prop.constructor.name;
+      type = prop.constructor.name;
     }
+    return type;
   }
 
   materialPropEquals(prop, value) {
     const pType = this.getPropertyType(prop);
-    switch(pType) {  
+    switch (pType) {
       case 'Color':
         return prop.getHex() === value;
       case 'Vector2':
@@ -57,12 +59,12 @@ export default class GameMoodManager {
   }
 
   getVectorTween(target, time, propName, targetVal) {
-    let targetProps = { x: targetVal.x, y: targetVal.y };
+    const targetProps = { x: targetVal.x, y: targetVal.y };
     if (targetVal.w) {
       targetProps.w = targetVal.w;
     }
     if (targetVal.z) {
-      targetProps.z = targetVal.z
+      targetProps.z = targetVal.z;
     }
     return TweenMax.to(target[propName], time, targetProps);
   }
@@ -70,7 +72,7 @@ export default class GameMoodManager {
   addPropertyTween(tl, target, time, propName, targetVal) {
     const pType = this.getPropertyType(target[propName]);
     if (!this.materialPropEquals(target[propName], targetVal)) {
-      switch(pType) {
+      switch (pType) {
         case 'Color':
           tl.add(this.getColorTween(target, time, propName, targetVal));
           break;
@@ -87,39 +89,24 @@ export default class GameMoodManager {
   }
 
   transitionEngine(presetNode, time) {
-    const { bloomPass, scene, ambientLight } = this.opts.engine;
-    const { BloomPass, Scene, AmbientLight } = presetNode;
+    const { bloomPass, scene, ambientLight, renderer } = this.opts.engine;
+    const qualities = Object.keys(QUALITY);
+    const qualityNode = presetNode[qualities[CONFIG.SceneQuality]];
+    const { BloomPass, Scene, AmbientLight, ToneMapping } = qualityNode;
+    
     const tl = new TimelineMax();
-    if (CONFIG.UsePostProcessing) {
+    if (BloomPass && bloomPass) {
       tl.to(bloomPass, time, {
         strength: BloomPass.Strength,
         threshold: BloomPass.Threshold,
         radius: BloomPass.Radius,
       }, 0);
-      // tl.add(this.getColorTween(bloomPass.highPassUniforms.defaultColor.value,
-      //   BloomPass.HighPassColor, time));
     }
     tl.to(scene.fog, time, { density: Scene.FogDensity }, 0);
-    // tl.add(this.getColorTween(scene.fog.color, Scene.FogColor, time), 0);
     tl.to(ambientLight, time, { intensity: AmbientLight.Intensity }, 0);
-    // tl.add(this.getColorTween(ambientLight.color, AmbientLight.Color, time), 0);
+    tl.add(this.getColorTween(ambientLight, time, 'color', AmbientLight.Color), 0);
+    tl.to(renderer, time, { toneMappingExposure: ToneMapping.Exposure }, 0);
   }
-
-  // transitionWorld(presetNode, time) {
-  //   const { floor, skytube, cylinder } = this.opts.world;
-  //   const { uniforms: stUniforms } = skytube.outterCylinder.material;
-  //   const { FloorMaterial, CylinderMaterial, Skytube } = presetNode;
-  //   const tl = new TimelineMax();
-  //   tl.add(this.getMaterialTweens(floor.material, FloorMaterial, time));
-  //   tl.add(this.getMaterialTweens(cylinder.material, CylinderMaterial, time));
-  //   tl.add(this.getColorTween(stUniforms.color.value, Skytube.Color, time));
-  //   tl.to(stUniforms.intensity, time, { value: Skytube.Intensity });
-  //   tl.to(stUniforms.fade, time, { value: Skytube.Fade });
-  //   tl.to(stUniforms.zoom, time, { value: Skytube.Zoom });
-  //   tl.to(stUniforms.stepSize, time, { value: Skytube.StepSize });
-  //   tl.to(stUniforms.tile, time, { value: Skytube.Tile });
-  //   tl.to(stUniforms.transverseSpeed, time, { value: Skytube.Transverse });
-  // }
 
   transitionDefaultMaterial(params) {
     const { tl, mat, time, config } = params;
@@ -154,18 +141,19 @@ export default class GameMoodManager {
         case 'EnemyRayMaterial':
         case 'PlayerHudFireballMaterial':
         case 'GenericTrailMaterial':
+        case 'WorldSkyCylinderMaterial':
           this.transitionShaderMaterial(tntParams);
           break;
         default:
           this.transitionDefaultMaterial(tntParams);
-          break; 
+          break;
       }
     });
   }
 
   transitionMaterials(materialsNode, time) {
     const tl = new TimelineMax();
-    const qualities = ['Low', 'Medium', 'High'];
+    const qualities = Object.keys(QUALITY);
     const qualityNode = materialsNode[qualities[CONFIG.MaterialQuality]];
     const matDict = MaterialFactory.getMaterialsByNodeName();
     const keys = Object.keys(qualityNode);
@@ -179,7 +167,7 @@ export default class GameMoodManager {
   }
 
   transitionTo(moodPreset, time) {
-    // this.transitionEngine(moodPreset.Engine, time);
+    this.transitionEngine(moodPreset.Engine, time);
     // this.transitionWorld(moodPreset.World, time);
     this.transitionMaterials(moodPreset.Materials, time);
   }

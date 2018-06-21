@@ -17,6 +17,17 @@ export default class WorldFloorMaterial extends GameMetaMaterial {
           wireframe: false,
         },
       },
+      medium: {
+        type: 'MeshPhongMaterial',
+        args: {
+          envMap: Skybox.textureCube,
+          map: GameMetaMaterial.GetTexture(IMAGE_ASSETS.ImpFloorBase, scale, scale),
+          color: 0x1c284d,
+          reflectivity: 0.5,
+          shininess: 5,
+          specular: 0xf174d,
+        },
+      },
       high: {
         type: 'MeshStandardMaterial',
         args: {

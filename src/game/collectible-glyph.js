@@ -78,7 +78,6 @@ export default class CollectibleGlyph {
   addGlyphMesh(offsets) {
     const { x, y, color, type } = this.opts;
     const geo = CollectibleGlyph.GetGlyphGeometry();
-    const cacheId = color;
     const mat = MaterialFactory.getMaterial('CollectibleGlyph', {
       name: `collect_glyph_${type}`,
       emissiveColor: color,

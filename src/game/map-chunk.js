@@ -68,7 +68,7 @@ export default class GameMapChunk {
     this.getObjects().forEach((o) => {
       if (o.state) {
         const id = o.state.id;
-        const state = this.states[id] || defaultStates[id];
+        const state = states[id] || defaultStates[id];
         o.state.write(state);
       }
     });
@@ -84,7 +84,7 @@ export default class GameMapChunk {
 
   translateObjects() {
     const { defaultPositions, offsetY } = this;
-    const { platforms, collectibles, sockets } = this.opts;
+    const { sockets } = this.opts;
     const vec2 = new THREE.Vector2();
     this.getObjects().forEach((obj) => {
       vec2.copy(defaultPositions[obj.body.id]);

@@ -36,16 +36,14 @@ import GameEnemyHud from './game/enemy-hud';
 
 class Game {
   constructor() {
+    this.started = false;
     this.init();
     this.updateSize();
     this.attachEvents();
     this.loader = THREE.DefaultLoadingManager;
     this.loader.onProgress = (url, itemsLoaded, itemsTotal) => {
       if (itemsLoaded === itemsTotal) {
-        CONFIG.EnableTools && this.addTools();
-        CONFIG.EnableStats && this.addStats();
-        this.moodManager.resetToDefault();
-        MainLoop.start();
+        this.start();
       }
     };
   }
@@ -106,6 +104,18 @@ class Game {
     this.engine.scene.add(this.map.group);
     this.engine.scene.add(this.world.group);
     this.engine.cameraTarget = this.player.mesh.position;
+  }
+
+  start() {
+    if (!this.started) {
+      this.started = true;
+      setTimeout(() => {
+        CONFIG.EnableTools && this.addTools();
+        CONFIG.EnableStats && this.addStats();
+        this.moodManager.resetToDefault();
+      }, 1000);
+      MainLoop.start();
+    }
   }
 
   addStats() {
