@@ -89,7 +89,7 @@ const DefaultMood = {
         color: 1658505,
       },
       enemy_col_trail: {
-        color: 1912681,
+        color: 0xff7800,
         lineWidth: 2,
       },
       plt_steps: {
@@ -271,7 +271,7 @@ const DefaultMood = {
         refractionRatio: 0.98,
       },
       enemy_col_trail: {
-        color: 0x064978,
+        color: 0xff7800,
         lineWidth: 2,
       },
       plt_steps: {
@@ -307,7 +307,7 @@ const DefaultMood = {
       },
       collect_item_4: {
         color: 16645935,
-        reflectivity: 1
+        reflectivity: 1,
       },
       collect_trail_4: {
         color: 16645935,
@@ -491,7 +491,7 @@ const DefaultMood = {
         refractionRatio: 0.98,
       },
       enemy_col_trail: {
-        color: 2178933,
+        color: 0xff7800,
         lineWidth: 2,
       },
       plt_steps: {

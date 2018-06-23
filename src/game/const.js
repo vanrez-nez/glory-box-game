@@ -10,12 +10,12 @@ export const CONFIG = {
   EnableOrbitControls: false,
   EnableAxes: false,
   DebugCollisions: false,
-  UsePostProcessing: false,
+  UsePostProcessing: true,
   EnableShadows: true,
   ToneMapping: THREE.LinearToneMapping,
-  EnableSkyShader: false,
-  MaterialQuality: QUALITY.Low,
-  SceneQuality: QUALITY.Medium,
+  EnableSkyShader: true,
+  MaterialQuality: QUALITY.High,
+  SceneQuality: QUALITY.High,
 };
 
 export const GAME = {
@@ -50,6 +50,7 @@ export const EVENTS = {
   CollectibleCollect: 'ECollectibleCollect',
   SteeringTrailLanded: 'ESteeringTrailLanded',
   EnemyRayHit: 'EEnemyRayHit',
+  EnemyDragonHit: 'EEnemyDragonHit',
   PlayerDeath: 'EPlayerDeath',
 };
 
@@ -58,11 +59,12 @@ export const PHYSICS = {
   Generic: 0,
   Player: 1,
   EnemyRay: 2,
-  WorldBounds: 3,
-  StaticPlatform: 4,
-  MovingPlatform: 5,
-  Collectible: 6,
-  Particle: 7,
+  EnemyDragon: 3,
+  WorldBounds: 4,
+  StaticPlatform: 5,
+  MovingPlatform: 6,
+  Collectible: 7,
+  Particle: 8,
 };
 
 export const LEVELS = {

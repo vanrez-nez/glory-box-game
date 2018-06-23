@@ -93,7 +93,6 @@ export default class GameMoodManager {
     const qualities = Object.keys(QUALITY);
     const qualityNode = presetNode[qualities[CONFIG.SceneQuality]];
     const { BloomPass, Scene, AmbientLight, ToneMapping } = qualityNode;
-    
     const tl = new TimelineMax();
     if (BloomPass && bloomPass) {
       tl.to(bloomPass, time, {

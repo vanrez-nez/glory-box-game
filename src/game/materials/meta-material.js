@@ -22,7 +22,7 @@ export default class GameMetaMaterial {
     this.low = null;
   }
 
-  static GetTexture(url, repeatX, repeatY, offsetX, offsetY) {
+  static GetTexture() {
     const args = [...arguments];
     const id = `${[...args]}`;
     return () => {

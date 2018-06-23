@@ -10,10 +10,11 @@ export default class GameEnemy {
     this.group.name = 'GameEnemy';
     this.dragon = new GameEnemyDragon({ parent: this.group });
     this.rays = new GameEnemyRays({ parent: this.group });
+    this.bodies = this.rays.bodies.concat(this.dragon.body);
   }
 
   update(delta, camera, playerPosition) {
-    this.dragon.update(delta);
+    this.dragon.update(delta, playerPosition);
     this.rays.update(delta, camera, playerPosition);
   }
 
@@ -22,11 +23,11 @@ export default class GameEnemy {
     this.rays.restart();
   }
 
-  get rayEvents() {
-    return this.rays.events;
+  get dragonEvents() {
+    return this.dragon.events;
   }
 
-  get bodies() {
-    return this.rays.bodies;
+  get rayEvents() {
+    return this.rays.events;
   }
 }

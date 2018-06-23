@@ -1,26 +1,52 @@
-import { GAME } from './const';
+import { GAME, PHYSICS, EVENTS } from './const';
 import { MODEL_ASSETS } from './assets';
 import { CartesianToCylinder, EaseExpoIn, EaseExpoOut } from './utils';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 import LineTrail from './line-trail';
+import GamePhysicsBody from './physics-body';
 
 const DEFAULT = {
   parent: null,
-  tailSize: 90,
+  tailSize: 120,
+  startPositionY: -40,
 };
 
 export default class GameEnemyDragon {
   constructor(opts) {
     this.opts = { ...DEFAULT, ...opts };
+    this.events = new EventEmitter3();
     this.modelLoaded = false;
-    this.positionY = 0;
+    this.positionY = this.opts.startPositionY;
     this.headAmp = 3;
-    this.speed = 3;
+    this.sinForce = 20;
+    this.speed = 2.7;
     this.theta = 0;
     this.time = 0;
     this.tailPositions = [];
     this.tailSegments = [];
+    this.body = this.getBody();
     this.loadModel();
+    this.attachEvents();
+  }
+
+  attachEvents() {
+    this.body.events.on(EVENTS.CollisionBegan, this.onCollisionBegan.bind(this));
+  }
+
+  onCollisionBegan() {
+    this.events.emit(EVENTS.EnemyDragonHit);
+    this.body.enabled = false;
+  }
+
+  getBody() {
+    return new GamePhysicsBody({
+      type: PHYSICS.EnemyDragon,
+      isStatic: true,
+      isSensor: true,
+      scale: new THREE.Vector2(100, 10),
+      label: 'enemy_dragon',
+      collisionTargets: [PHYSICS.Player],
+    });
   }
 
   loadModel() {
@@ -124,15 +150,17 @@ export default class GameEnemyDragon {
         const dx = prev.x - pos.x;
         const dy = prev.y - pos.y;
         const angle = Math.atan2(dy, dx);
-        pos.x = prev.x - Math.cos(angle) * 0.5;
-        pos.y = prev.y - Math.sin(angle) * 0.5;
+        pos.x = prev.x - Math.cos(angle);
+        pos.y = prev.y - Math.sin(angle);
       }
       return pos;
     }
   }
 
   restart() {
-    this.positionY = 0;
+    this.body.enabled = true;
+    this.positionY = this.opts.startPositionY;
+    this.body.position.y = this.positionY;
     this.time = 0;
     this.theta = 0;
     this.tailPositions.forEach((p) => {
@@ -140,18 +168,19 @@ export default class GameEnemyDragon {
     });
   }
 
-  updateHead() {
-    const { positionY, head, headAmp } = this;
+  updateHead(delta) {
+    const { positionY, head, headAmp, sinForce } = this;
     this.setOrbitPosition(this.head, this.theta);
     this.lookAtCenter(head, Math.PI / 4 * 6);
     head.position.y = positionY + Math.cos(this.time) * headAmp;
+    
     /*
       (x) coord of tail positions array are irrelevant to the actual
       mesh position since all calcs for (x) and (z) are made using
       polar coords. Instead, x coords defines the force of the
       sinusoidal motion for the tail.
     */
-    this.tailPositions[0].x = this.theta * 6;
+    this.tailPositions[0].x = this.theta * sinForce;
     // update first tail position to follow the head
     this.tailPositions[0].y = head.position.y + 0.7;
   }
@@ -176,12 +205,13 @@ export default class GameEnemyDragon {
     this.spine.pushPosition(this.head.position);
   }
 
-  update(delta) {
+  update(delta, playerPosition) {
     if (this.modelLoaded) {
+      this.positionY += delta * 7;
       this.theta += delta * 0.3 * this.speed;
       this.time += delta * this.speed;
-      // this.positionY += delta * this.speed * 0.5;
-      this.updateHead();
+      this.body.position.y = this.positionY;
+      this.updateHead(delta);
       this.updateTail();
       this.updateSpine();
     }

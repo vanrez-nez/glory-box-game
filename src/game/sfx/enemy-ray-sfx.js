@@ -21,7 +21,7 @@ export default class GameEnemyRaySfx {
   getBody() {
     return new GamePhysicsBody({
       type: PHYSICS.EnemyRay,
-      isStatic: false,
+      isStatic: true,
       isSensor: true,
       label: 'enemy_ray',
       collisionTargets: [PHYSICS.Player],
@@ -113,6 +113,7 @@ export default class GameEnemyRaySfx {
       mPos.y = offsetY;
       mesh.rotation.set(0, mesh.rotation.y + Math.PI, 0);
       body.position.set(positionX, mPos.y);
+      body.scale.y = mesh.scale.y;
       const project = GAME.PlayerOffset;
       CartesianToCylinder(mPos, positionX, mPos.y, project);
       uniforms.time.value += delta;

@@ -139,7 +139,6 @@ export default class GamePlayer {
         PHYSICS.WorldBounds,
         PHYSICS.StaticPlatform,
         PHYSICS.MovingPlatform,
-        PHYSICS.EnemyRay,
       ],
     });
     this.playerBody = body;

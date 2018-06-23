@@ -137,7 +137,9 @@ export default class GamePhysics {
       const b1 = bodies[i];
       for (let j = i + 1; j < bodies.length; j++) {
         const b2 = bodies[j];
-        if (b1.canCollideWith(b2.opts.type) === false) {
+        const disabled = b1.enabled === false || b2.enabled === false;
+        const canCollide = b1.canCollideWith(b2.opts.type) || b2.canCollideWith(b1.opts.type);
+        if (disabled || canCollide === false) {
           continue;
         }
         boxA.copy(b1.box).translate(b1.position);
@@ -193,8 +195,8 @@ export default class GamePhysics {
       const b = allBodies[i];
       const { opts } = b;
       if (b.enabled) {
-        // skip static, sensors and grounded objects from apply gravity
-        if (!opts.isStatic && !opts.isSensor && !b.collidingEdges.bottom) {
+        // skip static objects from apply gravity
+        if (!opts.isStatic) {
           const g = opts.gravity !== undefined ? opts.gravity : gravity;
           b.velocity.x += opts.mass * g.x;
           b.velocity.y += opts.mass * g.y;
@@ -205,7 +207,7 @@ export default class GamePhysics {
       this.constrainToBoundaries(b, bounds);
     }
     const cBodies = this.getBodiesWithinCollisionSpace();
-    const collisionPairs = this.getCollisions(cBodies);
+    const collisionPairs = this.getCollisions(allBodies);
     this.solveCollisions(collisionPairs);
   }
 }

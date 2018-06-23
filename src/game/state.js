@@ -16,11 +16,17 @@ export default class GameState {
     const { map, enemy } = this.opts;
     map.events.on(EVENTS.CollectiblePickup, this.onCollectiblePickup.bind(this));
     enemy.rayEvents.on(EVENTS.EnemyRayHit, this.onEnemyRayHit.bind(this));
+    enemy.dragonEvents.on(EVENTS.EnemyDragonHit, this.onDragonHit.bind(this));
   }
 
   onEnemyRayHit() {
     this.deaths += 1;
-    //this.events.emit(EVENTS.PlayerDeath);
+    this.events.emit(EVENTS.PlayerDeath);
+  }
+
+  onDragonHit() {
+    this.deaths += 1;
+    this.events.emit(EVENTS.PlayerDeath);
   }
 
   onCollectiblePickup(collectible) {
