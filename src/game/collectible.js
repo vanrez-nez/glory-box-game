@@ -1,10 +1,12 @@
 import { GAME, PHYSICS, EVENTS, COLLECTIBLE } from './const';
 import { SyncBodyPhysicsMesh } from './utils';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
+import { AudioManagerInstance as AudioManager } from './audio-manager';
 import CollectibleGlyph from './collectible-glyph';
 import LineTrail from './line-trail';
 import GamePhysicsBody from './physics-body';
 import GameObjectState from './object-state';
+
 
 const DEFAULT = {
   x: 0,
@@ -69,6 +71,7 @@ export default class GameCollectible {
 
   onCollisionBegan() {
     this.consumed = true;
+    AudioManager.play('collect');
   }
 
   addItem() {

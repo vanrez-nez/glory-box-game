@@ -2,6 +2,7 @@ import { GAME, PHYSICS } from '../const';
 import { CartesianToCylinder } from '../utils';
 import GamePhysicsBody from '../physics-body';
 import { MaterialFactoryInstance as MaterialFactory } from '../materials/material-factory';
+import { AudioManagerInstance as AudioManager } from '../audio-manager';
 
 const DEFAULT = {
   parent: null,
@@ -70,6 +71,7 @@ export default class GameEnemyRaySfx {
     tl.add('fire', 1.45);
     tl.set(body.scale, { x: 0.1 }, 'fire');
     tl.add(() => {
+      AudioManager.play('electric_blast');
       body.enabled = true;
     });
     tl.to(body.scale, 0.35, { x: 7, ease: Power2.easeOut }, 'fire');
@@ -92,10 +94,11 @@ export default class GameEnemyRaySfx {
 
   fire(x) {
     this.positionX = x;
-    this.timeline.progress(0);
+    this.timeline.progress(0, true);
     this.timeline.invalidate();
     this.running = true;
     this.body.enabled = false;
+    AudioManager.play('electric_charge');
   }
 
   hide() {

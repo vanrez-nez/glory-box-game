@@ -9,8 +9,10 @@ import { Clamp, CartesianToCylinder, SyncBodyPhysicsMesh } from './utils';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 import GamePhysicsBody from './physics-body';
 import PlayerExplosionSfx from './sfx/player-explosion-sfx';
+import { AudioManagerInstance as AudioManager } from './audio-manager';
 
 const DEFAULT = {
+  audioManager: null,
   jumpTolerance: 50,
   fallTolerance: 120,
   jumpForce: 1.3,
@@ -102,10 +104,12 @@ export default class GamePlayer {
       tl.to(scale, 0.15, { x: 0, y: 0, ease: Power2.easeOut });
       tl.to(pos, 0.1, { y: -hitForce, ease: Power2.easeOut }, 0);
       tl.to(pos, 0.15, { y: 0, ease: Power2.easeOut });
+      AudioManager.play('foot_step');
     }
   }
 
   startExplodeSfx() {
+    AudioManager.play('player_hit');
     this.explosionSfx.explode(this.playerBody.position);
   }
 
@@ -202,6 +206,9 @@ export default class GamePlayer {
     let [xForce, yForce] = [0, 0];
     if (locked === false) {
       yForce = this.getJumpForce(inputs);
+      if (yForce > 0) {
+        AudioManager.play('jump_1');
+      }
       xForce = this.getWalkingForce(inputs);
       if (xForce === 0) {
         playerBody.velocity.x = 0;

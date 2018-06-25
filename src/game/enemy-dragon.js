@@ -173,7 +173,7 @@ export default class GameEnemyDragon {
     this.setOrbitPosition(this.head, this.theta);
     this.lookAtCenter(head, Math.PI / 4 * 6);
     head.position.y = positionY + Math.cos(this.time) * headAmp;
-    
+
     /*
       (x) coord of tail positions array are irrelevant to the actual
       mesh position since all calcs for (x) and (z) are made using
