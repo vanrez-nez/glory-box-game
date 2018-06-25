@@ -33,6 +33,7 @@ import GameMoodManager from './game/mood-manager';
 import GameEnemy from './game/enemy';
 import GamePlayerHud from './game/player-hud';
 import GameEnemyHud from './game/enemy-hud';
+// import GameAudioManager from './game/audio-manager';
 
 class Game {
   constructor() {
@@ -53,14 +54,15 @@ class Game {
     this.engine = new Engine({
       canvas: document.body.querySelector('#js-canvas'),
     });
-
+    //this.audioManager = new GameAudioManager({});
     this.physics = new GamePhysics({
       bounds: new THREE.Box2(
         new THREE.Vector2(GAME.BoundsLeft, GAME.BoundsTop),
         new THREE.Vector2(GAME.BoundsRight, GAME.BoundsBottom)),
     });
 
-    this.player = new GamePlayer({});
+    this.player = new GamePlayer({
+    });
     this.map = new GameMap({
       physics: this.physics,
     });
@@ -152,7 +154,6 @@ class Game {
     const { position: bodyPosition } = player.playerBody;
     const { position: meshPosition } = player.mesh;
 
-    physics.updateCollisionSpace(bodyPosition, 50);
     physics.update(delta);
     enemy.update(delta, engine.camera, bodyPosition);
     player.update(delta, gameInput.state);
