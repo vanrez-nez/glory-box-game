@@ -1,5 +1,5 @@
 // const HOST = 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/204379';
-const PREFIX = 'static/';
+const PREFIX = 'static';
 
 export const IMAGE_ASSETS = {
   HullEmissive:       `${PREFIX}/images/macro_hull_emissive.jpg`,
@@ -25,4 +25,8 @@ export const MODEL_ASSETS = {
   Dragon: `${PREFIX}/models/dragon.glb`,
 };
 
-export const AUDIO_ASSETS = {};
+export const AUDIO_ASSETS = {
+  MainBackgroundWebm: `${PREFIX}/audio/main_bg.webm`,
+  MainBackgroundMp3: `${PREFIX}/audio/main_bg.mp3`,
+  FxSprite: `${PREFIX}/audio/sprite.wav`,
+};
