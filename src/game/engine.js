@@ -99,13 +99,19 @@ export default class Engine {
     this.height = h;
   }
 
+  resetCamera() {
+    this.cameraOffset.set(0, 0, 0);
+    this.cameraTargetTo.set(0, 0, 0);
+    this.camera.position.set(0, -30, GAME.ZoomCameraDistance);
+  }
+
   followTarget() {
     const { cameraVector, cameraTargetTo, cameraTarget,
       camera, cameraOffset } = this;
     CartesianToCylinder(
       cameraVector.copy(cameraTarget),
       cameraTarget.x * (Math.PI / 2),
-      cameraTarget.y + 5,
+      cameraTarget.y + 15,
       GAME.CameraDistance,
     );
     cameraVector.add(cameraOffset);

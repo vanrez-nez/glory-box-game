@@ -35,7 +35,6 @@ export default class GameAudioTrack {
       if (audio.isPlaying) {
         audio.stop();
       }
-      
       audio.play();
     }
   }

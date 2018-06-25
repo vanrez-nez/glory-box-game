@@ -79,7 +79,7 @@ export default class GameSfxManager {
   }
 
   onPlayerDeath() {
-    const { player, enemy, map } = this.opts;
+    const { engine, player, enemy, map } = this.opts;
     const tl = new TimelineMax();
     tl.add(() => {
       player.startExplodeSfx();
@@ -90,6 +90,7 @@ export default class GameSfxManager {
     });
     this.fadeOut(tl, 1.5);
     tl.add(() => {
+      engine.resetCamera();
       map.restart();
       enemy.restart();
       player.restore();

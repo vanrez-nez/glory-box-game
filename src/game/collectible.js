@@ -7,7 +7,6 @@ import LineTrail from './line-trail';
 import GamePhysicsBody from './physics-body';
 import GameObjectState from './object-state';
 
-
 const DEFAULT = {
   x: 0,
   y: 0,

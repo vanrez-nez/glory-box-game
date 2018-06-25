@@ -26,7 +26,7 @@ export default class GameState {
 
   onDragonHit() {
     this.deaths += 1;
-    this.events.emit(EVENTS.PlayerDeath);
+    // this.events.emit(EVENTS.PlayerDeath);
   }
 
   onCollectiblePickup(collectible) {
