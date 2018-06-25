@@ -13,12 +13,7 @@ const DEFAULT = {
 export default class GamePhysics {
   constructor(opts) {
     this.opts = { ...DEFAULT, ...opts };
-    this.dynamicBodies = [];
-    this.staticBodies = [];
-    this.allBodies = [];
-    // eslint-disable-next-line
-    this.rTree = new rbush();
-    this.collisionSpace = new THREE.Box2();
+    this.bodies = [];
     /*
       Dummy object to set colliding edges of world bodies
       when hitting world boundaries
@@ -28,45 +23,21 @@ export default class GamePhysics {
     this.testBoxB = new THREE.Box2();
   }
 
-  add(bodies) {
-    const { rTree, testBoxA, staticBodies, dynamicBodies } = this;
-    [].concat(bodies).forEach((body) => {
-      if (body.opts.isStatic) {
-        staticBodies.push(body);
-        const box = testBoxA.copy(body.box).translate(body.position);
-        body.rTreeItem = {
-          minX: box.min.x,
-          minY: box.min.y,
-          maxX: box.max.x,
-          maxY: box.max.y,
-          body,
-        };
-        rTree.insert(body.rTreeItem);
-      } else {
-        dynamicBodies.push(body);
-      }
+  add(body) {
+    const { bodies } = this;
+    [].concat(body).forEach((b) => {
+      bodies.push(b);
     });
-    this.allBodies = dynamicBodies.concat(staticBodies);
   }
 
-  remove(bodies) {
-    const { rTree, staticBodies, dynamicBodies } = this;
-    [].concat(bodies).forEach((body) => {
-      if (body.opts.isStatic) {
-        const idx = staticBodies.indexOf(body);
-        if (idx !== -1) {
-          staticBodies.splice(idx, 1);
-          rTree.remove(body.rTreeItem);
-          body.rTreeItem = null;
-        }
-      } else {
-        const idx = dynamicBodies.indexOf(body);
-        if (idx > -1) {
-          dynamicBodies.splice(idx, 1);
-        }
+  remove(body) {
+    const { bodies } = this;
+    [].concat(body).forEach((b) => {
+      const idx = bodies.indexOf(b);
+      if (idx !== -1) {
+        bodies.splice(idx, 1);
       }
     });
-    this.allBodies = dynamicBodies.concat(staticBodies);
   }
 
   constrainToBoundaries(body, bounds) {
@@ -109,25 +80,6 @@ export default class GamePhysics {
         body.updateCollisionEvents();
       }
     }
-  }
-
-  getBodiesWithinCollisionSpace() {
-    const { collisionSpace: cS, rTree } = this;
-    return rTree.search({
-      minX: cS.min.x,
-      minY: cS.min.y,
-      maxX: cS.max.x,
-      maxY: cS.max.y,
-    }).map(o => o.body)
-      .concat(this.dynamicBodies)
-      .filter(b => b.enabled);
-  }
-
-  updateCollisionSpace(position, area) {
-    const { collisionSpace: cS } = this;
-    cS.min.set(-area * 0.5, -area * 0.5);
-    cS.max.set(area * 0.5, area * 0.5);
-    cS.translate(position);
   }
 
   getCollisions(bodies) {
@@ -190,9 +142,9 @@ export default class GamePhysics {
 
   update(delta) {
     const { gravity, timeScale, bounds } = this.opts;
-    const { allBodies } = this;
-    for (let i = 0; i < allBodies.length; i++) {
-      const b = allBodies[i];
+    const { bodies } = this;
+    for (let i = 0; i < bodies.length; i++) {
+      const b = bodies[i];
       const { opts } = b;
       if (b.enabled) {
         // skip static objects from apply gravity
@@ -206,8 +158,7 @@ export default class GamePhysics {
       b.resetCollisionEdges();
       this.constrainToBoundaries(b, bounds);
     }
-    const cBodies = this.getBodiesWithinCollisionSpace();
-    const collisionPairs = this.getCollisions(allBodies);
+    const collisionPairs = this.getCollisions(bodies);
     this.solveCollisions(collisionPairs);
   }
 }
