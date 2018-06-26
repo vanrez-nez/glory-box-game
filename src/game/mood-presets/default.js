@@ -8,6 +8,10 @@ const DefaultMood = {
       ToneMapping: {
         Exposure: 1.5,
       },
+      AmbientLight: {
+        Color: 0xbdd5f7,
+        Intensity: 0.65,
+      },
     },
     Medium: {
       Scene: {
