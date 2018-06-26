@@ -111,7 +111,7 @@ export default class Engine {
     CartesianToCylinder(
       cameraVector.copy(cameraTarget),
       cameraTarget.x * (Math.PI / 2),
-      cameraTarget.y + 15,
+      cameraTarget.y + 12,
       GAME.CameraDistance,
     );
     cameraVector.add(cameraOffset);
