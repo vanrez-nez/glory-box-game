@@ -19,6 +19,7 @@ export const IMAGE_ASSETS = {
   GlyphsDisplacement: `${PREFIX}/images/glyphs_displacement.jpg`,
   GlyphsNormal:       `${PREFIX}/images/glyphs_normal.jpg`,
   GlyphsEmissive:     `${PREFIX}/images/glyphs_emissive.jpg`,
+  PerlinNoise:        `${PREFIX}/images/noise.jpg`,
 };
 
 export const MODEL_ASSETS = {

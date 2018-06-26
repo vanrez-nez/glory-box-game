@@ -145,6 +145,18 @@ export default class GameTools {
     d2Folder.add(u.fatDebrisLevels.value, 'w', 0.0, 1.0).name('Intensity');
   }
 
+  addEnemyVortexMaterial(folder, mat) {
+    const u = mat.uniforms;
+    this.addColorField(folder, u.uColorFrom, 'value', 'Color From');
+    this.addColorField(folder, u.uColorTo, 'value', 'Color To');
+    folder.add(u.uTwist, 'value', 0, 2000).name('Twist');
+    folder.add(u.uDisplacementScale, 'value', 0, 100).name('Disp Scale');
+    folder.add(u.uDisplacementBias, 'value', 0, 100).name('Disp Bias');
+    folder.add(u.uShapeBias.value, 'x', -10.0, 10.0).name('SBias x');
+    folder.add(u.uShapeBias.value, 'y', -10.0, 10.0).name('SBias y');
+    folder.add(u.uFogDistance, 'value', 0, 500).name('Fog Dist');
+  }
+
   addSkyShaderMaterial(folder, mat) {
     const u = mat.uniforms;
     this.addColorField(folder, u.color, 'value', 'Color');
@@ -285,6 +297,9 @@ export default class GameTools {
           break;
         case 'GenericTrailMaterial':
           this.addMeshLineMaterial(f, mat);
+          break;
+        case 'EnemyVortexMaterial':
+          this.addEnemyVortexMaterial(f, mat);
           break;
         case 'EnemyRayMaterial':
           this.addEnemyRayMaterial(f, mat);
