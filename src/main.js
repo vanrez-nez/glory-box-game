@@ -33,7 +33,6 @@ import GameMoodManager from './game/mood-manager';
 import GameEnemy from './game/enemy';
 import GamePlayerHud from './game/player-hud';
 import GameEnemyHud from './game/enemy-hud';
-// import GameAudioManager from './game/audio-manager';
 
 class Game {
   constructor() {
@@ -54,7 +53,6 @@ class Game {
     this.engine = new Engine({
       canvas: document.body.querySelector('#js-canvas'),
     });
-    //this.audioManager = new GameAudioManager({});
     this.physics = new GamePhysics({
       bounds: new THREE.Box2(
         new THREE.Vector2(GAME.BoundsLeft, GAME.BoundsTop),
