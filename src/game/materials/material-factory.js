@@ -11,6 +11,7 @@ import CollectibleSocketMaterial from './collectible-socket-material';
 import CollectibleGlyphMaterial from './collectible-glyph-material';
 import CollectibleItemMaterial from './collectible-item-material';
 import EnemyVortexMaterial from './enemy-vortex-material';
+import EnemyVortexParticleMaterial from './enemy-vortex-particle-material';
 import EnemyHeadMaterial from './enemy-head-material';
 import EnemyArmorMaterial from './enemy-armor-material';
 import EnemyEyesMaterial from './enemy-eyes-material';
@@ -34,6 +35,7 @@ const MATERIALS = {
   CollectibleGlyph: CollectibleGlyphMaterial,
   CollectibleItem: CollectibleItemMaterial,
   EnemyVortex: EnemyVortexMaterial,
+  EnemyVortexParticle: EnemyVortexParticleMaterial,
   EnemyRay: EnemyRayMaterial,
   EnemyHead: EnemyHeadMaterial,
   EnemyArmor: EnemyArmorMaterial,

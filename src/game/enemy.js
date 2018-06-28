@@ -18,7 +18,7 @@ export default class GameEnemy {
   update(delta, camera, playerPosition) {
     this.dragon.update(delta, playerPosition);
     this.rays.update(delta, camera, playerPosition);
-    this.vortex.update(delta);
+    this.vortex.update(delta, this.dragon.positionY);
   }
 
   restart() {

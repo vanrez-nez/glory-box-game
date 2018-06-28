@@ -8,7 +8,6 @@ export default class EnemyVortexMaterial extends GameMetaMaterial {
       low: {
         type: 'ShaderMaterial',
         args: {
-          //side: THREE.BackSide,
           fragmentShader: EnemyVortexShader.fragmentShader,
           vertexShader: EnemyVortexShader.vertexShader,
           uniforms: EnemyVortexShader.uniforms,

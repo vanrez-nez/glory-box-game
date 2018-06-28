@@ -5,13 +5,14 @@ import { IMAGE_ASSETS } from '../game/assets';
 const EnemyVortexShader = {
   uniforms: {
     uTime: { value: 0 },
-    uTwist: { value: 1820.5 },
-    uColorFrom: { value: new THREE.Color(0.008, 0.008, 0.008) },
-    uColorTo: { value: new THREE.Color(0.149, 0.208, 0.412) },
-    uShapeBias: { value: new THREE.Vector2(0, 0)},
-    uDisplacementScale: { value: 17 },
-    uDisplacementBias: { value: 13 },
-    uFogDistance: { value: 180 },
+    uTwist: { value: 3050 },
+    // 301d39 - 1a0708
+    uColorFrom: { value: new THREE.Color(0.188, 0.114, 0.224) },
+    uColorTo: { value: new THREE.Color(0.102, 0.027, 0.031) },
+    uShapeBias: { value: new THREE.Vector2(0, -3) },
+    uDisplacementScale: { value: 14 },
+    uDisplacementBias: { value: 24 },
+    uFogDistance: { value: 54 },
     tHeightMap: { value: GetTextureRepeat(IMAGE_ASSETS.PerlinNoise, 0, 0) },
   },
   fragmentShader: `
@@ -22,14 +23,34 @@ const EnemyVortexShader = {
     uniform float uFogDistance;
     uniform vec3 uColorFrom;
 
+    float random (vec2 st) {
+      return fract(sin(dot(st.xy, vec2(12.9898,78.233)))* 43758.5453123);
+    }
+
+    float dash(vec2 dashUv, float density) {
+      float line = floor(dashUv.x);
+      dashUv.y += uTime * 43.0 * (mod(line, 1.0) * 2.0 - 6.0) * random(vec2(line));
+      float rndDash = density * 0.1 * random(vec2(line));
+      float dash = smoothstep(rndDash, rndDash + 0.1 * density, 1.7 * random( floor(dashUv) ));
+      dash = dash * -1.0 + 1.0;
+      return dash;
+    }
+
     void main() {
-      vec3 tex = texture2D(tHeightMap, vUv - uTime * 0.08).rgb;
+      vec3 tex = texture2D(tHeightMap, vUv - uTime * 0.1).rgb;
       vec3 color = vec3((uColorFrom + uColorTo) * tex.r);
       float depth = gl_FragCoord.z / gl_FragCoord.w;
       float fogFactor = smoothstep( 0.0, uFogDistance, depth );
-      vec3 fogColor = mix( color, vec3(0.0), fogFactor);
+      color = mix( color, vec3(0.0), fogFactor);
+
+      vec2 uv = vUv * 2.0 - 1.0;
+      float d = dash(uv * vec2(260.0, 590.0), 1.0);
+      d *= smoothstep(0.0, abs(uv.x), 0.6);
+      vec3 dashColor = d * vec3(2.0) * fogFactor;
+      color = mix(dashColor, color, 0.8);
+
       float opacity = clamp(smoothstep(0.2, 1.0, 1.0 - vUv.y) * 2.5 - fogFactor, 0.0, 1.0);
-      gl_FragColor = vec4(fogColor, opacity);
+      gl_FragColor = vec4(color, opacity - 0.05);
     }
   `,
   vertexShader: `
