@@ -7,8 +7,10 @@ import GamePhysicsBody from './physics-body';
 
 const DEFAULT = {
   parent: null,
-  tailSize: 120,
-  startPositionY: -40,
+  tailSize: 100,
+  startPositionY: -60,
+  initialSpeed: 3,
+  maxSpeed: 10,
 };
 
 export default class GameEnemyDragon {
@@ -17,9 +19,9 @@ export default class GameEnemyDragon {
     this.events = new EventEmitter3();
     this.modelLoaded = false;
     this.positionY = this.opts.startPositionY;
-    this.headAmp = 3;
-    this.sinForce = 20;
-    this.speed = 2.7;
+    this.speed = this.opts.initialSpeed;
+    this.headAmp = 13;
+    this.sinForce = 10;
     this.theta = 0;
     this.time = 0;
     this.tailPositions = [];
@@ -66,6 +68,7 @@ export default class GameEnemyDragon {
 
   initHead() {
     const { head, eyes } = this;
+    head.scale.multiplyScalar(2);
     CartesianToCylinder(this.head.position, 0, 0, GAME.EnemyOffset);
     const headId = 'enemy_head';
     head.material = MaterialFactory.getMaterial('EnemyHead', {
@@ -162,6 +165,7 @@ export default class GameEnemyDragon {
     this.positionY = this.opts.startPositionY;
     this.body.position.y = this.positionY;
     this.time = 0;
+    this.speed = this.opts.initialSpeed;
     this.theta = 0;
     this.tailPositions.forEach((p) => {
       p.x = -200;
@@ -172,7 +176,8 @@ export default class GameEnemyDragon {
     const { positionY, head, headAmp, sinForce } = this;
     this.setOrbitPosition(this.head, this.theta);
     this.lookAtCenter(head, Math.PI / 4 * 6);
-    head.position.y = positionY + Math.cos(this.time) * headAmp;
+    const headCos = Math.cos(this.time) * headAmp;
+    head.position.y = this.positionY + headCos;
 
     /*
       (x) coord of tail positions array are irrelevant to the actual
@@ -191,9 +196,9 @@ export default class GameEnemyDragon {
     for (let i = 0; i < len; i++) {
       const seg = tailSegments[i];
       const pos = this.getSegmentPosition(i);
-      const scale = Math.max(0.05, 1.4 - EaseExpoIn(i / len));
+      const scale = Math.max(0.05, 3.0 - EaseExpoIn(i / len));
       seg.scale.set(scale, scale, scale);
-      const thetaOffset = (i + 1.8) * 0.05;
+      const thetaOffset = (i + 2.8) * 0.07;
       this.setOrbitPosition(seg, this.theta - thetaOffset);
       seg.position.y = pos.y;
       this.spine.updateTrailPosition(i, seg.position);
@@ -207,10 +212,12 @@ export default class GameEnemyDragon {
 
   update(delta, playerPosition) {
     if (this.modelLoaded) {
-      this.positionY += delta * 7;
-      this.theta += delta * 0.3 * this.speed;
-      this.time += delta * this.speed;
-      this.body.position.y = this.positionY;
+      this.speed += delta * 0.1;
+      this.speed = Math.min(this.opts.maxSpeed, this.speed);
+      this.positionY += delta * this.speed;
+      this.theta += delta * 1.2;
+      this.time += delta;
+      this.body.position.y = this.positionY - 5;
       this.updateHead(delta);
       this.updateTail();
       this.updateSpine();

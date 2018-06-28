@@ -93,8 +93,8 @@ const DefaultMood = {
         color: 1658505,
       },
       enemy_col_trail: {
-        color: 0xff7800,
-        lineWidth: 2,
+        color: 0x920e88,
+        lineWidth: 3,
       },
       plt_steps: {
         color: 986907,
@@ -212,7 +212,7 @@ const DefaultMood = {
       w_main_cylinder: {
         color: 5928349,
         emissive: 42239,
-        emissiveIntensity: 0.5286810376324442,
+        emissiveIntensity: 1.4286810376324442,
         reflectivity: 0.20588235294117646,
         specular: 9558271,
         shininess: 3.9349652904640116,
@@ -275,8 +275,8 @@ const DefaultMood = {
         refractionRatio: 0.98,
       },
       enemy_col_trail: {
-        color: 0xff7800,
-        lineWidth: 2,
+        color: 0x920e88,
+        lineWidth: 3,
       },
       plt_steps: {
         color: 0x111725,
@@ -431,7 +431,7 @@ const DefaultMood = {
       w_main_cylinder: {
         color: 7770550,
         emissive: 3894728,
-        emissiveIntensity: 0.5754475703324808,
+        emissiveIntensity: 1.4754475703324808,
         metalness: 0.4864815491413957,
         roughness: 0.15911582024113993,
         envMapIntensity: 0.7858969674826453,
@@ -495,8 +495,8 @@ const DefaultMood = {
         refractionRatio: 0.98,
       },
       enemy_col_trail: {
-        color: 0xff7800,
-        lineWidth: 2,
+        color: 0x920e88,
+        lineWidth: 3,
       },
       plt_steps: {
         color: 16777215,
