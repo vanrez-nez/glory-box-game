@@ -8,6 +8,8 @@ export default class GameWorld {
   constructor() {
     this.group = new THREE.Group();
     this.group.name = 'GameWorld';
+    this.noise = new Simple1DNoise();
+    this.noiseIdx = Math.random();
     this.addFloor();
     // this.addLobby();
     this.addMainCylinder();
@@ -153,9 +155,21 @@ export default class GameWorld {
   }
 
   update(delta, playerPosition) {
+    const { skyCylinder, mainCylinder, cylinderBase, noise } = this;
+
     if (CONFIG.EnableSkyShader) {
-      this.skyCylinder.material.uniforms.time.value += delta * 0.35;
-      this.skyCylinder.position.y = playerPosition.y;
+      const { uniforms } = skyCylinder.material;
+      uniforms.time.value += delta * 0.35;
+      skyCylinder.position.y = playerPosition.y;
+    }
+
+    if (cylinderBase.material.emissiveIntensity) {
+      this.noiseIdx += delta;
+      const { c1, c2 } = mainCylinder;
+      const val = Math.max(0.45, noise.getVal(this.noiseIdx));
+      c1.material.emissiveIntensity = val;
+      c2.material.emissiveIntensity = val;
+      cylinderBase.material.emissiveIntensity = val;
     }
     this.updateMainCylindersTiling(playerPosition);
   }
