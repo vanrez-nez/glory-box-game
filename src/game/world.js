@@ -166,7 +166,7 @@ export default class GameWorld {
     if (cylinderBase.material.emissiveIntensity) {
       this.noiseIdx += delta;
       const { c1, c2 } = mainCylinder;
-      const val = Math.max(0.45, noise.getVal(this.noiseIdx));
+      const val = Math.max(0.55, noise.getVal(this.noiseIdx) * 1.8);
       c1.material.emissiveIntensity = val;
       c2.material.emissiveIntensity = val;
       cylinderBase.material.emissiveIntensity = val;
