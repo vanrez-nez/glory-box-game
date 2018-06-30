@@ -9,7 +9,6 @@ const EnemyVortexShader = {
     // 301d39 - 1a0708
     uColorFrom: { value: new THREE.Color(0.188, 0.114, 0.224) },
     uColorTo: { value: new THREE.Color(0.102, 0.027, 0.031) },
-    uShapeBias: { value: new THREE.Vector2(0, -3) },
     uDisplacementScale: { value: 14 },
     uDisplacementBias: { value: 24 },
     uFogDistance: { value: 54 },
@@ -79,9 +78,6 @@ const EnemyVortexShader = {
       vec3 vNormal = normalize( normalMatrix * normal );
       
       vec4 mPosition = modelMatrix * vec4(position, 1.0);
-      mPosition.x *= 1.0 - uShapeBias.x * ( 1.0 - vUv.y );
-      mPosition.y *= 1.0 - ( vUv.y - 0.5 ) * uShapeBias.y;
-
       float angle_rad = uTwist * (PI / 180.0);
       float height = -500.0;
       float ang = (position.y-height*0.5)/height * angle_rad;

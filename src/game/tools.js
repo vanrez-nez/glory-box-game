@@ -152,8 +152,6 @@ export default class GameTools {
     folder.add(u.uTwist, 'value', 0, 4000).name('Twist');
     folder.add(u.uDisplacementScale, 'value', 0.0, 100.0).name('Disp Scale');
     folder.add(u.uDisplacementBias, 'value', 0.0, 100.0).name('Disp Bias');
-    folder.add(u.uShapeBias.value, 'x', -10.0, 10.0).name('SBias x');
-    folder.add(u.uShapeBias.value, 'y', -10.0, 10.0).name('SBias y');
     folder.add(u.uFogDistance, 'value', 0, 500).name('Fog Dist');
   }
 
