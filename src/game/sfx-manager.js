@@ -22,7 +22,6 @@ export default class GameSfxManager {
   attachEvents() {
     const { gameState, playerHud } = this.opts;
     gameState.events.on(EVENTS.CollectiblePickup, this.onCollectiblePickup.bind(this));
-    gameState.events.on(EVENTS.PlayerDeath, this.onPlayerDeath.bind(this));
     playerHud.events.on(EVENTS.CollectibleCollect, this.onCollectibleCollect.bind(this));
   }
 
@@ -78,8 +77,8 @@ export default class GameSfxManager {
     });
   }
 
-  onPlayerDeath() {
-    const { engine, player, enemy, map } = this.opts;
+  destroyPlayer() {
+    const { player } = this.opts;
     const tl = new TimelineMax();
     tl.add(() => {
       player.startExplodeSfx();
@@ -89,13 +88,11 @@ export default class GameSfxManager {
       player.hide();
     });
     this.fadeOut(tl, 1.5);
-    tl.add(() => {
-      engine.resetCamera();
-      map.restart();
-      enemy.restart();
-      player.restore();
-    });
-    this.fadeIn(tl, 0.2);
+  }
+
+  restart() {
+    const tl = new TimelineMax();
+    this.fadeIn(tl, 0);
   }
 
   onCollectibleCollect(color) {

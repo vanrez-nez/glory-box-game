@@ -19,7 +19,7 @@
     - Feat: Powerups (impulsers, shields)
     - Feat: Illumination and vignette effect
 */
-import { CONFIG, GAME } from './game/const';
+import { CONFIG, GAME, EVENTS } from './game/const';
 import Engine from './game/engine';
 import GameState from './game/state';
 import GameTools from './game/tools';
@@ -33,6 +33,7 @@ import GameMoodManager from './game/mood-manager';
 import GameEnemy from './game/enemy';
 import GamePlayerHud from './game/player-hud';
 import GameEnemyHud from './game/enemy-hud';
+import { AudioManagerInstance as AudioManager } from './game/audio-manager';
 
 class Game {
   constructor() {
@@ -49,6 +50,7 @@ class Game {
   }
 
   init() {
+    THREE.Cache.enabled = true;
     this.gameInput = new GameInput();
     this.engine = new Engine({
       canvas: document.body.querySelector('#js-canvas'),
@@ -58,7 +60,6 @@ class Game {
         new THREE.Vector2(GAME.BoundsLeft, GAME.BoundsTop),
         new THREE.Vector2(GAME.BoundsRight, GAME.BoundsBottom)),
     });
-
     this.player = new GamePlayer({
     });
     this.map = new GameMap({
@@ -103,6 +104,7 @@ class Game {
     this.engine.scene.add(this.enemy.group);
     this.engine.scene.add(this.map.group);
     this.engine.scene.add(this.world.group);
+    this.player.mesh.add(AudioManager.listener);
     this.engine.cameraTarget = this.player.mesh.position;
   }
 
@@ -115,7 +117,29 @@ class Game {
         this.moodManager.resetToDefault();
       }, 1000);
       MainLoop.start();
+      this.restartGame();
     }
+  }
+
+  restartGame() {
+    const { gameState, engine, map,
+      enemy, player, sfxManager } = this;
+    gameState.restart();
+    engine.resetCamera();
+    map.restart();
+    enemy.restart();
+    player.restore();
+    sfxManager.restart();
+    AudioManager.playMix('game_theme');
+  }
+
+  onPlayerDeath() {
+    this.sfxManager.destroyPlayer();
+    AudioManager.stopMix('game_theme');
+    AudioManager.playTrack('drama_end');
+    setTimeout(() => {
+      this.restartGame();
+    }, 3000);
   }
 
   addStats() {
@@ -133,6 +157,8 @@ class Game {
   }
 
   attachEvents() {
+    const { gameState } = this;
+    gameState.events.on(EVENTS.PlayerDeath, this.onPlayerDeath.bind(this));
     MainLoop.setUpdate(this.onUpdate.bind(this));
     MainLoop.setDraw(this.onDraw.bind(this));
     MainLoop.setEnd(this.onEnd.bind(this));

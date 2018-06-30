@@ -8,7 +8,7 @@ export default class GameState {
   constructor(opts) {
     this.opts = { ...DEFAULT, ...opts };
     this.events = new EventEmitter3();
-    this.reset();
+    this.restart();
     this.attachEvents();
   }
 
@@ -26,7 +26,7 @@ export default class GameState {
 
   onDragonHit() {
     this.deaths += 1;
-    // this.events.emit(EVENTS.PlayerDeath);
+    this.events.emit(EVENTS.PlayerDeath);
   }
 
   onCollectiblePickup(collectible) {
@@ -38,7 +38,7 @@ export default class GameState {
     this.attackPower += 1;
   }
 
-  reset() {
+  restart() {
     this.deaths = 0;
     this.attackPower = 0;
     this.collectHistory = [];
