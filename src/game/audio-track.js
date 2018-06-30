@@ -33,22 +33,22 @@ export default class GameAudioTrack {
     } else {
       audio = new THREE.Audio(listener);
     }
-    audio.setBuffer(buffer);
-    audio.setVolume(volume);
-    audio.setLoop(loop);
     this.audio = audio;
-    if (autoplay) {
-      this.play();
+    if (buffer) {
+      audio.setBuffer(buffer);
+      audio.setVolume(volume);
+      audio.setLoop(loop);
+
+      if (autoplay) {
+        this.play();
+      }
     }
   }
 
   play(spriteId, when = 0) {
-    const { audio, opts } = this;
-    if (audio.isPlaying) {
-      audio.stop();
-    }
+    this.stop();
     this.currentSprite = spriteId;
-    let [start, end] = this.range;
+    const [start, end] = this.range;
     this.playRange(when, start, end);
   }
 
@@ -57,15 +57,14 @@ export default class GameAudioTrack {
   }
 
   stop() {
-    this.sources.forEach(src => {
-      console.log('clear');
-      src.stop(0);
-      src.onended = null;
-      src.disconnect(0);
-    });
-    if (this.audio.source) {
-      this.audio.stop();
+    const { sources, audio } = this;
+    while (sources.length) {
+      const source = sources.pop();
+      source.stop(0);
+      source.disconnect(0);
     }
+    audio.isPlaying = false;
+    audio.offset = 0;
   }
 
   onTrackEnded() {
@@ -88,16 +87,17 @@ export default class GameAudioTrack {
     source.loop = loop;
     audio.source = source;
     audio.isPlaying = true;
-    const startSec = start / 1000;
-    const endSec = end / 1000;
     const whenSec = when / 1000;
+    const startSec = start / 1000;
+    let endSec = end / 1000;
+    endSec = endSec === Infinity ? 999 : endSec;
     if (loop) {
       source.loopStart = startSec;
       source.loopEnd = endSec;
       source.start(audio.startTime + whenSec, startSec);
     } else {
-      source.start(audio.startTime + whenSec, startSec,
-        endSec - startSec);
+      const duration = endSec - startSec;
+      source.start(audio.startTime + whenSec, startSec, duration);
     }
     audio.connect();
   }
