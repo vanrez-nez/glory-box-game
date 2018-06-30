@@ -70,7 +70,7 @@ export default class GameCollectible {
 
   onCollisionBegan() {
     this.consumed = true;
-    AudioManager.play('collect');
+    AudioManager.playTrack('collect');
   }
 
   addItem() {

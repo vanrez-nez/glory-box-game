@@ -2,13 +2,14 @@ import { GAME, PHYSICS, EVENTS } from './const';
 import { MODEL_ASSETS } from './assets';
 import { CartesianToCylinder, EaseExpoIn, EaseExpoOut } from './utils';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
+import { AudioManagerInstance as AudioManager } from './audio-manager';
 import LineTrail from './line-trail';
 import GamePhysicsBody from './physics-body';
 
 const DEFAULT = {
   parent: null,
   tailSize: 100,
-  startPositionY: -60,
+  startPositionY: -80,
   initialSpeed: 3,
   maxSpeed: 10,
 };
@@ -37,6 +38,7 @@ export default class GameEnemyDragon {
 
   onCollisionBegan() {
     this.events.emit(EVENTS.EnemyDragonHit);
+    AudioManager.playTrack('dragon_roar', '', 800);
     this.body.enabled = false;
   }
 

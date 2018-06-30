@@ -1,4 +1,5 @@
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
+import { AudioManagerInstance as AudioManager } from './audio-manager';
 
 const DEFAULT = {
   parent: null,
@@ -11,6 +12,8 @@ export default class GameEnemyVortex {
     this.particles = [];
     this.addMesh();
     this.addParticles();
+    AudioManager.setPositionalTrackParent('wind_loop', this.mesh);
+    AudioManager.setPositionalTrackParent('dragon_near_loop', this.mesh);
   }
 
   addMesh() {
@@ -19,6 +22,7 @@ export default class GameEnemyVortex {
     const mat = MaterialFactory.getMaterial('EnemyVortex', {});
     this.material = mat;
     this.mesh = new THREE.Mesh(geo, mat);
+    this.mesh.scale.set(1, 3, 1);
     this.opts.parent.add(this.mesh);
   }
 
@@ -44,8 +48,9 @@ export default class GameEnemyVortex {
     const tex = this.getParticleTexture();
     for (let i = 0; i < params.length; i++) {
       const [size, color] = params[i];
-      const mat = MaterialFactory.getMaterial('EnemyVortexParticle', { 
-        size, color,
+      const mat = MaterialFactory.getMaterial('EnemyVortexParticle', {
+        size,
+        color,
         map: tex,
       });
       materials.push(mat);

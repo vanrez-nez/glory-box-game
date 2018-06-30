@@ -104,12 +104,12 @@ export default class GamePlayer {
       tl.to(scale, 0.15, { x: 0, y: 0, ease: Power2.easeOut });
       tl.to(pos, 0.1, { y: -hitForce, ease: Power2.easeOut }, 0);
       tl.to(pos, 0.15, { y: 0, ease: Power2.easeOut });
-      AudioManager.play('foot_step');
+      AudioManager.playTrack('foot_step');
     }
   }
 
   startExplodeSfx() {
-    AudioManager.play('player_hit');
+    AudioManager.playTrack('player_hit');
     this.explosionSfx.explode(this.playerBody.position);
   }
 
@@ -207,7 +207,7 @@ export default class GamePlayer {
     if (locked === false) {
       yForce = this.getJumpForce(inputs);
       if (yForce > 0) {
-        AudioManager.play('jump_1');
+        AudioManager.playTrack('jump_1');
       }
       xForce = this.getWalkingForce(inputs);
       if (xForce === 0) {

@@ -71,7 +71,7 @@ export default class GameEnemyRaySfx {
     tl.add('fire', 1.45);
     tl.set(body.scale, { x: 0.1 }, 'fire');
     tl.add(() => {
-      AudioManager.play('electric_blast');
+      AudioManager.playTrack('electric_blast');
       body.enabled = true;
     });
     tl.to(body.scale, 0.35, { x: 7, ease: Power2.easeOut }, 'fire');
@@ -98,7 +98,7 @@ export default class GameEnemyRaySfx {
     this.timeline.invalidate();
     this.running = true;
     this.body.enabled = false;
-    AudioManager.play('electric_charge');
+    AudioManager.playTrack('electric_charge');
   }
 
   hide() {
