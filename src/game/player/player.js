@@ -4,12 +4,12 @@
 // https://zackbellgames.com/2014/10/27/how-to-make-a-platformer-feel-good/
 // https://kotaku.com/5420545/lets-talk-about-jumping
 
-import { PHYSICS, EVENTS, GAME } from './const';
-import { Clamp, CartesianToCylinder, SyncBodyPhysicsMesh } from './utils';
-import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
-import GamePhysicsBody from './physics/physics-body';
-import PlayerExplosionSfx from './sfx/player-explosion-sfx';
-import { AudioManagerInstance as AudioManager } from './audio/audio-manager';
+import { PHYSICS, EVENTS, GAME } from '../const';
+import { Clamp, CartesianToCylinder, SyncBodyPhysicsMesh } from '../utils';
+import { MaterialFactoryInstance as MaterialFactory } from '../materials/material-factory';
+import GamePhysicsBody from '../physics/physics-body';
+import PlayerExplosionSfx from '../sfx/player-explosion-sfx';
+import { AudioManagerInstance as AudioManager } from '../audio/audio-manager';
 
 const DEFAULT = {
   audioManager: null,

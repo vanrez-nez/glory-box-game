@@ -25,14 +25,14 @@ import GameState from './game/state';
 import GameTools from './game/tools';
 import GameInput from './game/input';
 import GamePhysics from './game/physics/physics';
-import GamePlayer from './game/player';
+import GamePlayer from './game/player/player';
 import GameWorld from './game/world';
 import GameMap from './game/map';
 import GameSfxManager from './game/sfx-manager';
 import GameMoodManager from './game/mood-manager';
-import GameEnemy from './game/enemy';
-import GamePlayerHud from './game/player-hud';
-import GameEnemyHud from './game/enemy-hud';
+import GameEnemy from './game/enemy/enemy';
+import GamePlayerHud from './game/player/player-hud';
+import GameEnemyHud from './game/enemy/enemy-hud';
 import { AudioManagerInstance as AudioManager } from './game/audio/audio-manager';
 
 class Game {

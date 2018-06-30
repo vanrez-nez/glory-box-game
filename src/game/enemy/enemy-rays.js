@@ -1,6 +1,6 @@
-import { EVENTS } from './const';
-import JobScheduler from './job-scheduler';
-import GameEnemyRaySfx from './sfx/enemy-ray-sfx';
+import { EVENTS } from '../const';
+import JobScheduler from '../job-scheduler';
+import GameEnemyRaySfx from '../sfx/enemy-ray-sfx';
 
 const DEFAULT = {
   parent: null,

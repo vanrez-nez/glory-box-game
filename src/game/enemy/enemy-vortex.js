@@ -1,5 +1,5 @@
-import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
-import { AudioManagerInstance as AudioManager } from './audio/audio-manager';
+import { MaterialFactoryInstance as MaterialFactory } from '../materials/material-factory';
+import { AudioManagerInstance as AudioManager } from '../audio/audio-manager';
 
 const DEFAULT = {
   parent: null,
