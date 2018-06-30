@@ -1,4 +1,4 @@
-import { AUDIO_ASSETS } from './assets';
+import { AUDIO_ASSETS } from '../assets';
 import GameAudioTrack from './audio-track';
 import GameAudioMix from './audio-mix';
 

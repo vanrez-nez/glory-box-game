@@ -1,4 +1,4 @@
-import { PHYSICS } from './const';
+import { PHYSICS } from '../const';
 
 // https://github.com/kittykatattack/bump/blob/master/src/bump.js
 export default function SolveRectangleCollision(b1, b2, solve = true) {

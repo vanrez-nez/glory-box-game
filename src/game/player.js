@@ -7,9 +7,9 @@
 import { PHYSICS, EVENTS, GAME } from './const';
 import { Clamp, CartesianToCylinder, SyncBodyPhysicsMesh } from './utils';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
-import GamePhysicsBody from './physics-body';
+import GamePhysicsBody from './physics/physics-body';
 import PlayerExplosionSfx from './sfx/player-explosion-sfx';
-import { AudioManagerInstance as AudioManager } from './audio-manager';
+import { AudioManagerInstance as AudioManager } from './audio/audio-manager';
 
 const DEFAULT = {
   audioManager: null,

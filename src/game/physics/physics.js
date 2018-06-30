@@ -1,5 +1,5 @@
 
-import { PHYSICS } from './const';
+import { PHYSICS } from '../const';
 import SolveRectangleCollision from './collision';
 import GamePhysicsBody from './physics-body';
 

@@ -1,6 +1,6 @@
 import { PHYSICS, GAME } from '../const';
 import { SyncBodyPhysicsMesh, CartesianToCylinder } from '../utils';
-import GamePhysicsBody from '../physics-body';
+import GamePhysicsBody from '../physics/physics-body';
 import LineTrail from '../line-trail';
 import { MaterialFactoryInstance as MaterialFactory } from '../materials/material-factory';
 
