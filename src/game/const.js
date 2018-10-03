@@ -25,7 +25,7 @@ export const GAME = {
   CollectibleSocketOffset: 0,
   CollectibleItemOffset: 1.9,
   PlayerOffset: 2.45,
-  EnemyOffset: 4,
+  EnemyOffset: 5,
   CameraDistance: 35,
   ZoomCameraDistance: 150,
   PlatformZSize: 2,
@@ -39,9 +39,11 @@ export const KEYBOARD_BINDINGS = {
   Jump: [38, 32], // space, arrow up
   Left: [37],
   Right: [39],
+  Escape: [27],
 };
 
 export const EVENTS = {
+  GameRestart: 'EGameRestart',
   MapChunkLoaded: 'EMapChunkLoaded',
   MapChunkUnloaded: 'EMapChunkUnloaded',
   CollisionBegan: 'ECollisionBegan',
