@@ -14,7 +14,7 @@ export default class GameInput {
 
   setState(action, isDown) {
     this.state[action] = isDown;
-    this.events.emit(action, isDown);
+    this.events.emit(KB[action], isDown);
   }
 
   getKeyActionByCode(code) {
