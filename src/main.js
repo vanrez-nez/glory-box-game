@@ -2,24 +2,19 @@
 /*
   TODO:
     - Feat: Player falling on sides should generate friction and be able to jump
-    - Feat: Shake effect
     - Feat: Desintegration and reintegration of player
     - Feat: Player lobby with random freebies and initial impulse
-    - Feat: Audio Effects on Jump
     - Feat: Initial audio atmosphere for lobby and transition to full audio when player starts
     - Feat: Player rotation when walking and jumping
     - Feat: Game Menu with (start, audio, quality selector, logo and instructions)
     - Feat: Game HUD
-    - Feat: Danger pressure from bottom
     - Feat: Background geometry on center
     - Feat: Background geometry on sides
-    - Feat: Teasing audio effects
     - Feat: Leveling
     - Feat: Obstacles ()
-    - Feat: Powerups (impulsers, shields)
     - Feat: Illumination and vignette effect
 */
-import { CONFIG, GAME, EVENTS } from './game/const';
+import { CONFIG, GAME, EVENTS, KEYBOARD_BINDINGS } from './game/const';
 import Engine from './game/engine';
 import GameState from './game/state';
 import GameTools from './game/tools';
@@ -39,6 +34,7 @@ class Game {
   constructor() {
     this.started = false;
     this.init();
+    this.bindInputEvents();
     this.updateSize();
     this.attachEvents();
     this.loader = THREE.DefaultLoadingManager;
@@ -106,6 +102,23 @@ class Game {
     this.engine.scene.add(this.world.group);
     this.player.mesh.add(AudioManager.listener);
     this.engine.cameraTarget = this.player.mesh.position;
+  }
+
+  bindInputEvents() {
+    const { gameInput } = this;
+    gameInput.events.on(KEYBOARD_BINDINGS.Escape, (action, isDown) => {
+      this.pause();
+    });
+  }
+
+  pause() {
+    if (this.started) {
+      MainLoop.stop();
+    }
+  }
+
+  resume() {
+    MainLoop.start();
   }
 
   start() {
