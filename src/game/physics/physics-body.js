@@ -1,6 +1,5 @@
 
 import { EVENTS, PHYSICS } from '../const';
-import { Clamp } from '../utils';
 import CollisionEdges from './collision-edges';
 
 const DEFAULT = {
@@ -74,8 +73,8 @@ export default class GamePhysicsBody {
     const { velocity, acceleration, position } = this;
     const { friction, maxVelocity, onUpdate } = this.opts;
     velocity.add(acceleration);
-    velocity.x = Clamp(velocity.x, -maxVelocity.x, maxVelocity.x);
-    velocity.y = Clamp(velocity.y, -maxVelocity.y, maxVelocity.y);
+    velocity.x = THREE.Math.clamp(velocity.x, -maxVelocity.x, maxVelocity.x);
+    velocity.y = THREE.Math.clamp(velocity.y, -maxVelocity.y, maxVelocity.y);
     acceleration.set(0, 0);
     if (delta > 0) {
       const dt = (1000 / 60) / (delta * 1000) * timeScale;

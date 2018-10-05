@@ -5,7 +5,7 @@
 // https://kotaku.com/5420545/lets-talk-about-jumping
 
 import { PHYSICS, EVENTS, GAME } from '../const';
-import { Clamp, CartesianToCylinder, SyncBodyPhysicsMesh } from '../utils';
+import { CartesianToCylinder, SyncBodyPhysicsMesh } from '../utils';
 import { MaterialFactoryInstance as MaterialFactory } from '../materials/material-factory';
 import GamePhysicsBody from '../physics/physics-body';
 import PlayerExplosionSfx from '../sfx/player-explosion-sfx';
@@ -228,9 +228,9 @@ export default class GamePlayer {
     }
     if (!grounded) {
       // Modify height mass with velocity
-      mesh.scaleOffset.y = Clamp(playerBody.velocity.y * 0.5, -0.1, 0.9);
+      mesh.scaleOffset.y = THREE.Math.clamp(playerBody.velocity.y * 0.5, -0.1, 0.9);
       // Modity width mass with velocity
-      mesh.scaleOffset.x = Clamp(playerBody.velocity.y * -0.2, -0.4, 0.15);
+      mesh.scaleOffset.x = THREE.Math.clamp(playerBody.velocity.y * -0.2, -0.4, 0.15);
       mesh.scaleOffset.z = mesh.scaleOffset.x;
     }
   }

@@ -1,5 +1,5 @@
+import { groupBy } from 'lodash';
 import { CONFIG } from '../const';
-import { GroupBy } from '../utils';
 import WorldFloorMaterial from './world-floor-material';
 import WorldCylinderMaterial from './world-cylinder-material';
 import WorldSkyCylinderMaterial from './world-sky-cylinder-material';
@@ -78,11 +78,11 @@ export default class GameMaterialFactory {
   }
 
   getMaterialsByNodeName() {
-    return GroupBy(this.instances, obj => obj.opts.nodeName);
+    return groupBy(this.instances, obj => obj.opts.nodeName);
   }
 
   getMaterialsByMaterialType() {
-    return GroupBy(this.instances, obj => obj.constructor.name);
+    return groupBy(this.instances, obj => obj.constructor.name);
   }
 }
 

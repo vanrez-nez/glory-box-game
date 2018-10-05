@@ -1,6 +1,6 @@
 
+import { range, shuffle } from 'lodash';
 import { EVENTS, MAP, DIRECTIONS, LEVELS } from './const';
-import { ShuffleArray, ArrayRange } from './utils';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 import GameMapParser from './map-parser';
 import GamePlatform from './platform';
@@ -155,10 +155,9 @@ export default class GameMap {
     const { randomPicks: rP, prevPicks } = this;
     if (rP[level] === undefined || rP[level].length === 0) {
       const [start, end] = CHUNK_LEVELS[level];
-      let range = ArrayRange(start, end);
-      range = range.filter(n => prevPicks.indexOf(n) === -1);
-      ShuffleArray(range);
-      rP[level] = range;
+      let arr = shuffle(range(start, end));
+      arr = arr.filter(n => prevPicks.indexOf(n) === -1);
+      rP[level] = arr;
     }
     const pick = rP[level].pop();
     this.prevPicks.unshift(pick);
