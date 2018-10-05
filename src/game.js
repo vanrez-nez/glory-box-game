@@ -14,6 +14,7 @@
     - Feat: Obstacles ()
     - Feat: Illumination and vignette effect
 */
+import { debounce } from 'lodash';
 import Stats from 'stats.js';
 import MainLoop from 'mainloop.js';
 import { CONFIG, GAME, EVENTS, KEYBOARD_BINDINGS } from './game/const';
@@ -108,7 +109,10 @@ class Game {
 
   bindInputEvents() {
     const { gameInput } = this;
-    gameInput.events.on(KEYBOARD_BINDINGS.Escape, this.pause.bind(this));
+    const onKey = debounce(() => {
+      MainLoop.isRunning() ? this.pause() : this.resume();
+    }, 750, { leading: true, trailing: false });
+    gameInput.events.on(KEYBOARD_BINDINGS.Escape, onKey);
   }
 
   pause() {
