@@ -1,3 +1,4 @@
+import deepmerge from 'deepmerge';
 import DefaultMood from './default';
 
 const NeutralMood = deepmerge(DefaultMood, {

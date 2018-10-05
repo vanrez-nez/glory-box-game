@@ -1,3 +1,4 @@
+import { MeshLineMaterial } from 'three.meshline';
 import { QUALITY } from '../const';
 import { GetTextureRepeat } from '../utils';
 
@@ -92,13 +93,8 @@ export default class GameMetaMaterial {
       this.solvePropDefers(profile.args);
       if (THREE[mType]) {
         mat = new THREE[mType](profile.args);
-      } else if (window[mType]) {
-        /*
-          Some materials are from external libraries such as
-          the MeshLineMaterial, in that case we search for
-          a global declaration
-        */
-        mat = new window[mType](profile.args);
+      } else if (mType === 'MeshLineMaterial') {
+        mat = new MeshLineMaterial(profile.args);
       }
       mat.userData = {
         nodeId: this.opts.nodeName,

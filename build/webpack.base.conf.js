@@ -1,7 +1,8 @@
 'use strict'
+const webpack = require('webpack')
 const path = require('path')
-const utils = require('./utils')
 const config = require('../config')
+const pkg = require('../package.json')
 
 function resolve (dir) {
   return path.join(__dirname, '..', dir)
@@ -36,6 +37,9 @@ module.exports = {
       '@': resolve('src'),
     }
   },
+  plugins: [
+    new webpack.ProvidePlugin(pkg.globals),
+  ],
   module: {
     rules: [
       ...(config.dev.useEslint ? [createLintingRule()] : []),
@@ -64,7 +68,12 @@ module.exports = {
         options: {
           limit: 100,
         }
-      }
+      },
+      {
+        test: /\.js$/,
+        use: ['script-loader'],
+        include: [resolve('static/js/vendor')]
+      },
     ]
   },
   node: {

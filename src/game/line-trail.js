@@ -1,3 +1,4 @@
+import { MeshLineMaterial, MeshLine } from 'three.meshline';
 
 const DEFAULT = {
   maxPositions: 15,

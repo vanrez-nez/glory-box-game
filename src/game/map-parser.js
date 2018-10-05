@@ -1,3 +1,4 @@
+import thread from 'threads';
 import { MAP, DIRECTIONS } from './const';
 
 const DEFAULT = {

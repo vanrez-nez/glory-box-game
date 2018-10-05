@@ -1,4 +1,5 @@
 
+import * as dat from 'dat.gui';
 import { CONFIG } from './const';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 
