@@ -26,7 +26,7 @@ export default class GameLobby {
 
   addLogoMesh() {
     const extrudeSettings = {
-      amount: 0.4,
+      depth: 0.4,
       bevelEnabled: false,
     };
     const loader = new THREE.SVGLoader();

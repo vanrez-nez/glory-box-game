@@ -58,7 +58,7 @@ export default class CollectibleGlyph {
       CollectibleGlyph.SetHexVertices(pathHole, 2);
       shape.holes.push(pathHole);
       const extrudeSettings = {
-        amount: 0.3,
+        depth: 0.3,
         bevelEnabled: false,
       };
       SocketGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
