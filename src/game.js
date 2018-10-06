@@ -40,12 +40,26 @@ class Game {
     this.bindInputEvents();
     this.updateSize();
     this.attachEvents();
-    this.loader = THREE.DefaultLoadingManager;
-    this.loader.onProgress = (url, itemsLoaded, itemsTotal) => {
-      if (itemsLoaded === itemsTotal) {
-        this.start();
-      }
-    };
+    Promise.all([
+      this.loadAssets(),
+      this.loadMap(),
+    ]).then(this.start.bind(this));
+  }
+
+  async loadAssets() {
+    return new Promise((resolve) => {
+      this.loader = THREE.DefaultLoadingManager;
+      this.loader.onProgress = (url, itemsLoaded, itemsTotal) => {
+        if (itemsLoaded === itemsTotal) {
+          resolve();
+        }
+      };
+    });
+  }
+
+  async loadMap() {
+    const { map } = this;
+    await map.load();
   }
 
   init() {
@@ -128,11 +142,9 @@ class Game {
   start() {
     if (!this.started) {
       this.started = true;
-      setTimeout(() => {
-        CONFIG.EnableTools && this.addTools();
-        CONFIG.EnableStats && this.addStats();
-        this.moodManager.resetToDefault();
-      }, 1000);
+      CONFIG.EnableTools && this.addTools();
+      CONFIG.EnableStats && this.addStats();
+      this.moodManager.resetToDefault();
       MainLoop.start();
       this.restartGame();
     }

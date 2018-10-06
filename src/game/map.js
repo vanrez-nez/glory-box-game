@@ -25,16 +25,24 @@ export default class GameMap {
     this.events = new EventEmitter3();
     this.group = new THREE.Group();
     this.group.name = 'GameMap';
-    this.mapParser = new GameMapParser({
-      mapId: '#game_map',
-      onParse: this.initChunks.bind(this),
-    });
     this.initialized = false;
     this.prevPicks = [];
     this.masterChunks = {};
     this.mapChunks = [];
     this.chunkStates = {};
     this.randomPicks = {};
+  }
+
+  async load() {
+    return new Promise((resolve) => {
+      this.mapParser = new GameMapParser({
+        mapId: '#game_map',
+        onParse: () => {
+          this.initChunks();
+          resolve();
+        },
+      });
+    });
   }
 
   initChunks() {
