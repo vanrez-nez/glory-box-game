@@ -31,7 +31,7 @@ module.exports = {
      */
 
     // https://webpack.js.org/configuration/devtool/#development
-    devtool: 'cheap-module-eval-source-map',
+    devtool: 'eval-source-map',
     cacheBusting: true,
     cssSourceMap: true
   },
