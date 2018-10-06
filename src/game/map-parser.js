@@ -78,8 +78,7 @@ export default class GameMapParser {
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
           const color = getMapPixelRGB(x, y);
-          // eslint-disable-next-line
-          const key = color[0] + ',' + color[1] + ',' + color[2];
+          const key = `${color[0]},${color[1]},${color[2]}`;
           const type = Colors[key] || EmptyType;
           result.push(type);
         }
