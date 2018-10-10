@@ -90,9 +90,7 @@ export default class GameMoodManager {
 
   transitionEngine(presetNode, time) {
     const { bloomPass, scene, ambientLight, renderer } = this.opts.engine;
-    const qualities = Object.keys(QUALITY);
-    const qualityNode = presetNode[qualities[CONFIG.SceneQuality]];
-    const { BloomPass, Scene, AmbientLight, ToneMapping } = qualityNode;
+    const { BloomPass, Scene, AmbientLight, ToneMapping } = presetNode;
     const tl = new TimelineMax();
     if (BloomPass && bloomPass) {
       tl.to(bloomPass, time, {
@@ -150,14 +148,12 @@ export default class GameMoodManager {
     });
   }
 
-  transitionMaterials(materialsNode, time) {
+  transitionMaterials(presetNode, time) {
     const tl = new TimelineMax();
-    const qualities = Object.keys(QUALITY);
-    const qualityNode = materialsNode[qualities[CONFIG.MaterialQuality]];
     const matDict = MaterialFactory.getMaterialsByNodeName();
-    const keys = Object.keys(qualityNode);
+    const keys = Object.keys(presetNode);
     keys.forEach((key) => {
-      const matConfig = qualityNode[key];
+      const matConfig = presetNode[key];
       const instances = matDict[key];
       if (matConfig && instances) {
         this.transitionMaterialsGroup(tl, instances, matConfig, time);
@@ -165,9 +161,19 @@ export default class GameMoodManager {
     });
   }
 
-  transitionTo(moodPreset, time) {
-    this.transitionEngine(moodPreset.Engine, time);
+  getQualityNode(presetNode) {
+    const qualities = Object.keys(QUALITY);
+    return presetNode[qualities[CONFIG.SceneQuality]];
+  }
+
+  async transitionTo(moodPreset, time) {
+    const engineNode = this.getQualityNode(moodPreset.Engine);
+    const materialsNode = this.getQualityNode(moodPreset.Materials);
+    this.transitionEngine(engineNode, time);
     // this.transitionWorld(moodPreset.World, time);
-    this.transitionMaterials(moodPreset.Materials, time);
+    this.transitionMaterials(materialsNode, time);
+    return new Promise((resolve) => {
+      setTimeout(resolve, 1000);
+    });
   }
 }
