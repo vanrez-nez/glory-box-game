@@ -1,8 +1,8 @@
-import thread from 'threads';
+import threads from 'threads';
 import { MAP, DIRECTIONS } from './const';
 
 const DEFAULT = {
-  mapId: '',
+  imageElement: null,
   onParse: () => {},
 };
 
@@ -18,21 +18,38 @@ export default class GameMapParser {
     this.width = 0;
     this.height = 0;
     this.tiles = [];
-    this.mapImageData = this.getImageData(opts.mapId);
+    this.mapImageData = null;
+    this.init();
+  }
+
+  async init() {
+    await this.waitForImage();
+    this.readImageData();
     this.parseMap();
   }
 
-  getImageData(id) {
+  waitForImage() {
+    const { imageElement: img } = this.opts;
+    return new Promise((resolve) => {
+      if (img.complete || img.naturalWidth !== 0) {
+        resolve();
+      } else {
+        img.addEventListener('load', resolve);
+      }
+    });
+  }
+
+  readImageData() {
+    const { imageElement: img } = this.opts;
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    const img = document.querySelector(id);
     const { width: w, height: h } = img;
     canvas.width = w;
     canvas.height = h;
     ctx.drawImage(img, 0, 0);
     this.width = w;
     this.height = h;
-    return ctx.getImageData(0, 0, w, h).data;
+    this.mapImageData = ctx.getImageData(0, 0, w, h).data;
   }
 
   stepToDirection(x, y, direction) {
@@ -68,7 +85,7 @@ export default class GameMapParser {
   }
 
   parseMap() {
-    const t = thread.spawn((input, done) => {
+    const t = threads.spawn((input, done) => {
       const result = [];
       const { mapData: data, width, height, Colors, EmptyType } = input;
       function getMapPixelRGB(x, y) {

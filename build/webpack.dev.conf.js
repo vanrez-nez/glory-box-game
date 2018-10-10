@@ -7,7 +7,6 @@ const path = require('path')
 const baseWebpackConfig = require('./webpack.base.conf')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 const portfinder = require('portfinder')
 
@@ -16,11 +15,7 @@ const PORT = process.env.PORT && Number(process.env.PORT)
 
 const devWebpackConfig = merge(baseWebpackConfig, {
   module: {
-    rules: utils.styleLoaders({ 
-      sourceMap: config.dev.cssSourceMap, 
-      usePostCSS: true,
-      extract: true
-    })
+    rules: utils.styleLoaders({ sourceMap: config.dev.cssSourceMap, usePostCSS: true })
   },
   // cheap-module-eval-source-map is faster for development
   devtool: config.dev.devtool,
@@ -56,10 +51,6 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NamedModulesPlugin(), // HMR shows correct file names in console on update.
     new webpack.NoEmitOnErrorsPlugin(),
-    // extract css into its own file    
-    new ExtractTextPlugin({
-      filename: utils.assetsPath('css/[name].css'),
-    }),
     // https://github.com/ampedandwired/html-webpack-plugin
     new HtmlWebpackPlugin({
       filename: 'index.html',
@@ -73,8 +64,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         to: config.dev.assetsSubDirectory,
         ignore: ['.*']
       }
-    ]),
-
+    ])
   ]
 })
 

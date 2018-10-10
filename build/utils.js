@@ -19,7 +19,7 @@ exports.cssLoaders = function (options) {
     loader: 'css-loader',
     options: {
       sourceMap: options.sourceMap
-    }
+    }    
   }
 
   const postcssLoader = {
@@ -44,11 +44,17 @@ exports.cssLoaders = function (options) {
 
     // Extract CSS when that option is specified
     // (which is the case during production build)
-    return ExtractTextPlugin.extract({
-      use: loaders,
-    })
+    if (options.extract) {
+      return ExtractTextPlugin.extract({
+        use: loaders,
+        fallback: 'vue-style-loader'
+      })
+    } else {
+      return ['vue-style-loader'].concat(loaders)
+    }
   }
 
+  // https://vue-loader.vuejs.org/en/configurations/extract-css.html
   return {
     css: generateLoaders(),
     postcss: generateLoaders(),
@@ -60,7 +66,7 @@ exports.cssLoaders = function (options) {
   }
 }
 
-// Generate loaders for standalone style files
+// Generate loaders for standalone style files (outside of .vue)
 exports.styleLoaders = function (options) {
   const output = []
   const loaders = exports.cssLoaders(options)
@@ -69,7 +75,8 @@ exports.styleLoaders = function (options) {
     const loader = loaders[extension]
     output.push({
       test: new RegExp('\\.' + extension + '$'),
-      use: loader
+      use: loader,
+      include: /node_modules/,
     })
   }
 

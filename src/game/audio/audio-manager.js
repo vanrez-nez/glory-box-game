@@ -1,4 +1,4 @@
-import { AUDIO_ASSETS } from '../assets';
+// import { AUDIO_ASSETS } from '../assets';
 import GameAudioTrack from './audio-track';
 import GameAudioMix from './audio-mix';
 
@@ -15,7 +15,7 @@ export class GameAudioManager {
     this.loaded = false;
     this.queued = [];
     this.preload([
-      'static/audio/loop_drums.wav',
+      // 'static/audio/loop_drums.wav',
       'static/audio/jump_alt.wav',
       'static/audio/wind_loop.wav',
       'static/audio/dragon_near.wav',
@@ -32,7 +32,7 @@ export class GameAudioManager {
   preload(items) {
     const { loader } = this;
     this.itemsLeft = items.length;
-    items.forEach(item => loader.load(item, this.onItemLoaded.bind(this, item)));
+    //items.forEach(item => loader.load(item, this.onItemLoaded.bind(this, item)));
   }
 
   onItemLoaded(src, buffer) {
@@ -156,7 +156,7 @@ export class GameAudioManager {
     }
   }
 
-  mute(enabled) {}
+  mute() {}
 
   loadMix(mixId, opts) {
     const { mixes, listener } = this;

@@ -1,15 +1,18 @@
 'use strict'
-const webpack = require('webpack')
+const webpack = require('webpack');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path')
+const utils = require('./utils')
 const config = require('../config')
-const pkg = require('../package.json')
+const vueLoaderConfig = require('./vue-loader.conf')
+const stylusLoader = require("stylus-loader");
 
 function resolve (dir) {
   return path.join(__dirname, '..', dir)
 }
 
 const createLintingRule = () => ({
-  test: /\.(js)$/,
+  test: /\.(js|vue)$/,
   loader: 'eslint-loader',
   enforce: 'pre',
   include: [resolve('src'), resolve('test')],
@@ -22,7 +25,7 @@ const createLintingRule = () => ({
 module.exports = {
   context: path.resolve(__dirname, '../'),
   entry: {
-    main: './src/main.js'
+    app: './src/main.js'
   },
   output: {
     path: config.build.assetsRoot,
@@ -32,17 +35,55 @@ module.exports = {
       : config.dev.assetsPublicPath
   },
   resolve: {
-    extensions: ['.js', '.json'],
+    extensions: ['.js', '.vue', '.json'],
     alias: {
+      'vue$': 'vue/dist/vue.esm.js',
       '@': resolve('src'),
+      '@styles': resolve('src/styles'),
     }
   },
   plugins: [
-    new webpack.ProvidePlugin(pkg.globals),
+    new webpack.ProvidePlugin({
+      EventEmitter3: 'eventemitter3',
+      TweenMax: [
+        'gsap',
+        'TweenMax'
+      ]
+    }),
+    new CopyWebpackPlugin([
+      {
+        from: resolve('static'),
+        to: resolve('dist/static'),
+        ignore: ['.*']
+      }
+    ]),
+    new stylusLoader.OptionsPlugin({
+      default: {
+          use: [
+              require("nib")(),
+              require("rupture")(),
+              require("poststylus")([
+                  require("rucksack-css")({
+                      autoprefixer: false,
+                      fallbacks: false
+                  }),
+              ])
+          ],
+          import: [
+              "~nib/lib/nib/index.styl",
+              "~rupture/rupture/index.styl"
+          ]
+      }
+    })
   ],
   module: {
     rules: [
       ...(config.dev.useEslint ? [createLintingRule()] : []),
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader',
+        options: vueLoaderConfig
+      },
       {
         test: /\.js$/,
         loader: 'babel-loader',
@@ -52,29 +93,39 @@ module.exports = {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         loader: 'url-loader',
         options: {
-          limit: 2000,
+          limit: 10000,
+          name: utils.assetsPath('img/[name].[hash:7].[ext]')
         }
       },
       {
         test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
         loader: 'url-loader',
         options: {
-          limit: 2000,
+          limit: 10000,
+          name: utils.assetsPath('media/[name].[hash:7].[ext]')
         }
       },
       {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
         loader: 'url-loader',
         options: {
-          limit: 100,
+          limit: 10000,
+          name: utils.assetsPath('fonts/[name].[hash:7].[ext]')
         }
       },
       {
         test: /\.js$/,
         use: ['script-loader'],
-        include: [resolve('static/js/vendor')]
+        include: [resolve('static/js')]
       },
-    ]
+      {
+        test: /\.(glb)$/,
+        loader: 'file-loader',
+        options: {
+          name: utils.assetsPath('models/[name].[hash:7].[ext]'),
+        },
+      },
+    ],
   },
   node: {
     // prevent webpack from injecting useless setImmediate polyfill because Vue
@@ -87,5 +138,5 @@ module.exports = {
     net: 'empty',
     tls: 'empty',
     child_process: 'empty'
-  },
+  }
 }

@@ -14,10 +14,9 @@
     - Feat: Obstacles ()
     - Feat: Illumination and vignette effect
 */
-import { debounce } from 'lodash';
 import Stats from 'stats.js';
 import MainLoop from 'mainloop.js';
-import { CONFIG, GAME, EVENTS, KEYBOARD_BINDINGS } from './game/const';
+import { CONFIG, GAME, EVENTS } from './game/const';
 import Engine from './game/engine';
 import GameState from './game/state';
 import GameTools from './game/tools';
@@ -33,11 +32,16 @@ import GamePlayerHud from './game/player/player-hud';
 import GameEnemyHud from './game/enemy/enemy-hud';
 import { AudioManagerInstance as AudioManager } from './game/audio/audio-manager';
 
-class Game {
-  constructor() {
+const DEFAULT = {
+  canvasElement: null,
+  mapElement: null,
+};
+
+export default class Game {
+  constructor(opts) {
+    this.opts = { ...DEFAULT, ...opts };
     this.started = false;
     this.init();
-    this.bindInputEvents();
     this.updateSize();
     this.attachEvents();
     Promise.all([
@@ -63,20 +67,23 @@ class Game {
   }
 
   init() {
+    const { opts } = this;
     THREE.Cache.enabled = true;
     this.gameInput = new GameInput();
     this.engine = new Engine({
-      canvas: document.body.querySelector('#js-canvas'),
+      canvas: opts.canvasElement,
     });
     this.physics = new GamePhysics({
       bounds: new THREE.Box2(
         new THREE.Vector2(GAME.BoundsLeft, GAME.BoundsTop),
-        new THREE.Vector2(GAME.BoundsRight, GAME.BoundsBottom)),
+        new THREE.Vector2(GAME.BoundsRight, GAME.BoundsBottom),
+      ),
     });
     this.player = new GamePlayer({
     });
     this.map = new GameMap({
       physics: this.physics,
+      mapImageElement: opts.mapElement,
     });
     this.enemy = new GameEnemy({});
     this.world = new GameWorld();
@@ -121,14 +128,6 @@ class Game {
     this.engine.cameraTarget = this.player.mesh.position;
   }
 
-  bindInputEvents() {
-    const { gameInput } = this;
-    const onKey = debounce(() => {
-      MainLoop.isRunning() ? this.pause() : this.resume();
-    }, 750, { leading: true, trailing: false });
-    gameInput.events.on(KEYBOARD_BINDINGS.Escape, onKey);
-  }
-
   pause() {
     if (this.started) {
       MainLoop.stop();
@@ -146,13 +145,15 @@ class Game {
       CONFIG.EnableStats && this.addStats();
       this.moodManager.resetToDefault();
       MainLoop.start();
-      this.restartGame();
+      this.restart();
     }
   }
 
-  restartGame() {
-    const { gameState, engine, map,
-      enemy, player, sfxManager } = this;
+  restart() {
+    const {
+      gameState, engine, map,
+      enemy, player, sfxManager,
+    } = this;
     gameState.restart();
     engine.resetCamera();
     map.restart();
@@ -167,7 +168,7 @@ class Game {
     AudioManager.stopMix('game_theme');
     AudioManager.playTrack('drama_end');
     setTimeout(() => {
-      this.restartGame();
+      this.restart();
     }, 3000);
   }
 
@@ -200,8 +201,10 @@ class Game {
   }
 
   onUpdate(delta) {
-    const { engine, gameInput, enemy, player, map,
-      world, physics, playerHud, enemyHud } = this;
+    const {
+      engine, gameInput, enemy, player, map,
+      world, physics, playerHud, enemyHud,
+    } = this;
     delta /= 1000;
 
     const { position: bodyPosition } = player.playerBody;
@@ -229,5 +232,3 @@ class Game {
     }
   }
 }
-
-window.game = new Game();

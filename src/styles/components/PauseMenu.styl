@@ -1,0 +1,26 @@
+.PauseMenu
+  top 0
+  size 100%
+  position absolute
+  background rgba(0, 0, 0, 0.8)
+  display flex
+  align-items center
+  justify-content center
+
+.PauseMenu-list
+  padding 0
+
+.PauseMenu-listItem
+  overflow hidden
+  > a:focus
+    outline 0
+  > a
+    font-size 2.5rem
+    color white
+    opacity 0.45
+    text-decoration none
+
+.PauseMenu-listItem--active,
+.PauseMenu-listItem:hover
+  > a
+    opacity 1

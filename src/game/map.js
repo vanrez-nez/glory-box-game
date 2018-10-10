@@ -17,6 +17,7 @@ const CHUNK_LEVELS = {
 
 const DEFAULT = {
   physics: null,
+  mapImageElement: null,
 };
 
 export default class GameMap {
@@ -34,9 +35,10 @@ export default class GameMap {
   }
 
   async load() {
+    const { opts } = this;
     return new Promise((resolve) => {
       this.mapParser = new GameMapParser({
-        mapId: '#game_map',
+        imageElement: opts.mapImageElement,
         onParse: () => {
           this.initChunks();
           resolve();

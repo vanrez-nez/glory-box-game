@@ -6,7 +6,7 @@ export const QUALITY = {
 
 export const CONFIG = {
   EnableTools: false,
-  EnableStats: false,
+  EnableStats: true,
   EnableOrbitControls: false,
   EnableAxes: false,
   DebugCollisions: false,
@@ -39,7 +39,6 @@ export const KEYBOARD_BINDINGS = {
   Jump: [38, 32], // space, arrow up
   Left: [37],
   Right: [39],
-  Escape: [27],
 };
 
 export const EVENTS = {

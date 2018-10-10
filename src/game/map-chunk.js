@@ -67,7 +67,7 @@ export default class GameMapChunk {
     const { states, defaultStates } = this;
     this.getObjects().forEach((o) => {
       if (o.state) {
-        const id = o.state.id;
+        const { id } = o.state;
         const state = states[id] || defaultStates[id];
         o.state.write(state);
       }
