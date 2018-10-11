@@ -174,12 +174,12 @@ export default class GameEnemyDragon {
     });
   }
 
-  updateHead(delta) {
+  updateHead() {
     const { positionY, head, headAmp, sinForce } = this;
     this.setOrbitPosition(this.head, this.theta);
     this.lookAtCenter(head, Math.PI / 4 * 6);
     const headCos = Math.cos(this.time) * headAmp;
-    head.position.y = this.positionY + headCos;
+    head.position.y = positionY + headCos;
 
     /*
       (x) coord of tail positions array are irrelevant to the actual
@@ -212,7 +212,7 @@ export default class GameEnemyDragon {
     this.spine.pushPosition(this.head.position);
   }
 
-  update(delta, playerPosition) {
+  update(delta) {
     if (this.modelLoaded) {
       this.speed += delta * 0.1;
       this.speed = Math.min(this.opts.maxSpeed, this.speed);

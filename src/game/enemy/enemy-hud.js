@@ -39,7 +39,7 @@ export default class GameEnemyHud {
     }, 'enemy_eyes');
   }
 
-  update(delta) {
+  update() {
     const { camera } = this.opts;
     const { head } = this;
     if (this.modelLoaded) {
