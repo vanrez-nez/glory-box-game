@@ -1,11 +1,14 @@
 <template>
-  <router-link v-if='isRouter'
-    :name="routerName"
+  <router-link
+    class="MenuAnchor"
+    v-if='isRouter'
+    :to="{name: routeName}"
     @click.native="$emit('click')"
   >
     <slot></slot>
   </router-link>
   <a v-else
+    class="MenuAnchor"
     :href="href"
     @click="$emit('click')"
     :target='target'
@@ -26,15 +29,17 @@ export default {
       type: String,
       default: '#',
     },
-    routerName: {
+    routeName: {
       type: String,
       default: '',
     },
   },
   computed: {
     isRouter() {
-      return this.routerName !== '';
+      return this.routeName !== '';
     },
   },
 };
 </script>
+
+<style lang="stylus" src='@styles/components/MenuAnchor.styl'></style>

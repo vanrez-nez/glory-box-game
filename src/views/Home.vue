@@ -1,50 +1,71 @@
 <template>
-  <div class="Home" v-hotkey="keymap">
-    <keep-alive>
-      <game ref="game" :paused='menuVisible'></game>
-    </keep-alive>
-    <pause-menu
-      v-if="menuVisible"
-      @resume="menuVisible = false"
-      @restart="onRestart"
-    ></pause-menu>
+  <div class="Home">
+    <generic-menu
+      v-if='mainMenuVisible'
+      :items='mainMenu'
+    >
+    </generic-menu>
+    <generic-menu
+      v-if='qualityMenuVisible'
+      :items='qualityMenu'>
+    </generic-menu>
   </div>
 </template>
 
 <script>
-import Game from '@/components/Game';
-import PauseMenu from '@/components/PauseMenu';
+import GenericMenu from '@/components/GenericMenu';
+
+const LOW_QUALITY = 0;
+const MEDIUM_QUALITY = 1;
+const HIGH_QUALITY = 2;
 
 export default {
   name: 'Home',
   data() {
     return {
-      menuVisible: false,
+      mainMenuVisible: true,
+      qualityMenuVisible: false,
+      mainMenu: [
+        { text: 'START', onClick: this.onStartActivate },
+        { text: 'CONTROLS', onClick: this.onControls },
+        { text: 'ABOUT', routeName: 'about' },
+      ],
+      qualityMenu: [
+        { text: 'LOW', onClick: this.bindToQuality(LOW_QUALITY) },
+        { text: 'MEDIUM', onClick: this.bindToQuality(MEDIUM_QUALITY) },
+        { text: 'HIGH', onClick: this.bindToQuality(HIGH_QUALITY) },
+      ],
     };
   },
   components: {
-    Game,
-    PauseMenu,
+    GenericMenu,
+  },
+  activated() {
+    this.mainMenuVisible = true;
+    this.qualityMenuVisible = false;
   },
   methods: {
-    toggleMenu() {
-      this.menuVisible = !this.menuVisible;
+    bindToQuality(quality) {
+      return this.onQualitySelect.bind(this, quality);
     },
-    onRestart() {
-      const { game } = this.$refs;
-      game.$emit('restart');
+    onStartActivate() {
+      this.mainMenuVisible = false;
+      this.qualityMenuVisible = true;
     },
-  },
-  computed: {
-    keymap() {
-      return {
-        esc: this.toggleMenu,
-      };
+    onControls() {
+      console.log('controls');
+    },
+    onQualitySelect(quality) {
+      switch (quality) {
+        case LOW_QUALITY:
+        case MEDIUM_QUALITY:
+        case HIGH_QUALITY:
+          this.$router.push('game');
+          break;
+      }
     },
   },
 };
 </script>
 
-<style lang="stylus">
-  src='@styles/views/Home.styl';
-</style>
+<style lang="stylus" src='@styles/views/Home.styl'></style>
