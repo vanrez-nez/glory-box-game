@@ -1,12 +1,13 @@
 <template>
-  <div class="Home">
+  <div class="Home" v-hotkey="keymap">
     <generic-menu
-      v-if='mainMenuVisible'
+      class='Home-mainMenu'
+      v-if="activeMenu === 'main-menu'"
       :items='mainMenu'
     >
     </generic-menu>
     <generic-menu
-      v-if='qualityMenuVisible'
+      v-if="activeMenu === 'quality-menu'"
       :items='qualityMenu'>
     </generic-menu>
   </div>
@@ -19,12 +20,14 @@ const LOW_QUALITY = 0;
 const MEDIUM_QUALITY = 1;
 const HIGH_QUALITY = 2;
 
+const MAIN_MENU = 'main-menu';
+const QUALITY_MENU = 'quality-menu';
+
 export default {
   name: 'Home',
   data() {
     return {
-      mainMenuVisible: true,
-      qualityMenuVisible: false,
+      activeMenu: MAIN_MENU,
       mainMenu: [
         { text: 'START', onClick: this.onStartActivate },
         { text: 'CONTROLS', onClick: this.onControls },
@@ -41,16 +44,14 @@ export default {
     GenericMenu,
   },
   activated() {
-    this.mainMenuVisible = true;
-    this.qualityMenuVisible = false;
+    this.activeMenu = MAIN_MENU;
   },
   methods: {
     bindToQuality(quality) {
       return this.onQualitySelect.bind(this, quality);
     },
     onStartActivate() {
-      this.mainMenuVisible = false;
-      this.qualityMenuVisible = true;
+      this.activeMenu = QUALITY_MENU;
     },
     onControls() {
       console.log('controls');
@@ -63,6 +64,15 @@ export default {
           this.$router.push('game');
           break;
       }
+    },
+  },
+  computed: {
+    keymap() {
+      return {
+        esc: () => {
+          this.activeMenu = MAIN_MENU;
+        },
+      };
     },
   },
 };
