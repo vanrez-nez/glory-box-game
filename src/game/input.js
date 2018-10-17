@@ -1,10 +1,17 @@
+import Gamepad from '@/common/gamepad';
 import { KEYBOARD_BINDINGS as KB } from './const';
+
 
 export default class GameInput {
   constructor() {
     this.events = new EventEmitter3();
+    this.gamepad = new Gamepad({
+      autoupdate: false,
+      onButtonChange: this.handleButtonEvent.bind(this),
+      // onAxesChange: this.handleInput,
+    });
     this.initState();
-    this.setupKeyboard();
+    this.bindKeyboard();
   }
 
   initState() {
@@ -31,10 +38,22 @@ export default class GameInput {
     }
   }
 
-  setupKeyboard() {
+  handleButtonEvent(e) {
+    const { detail } = e;
+    const action = this.getKeyActionByCode(detail.name);
+    if (action) {
+      this.setState(action, detail.isDown);
+    }
+  }
+
+  bindKeyboard() {
     Object.keys(KB).forEach(() => {
       document.addEventListener('keydown', this.handleKeyEvent.bind(this), false);
       document.addEventListener('keyup', this.handleKeyEvent.bind(this), false);
     });
+  }
+
+  update() {
+    this.gamepad.update();
   }
 }
