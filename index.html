@@ -1,13 +1,96 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css?family=Teko:500" rel="stylesheet">
-    <title>glory-box</title>
-  </head>
-  <body>
+    <link href="https://fonts.googleapis.com/css?family=Teko:400" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
+    <title>Glory Box</title>
+    <style>
+        body {
+            background-color: #120C17;
+        };
+    </style>
+</head>
+
+<body>
+    <svg xmlns="http://www.w3.org/2ffffff/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"
+        version="1.1">
+        <defs>
+            <symbol id="icon-logo" viewBox="0 0 32 32">
+                <path fill="#1a1b21" stroke="#5c95cf" stroke-width="0.3529" stroke-miterlimit="10" stroke-linecap="butt" stroke-linejoin="miter" style="stroke: var(--color2, #5c95cf)" style="fill: var(--color1, #1a1b21)" d="M31.815 15.996c0 8.737-7.082 15.819-15.819 15.819s-15.819-7.082-15.819-15.819c0-8.737 7.082-15.819 15.819-15.819s15.819 7.082 15.819 15.819z"></path>
+                <path fill="#222025" style="fill: var(--color3, #222025)" d="M20.142 5.902h-14.363v15.74l6.070 4.685h14.363v-15.731z"></path>
+                <path fill="#f9d8e6" style="fill: var(--color4, #f9d8e6)" d="M7.049 16.675v-1.359h3.061v-0.679h-3.061v-1.359h4.817v2.038l-0.873 0.679 0.873 0.679v2.038h-4.817v-1.359h3.061v-0.679h-3.061z"></path>
+                <path fill="#ea298f" style="fill: var(--color5, #ea298f)" d="M13.419 13.278h4.817v5.435h-4.817v-5.435zM15.166 14.637v2.717h1.315v-2.717h-1.315z"></path>
+                <path fill="#fffffb" style="fill: var(--color6, #fffffb)" d="M23.283 15.316v-2.038h1.747v2.038l-0.873 0.679 0.873 0.679v2.038h-1.747v-2.038h-1.756v2.038h-1.747v-2.038l0.873-0.679-0.873-0.679v-2.038h1.747v2.038h1.756z"></path>
+                <path fill="#aa206e" style="fill: var(--color7, #aa206e)" d="M8.752 8.108v2.717h1.306v-2.038h1.747v3.397h-4.808v-5.435h4.817v1.359h-3.061z"></path>
+                <path fill="#aa206e" style="fill: var(--color7, #aa206e)" d="M13.358 6.749h1.747v4.076h3.114v1.359h-4.87v-5.435z"></path>
+                <path fill="#ea298f" style="fill: var(--color5, #ea298f)" d="M13.393 21.192v-1.359h4.817v3.397h-3.061v2.038h-1.747v-3.397h3.061v-0.679h-3.070zM17.337 23.91l0.873 1.359h-1.747l-0.873-1.359h1.747z"></path>
+                <path fill="#ea298f" style="fill: var(--color5, #ea298f)" d="M23.283 23.23h-3.52v-3.397h1.747v2.038h1.773v-2.038h1.747v5.435h-5.276v-1.359h3.52v-0.679z"></path>
+                <path fill="#4a4652" style="fill: var(--color8, #4a4652)" d="M6.97 19.851h4.976v3.864z"></path>
+                <path fill="#4a4652" style="fill: var(--color8, #4a4652)" d="M25.030 12.167l-5.32 0.018-0.044-4.182z"></path>
+            </symbol>
+            <symbol id="icon-info" viewBox="0 0 24 24">
+                <path d="M11.016 9v-2.016h1.969v2.016h-1.969zM12 20.016c4.406 0 8.016-3.609 8.016-8.016s-3.609-8.016-8.016-8.016-8.016 3.609-8.016 8.016 3.609 8.016 8.016 8.016zM12 2.016c5.531 0 9.984 4.453 9.984 9.984s-4.453 9.984-9.984 9.984-9.984-4.453-9.984-9.984 4.453-9.984 9.984-9.984zM11.016 17.016v-6h1.969v6h-1.969z"></path>
+            </symbol>
+            <symbol id="icon-fullscreen_enable" viewBox="0 0 33 32">
+                <path d="M3.422 21.39h-3.422v10.61h11.979v-3.422h-8.556z" />
+                <path d="M0 11.979h3.422v-8.556h8.556v-3.422h-11.979z" />
+                <path d="M21.39 0v3.422h8.556v8.556h3.422v-11.979z" />
+                <path d="M29.947 28.578h-8.556v3.422h11.979v-10.61h-3.422z" />
+            </symbol>
+            <symbol id="icon-gamepad" viewBox="0 0 50 32">
+                <path fill="none" stroke="#ffffff" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10"
+                    stroke-width="2.6667" d="M38.267 3.2h-26.667c-6.133 0-10.267 4.8-10.267 10.933s1.467 16.533 7.467 16.533c4.267 0 8.133-11.6 12.667-11.733h6.8c3.867 0.133 7.733 11.733 14.133 11.733 5.2 0 6.4-9.333 6.4-16.533 0-9.867-8.533-10.933-10.533-10.933z"
+                    style="stroke:var(--color1, #ffffff)" />
+                <path d="M20.267 3.2v-3.2h9.333v3.2z" />
+                <path d="M13.333 14.4h-2.133v-2c0-0.533-0.533-1.067-1.067-1.067h-0.267c-0.533 0-1.067 0.533-1.067 1.067v2.133h-2.133c-0.533 0-1.067 0.533-1.067 1.067v0.4c0 0.533 0.533 1.067 1.067 1.067h2.133v2.133c0 0.533 0.533 1.067 1.067 1.067h0.4c0.533 0 1.067-0.533 1.067-1.067v-2.133h2c0.533 0 1.067-0.533 1.067-1.067v-0.4c0-0.667-0.4-1.2-1.067-1.2z" />
+                <path d="M41.067 12.667c0 0.957-0.776 1.733-1.733 1.733s-1.733-0.776-1.733-1.733c0-0.957 0.776-1.733 1.733-1.733s1.733 0.776 1.733 1.733z" />
+                <path d="M37.867 16.4c0 0.957-0.776 1.733-1.733 1.733s-1.733-0.776-1.733-1.733c0-0.957 0.776-1.733 1.733-1.733s1.733 0.776 1.733 1.733z" />
+                <path d="M41.467 18.8c0 0.957-0.776 1.733-1.733 1.733s-1.733-0.776-1.733-1.733c0-0.957 0.776-1.733 1.733-1.733s1.733 0.776 1.733 1.733z" />
+                <path d="M44.533 15.067c0 0.957-0.776 1.733-1.733 1.733s-1.733-0.776-1.733-1.733c0-0.957 0.776-1.733 1.733-1.733s1.733 0.776 1.733 1.733z" />
+                <path fill="none" stroke="#ffffff" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10"
+                    stroke-width="1.3333" d="M19.467 6.267h10.933" style="stroke:var(--color1, #ffffff)" />
+                <path fill="none" stroke="#ffffff" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10"
+                    stroke-width="1.3333" d="M22.533 9.467h1.6" style="stroke:var(--color1, #ffffff)" />
+                <path fill="none" stroke="#ffffff" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10"
+                    stroke-width="1.3333" d="M25.733 9.467h1.6" style="stroke:var(--color1, #ffffff)" />
+            </symbol>
+            <symbol id="icon-keyboard" viewBox="0 0 55 32">
+                <path fill="none" stroke="#ffffff" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10"
+                    stroke-width="2.735" d="M1.368 1.368h52.103v29.265h-52.103v-29.265z" style="stroke:var(--color1, #ffffff)" />
+                <path d="M12.171 21.060h27.35v5.197h-27.35v-5.197z" />
+                <path d="M5.060 21.060h4.376v5.060h-4.376v-5.060z" />
+                <path d="M12.171 5.88h4.376v5.060h-4.376v-5.060z" />
+                <path d="M12.171 13.265h4.376v5.060h-4.376v-5.060z" />
+                <path d="M5.060 13.265h4.376v5.060h-4.376v-5.060z" />
+                <path d="M5.060 5.88h4.376v5.060h-4.376v-5.060z" />
+                <path d="M26.12 5.88h4.376v5.060h-4.376v-5.060z" />
+                <path d="M48.957 18.325h-9.436v-5.060h2.462v-7.385h6.974z" />
+                <path d="M41.983 21.060h6.974v5.060h-6.974v-5.060z" />
+                <path d="M26.12 13.265h4.376v5.060h-4.376v-5.060z" />
+                <path d="M32.684 5.88h6.838v5.060h-6.838v-5.060z" />
+                <path d="M32.684 13.265h4.376v5.060h-4.376v-5.060z" />
+                <path d="M19.009 13.265h4.376v5.060h-4.376v-5.060z" />
+                <path d="M19.009 5.88h4.376v5.060h-4.376v-5.060z" />
+            </symbol>
+            <symbol id="icon-fullscreen_disable" viewBox="0 0 32 32">
+                <path d="M8.727 0v8.727h-8.727v2.909h11.636v-11.636h-2.909z" />
+                <path d="M32 8.727h-8.727v-8.727h-2.909v11.636h11.636v-2.909z" />
+                <path d="M32 20.364h-11.636v11.636h2.909v-8.727h8.727v-2.909z" />
+                <path d="M11.636 20.364h-11.636v2.909h8.727v8.727h2.909v-11.636z" />
+            </symbol>
+            <symbol id="icon-audio_disabled" viewBox="0 0 31 32">
+                <path d="M6 8h-6v16h6l5.333 8h4.667v-32h-4.667l-5.333 8zM13.333 2.667v26.667h-0.667l-5.333-8h-4.667v-10.667h4.667l5.333-8h0.667zM27.2 16l3.733-3.733-1.867-1.867-3.733 3.733-3.733-3.733-1.867 1.867 3.733 3.733-3.733 3.733 1.867 1.867 3.733-3.733 3.733 3.733 1.867-1.867-3.733-3.733z" />
+            </symbol>
+            <symbol id="icon-audio_enabled" viewBox="0 0 27 32">
+                <path d="M6 8h-6v16h6l5.333 8h4.667v-32h-4.667l-5.333 8zM13.333 2.667v26.667h-0.533l-5.333-8h-4.8v-10.667h4.8l5.333-8h0.533zM18.667 25.333h2.667v-16h-2.667v16zM24 13.333v8h2.667v-8h-2.667z" />
+            </symbol>
+        </defs>
+    </svg>
     <div id="app"></div>
     <!-- built files will be auto injected -->
-  </body>
+</body>
+
 </html>
