@@ -1,8 +1,23 @@
 @import '../vars'
+@import '../mixins'
+@import '../helpers'
 
 .Home
-  size 100%
-  background $cinder
-  display flex
-  align-items center
-  justify-content center
+  @extends .view-wrapper
+  background $CINDER
+
+.Home-menuTitle
+  font-family 'Oswald', sans-serif
+  color rgba($STEEL_BLUE, 0.56)
+  font-size rem(18px)
+  letter-spacing rem(1px)
+
+.Home-menuContainer
+  top 40%
+  left 50%
+  position absolute
+  transform translate(-50%, -50%)
+  height 510px
+
+.Home .GenericMenu-item
+  display inline-block

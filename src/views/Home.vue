@@ -1,20 +1,31 @@
 <template>
-  <div class="Home" v-hotkey="keymap">
-    <generic-menu
-      class='Home-mainMenu'
-      v-if="activeMenu === 'main-menu'"
-      :items='mainMenu'
-    >
-    </generic-menu>
-    <generic-menu
-      v-if="activeMenu === 'quality-menu'"
-      :items='qualityMenu'>
-    </generic-menu>
+  <div class="Home">
+    <div class="Home-menuContainer">
+      <game-logo></game-logo>
+      <template v-if="activeMenu === 'main-menu'">
+        <generic-menu
+          class='Home-mainMenu'
+          :items='mainMenu'
+        >
+        </generic-menu>
+      </template>
+      <template v-if="activeMenu === 'quality-menu'">
+        <p class="Home-menuTitle">Graphics Quality</p>
+        <generic-menu
+          :items='qualityMenu'
+          @exit='reset'
+        >
+        </generic-menu>
+      </template>
+    </div>
+    <action-bar></action-bar>
   </div>
 </template>
 
 <script>
+import ActionBar from '@/components/ActionBar';
 import GenericMenu from '@/components/GenericMenu';
+import GameLogo from '@/components/GameLogo';
 
 const LOW_QUALITY = 0;
 const MEDIUM_QUALITY = 1;
@@ -41,10 +52,12 @@ export default {
     };
   },
   components: {
+    ActionBar,
     GenericMenu,
+    GameLogo,
   },
   activated() {
-    this.activeMenu = MAIN_MENU;
+    this.reset();
   },
   methods: {
     bindToQuality(quality) {
@@ -54,7 +67,7 @@ export default {
       this.activeMenu = QUALITY_MENU;
     },
     onControls() {
-      console.log('controls');
+      // console.log('controls');
     },
     onQualitySelect(quality) {
       switch (quality) {
@@ -65,14 +78,8 @@ export default {
           break;
       }
     },
-  },
-  computed: {
-    keymap() {
-      return {
-        esc: () => {
-          this.activeMenu = MAIN_MENU;
-        },
-      };
+    reset() {
+      this.activeMenu = MAIN_MENU;
     },
   },
 };
