@@ -1,16 +1,23 @@
 <template>
   <div class="PauseMenu">
-    <generic-menu :items='menuItems'></generic-menu>
+    <generic-menu
+      :vertical='true'
+      :items='menuItems'
+      @exit='onMenuExit'
+    ></generic-menu>
+    <action-bar></action-bar>
   </div>
 </template>
 
 <script>
 import GenericMenu from './GenericMenu';
+import ActionBar from './ActionBar';
 
 export default {
   name: 'PauseMenu',
   components: {
     GenericMenu,
+    ActionBar,
   },
   data() {
     return {
@@ -36,6 +43,9 @@ export default {
     };
   },
   methods: {
+    onMenuExit() {
+      this.$emit('menuExit');
+    },
     onResume() {
       this.$emit('resume');
     },
