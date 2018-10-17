@@ -65,6 +65,7 @@ module.exports = {
     'no-continue': 0,
     'prefer-rest-params': 0,
     'object-curly-newline': 0,
+    'object-property-newline': 0,
   },
   globals: {
     'THREE': false,
