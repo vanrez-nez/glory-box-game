@@ -1,8 +1,9 @@
 <template>
-  <div class="Game" v-hotkey="keymap">
-      <game-stage ref="gameStage"></game-stage>
+  <div class="Game">
+    <game-stage ref="gameStage" @stagePause="onStagePause"></game-stage>
     <pause-menu
       v-if="menuVisible"
+      @menuExit="onMenuExit"
       @resume="onResume"
       @restart="onRestart"
     ></pause-menu>
@@ -36,10 +37,15 @@ export default {
         this.onPause();
       }
     },
+    onStagePause() {
+      this.menuVisible = true;
+    },
     onResume() {
       const { gameStage } = this.$refs;
       this.menuVisible = false;
-      gameStage.$emit('resume');
+      this.$nextTick(() => {
+        gameStage.$emit('resume');
+      });
     },
     onPause() {
       const { gameStage } = this.$refs;
@@ -50,6 +56,9 @@ export default {
       const { gameStage } = this.$refs;
       this.menuVisible = false;
       gameStage.$emit('restart');
+    },
+    onMenuExit() {
+      this.toggleMenu();
     },
   },
   computed: {
