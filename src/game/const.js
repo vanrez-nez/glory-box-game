@@ -36,12 +36,14 @@ export const GAME = {
 };
 
 export const KEYBOARD_BINDINGS = {
-  Jump: [38, 32], // space, arrow up
-  Left: [37],
-  Right: [39],
+  Jump: [38, 32, 'A'], // space, arrow up
+  Left: [37, 'DPAD_LEFT'],
+  Right: [39, 'DPAD_RIGHT'],
+  Pause: [27, 'SELECT'],
 };
 
 export const EVENTS = {
+  GamePause: 'EGamePause',
   GameRestart: 'EGameRestart',
   MapChunkLoaded: 'EMapChunkLoaded',
   MapChunkUnloaded: 'EMapChunkUnloaded',
