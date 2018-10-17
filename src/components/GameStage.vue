@@ -10,7 +10,8 @@
 </template>
 
 <script>
-import Game from '../game';
+import { EVENTS } from '@/game/const';
+import Game from '@/game';
 
 export default {
   name: 'GameStage',
@@ -35,9 +36,15 @@ export default {
           canvasElement: canvas,
           mapElement:  map,
         });
+        this.game.events.on(EVENTS.Pause, () => {
+          console.log('paused!');
+        });
       } else {
         this.restart();
       }
+    },
+    onStagePause() {
+      this.$emit('stagePause');
     },
     resume() {
       this.game.resume();
