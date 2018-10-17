@@ -1,0 +1,21 @@
+@import '../vars'
+
+.ActionBar
+  position absolute
+  bottom 25px
+  right 25px
+  
+.ActionBar-button
+  display inline-block
+  padding 5px 10px
+  cursor pointer
+  &:hover
+    svg
+      opacity: 1
+
+.ActionBar-svgIcon
+  > svg
+    height 20px
+    width 32px
+    opacity 0.5
+    fill $WHITE
