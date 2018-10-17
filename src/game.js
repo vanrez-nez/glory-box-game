@@ -16,7 +16,7 @@
 */
 import Stats from 'stats.js';
 import MainLoop from 'mainloop.js';
-import { CONFIG, GAME, EVENTS } from './game/const';
+import { CONFIG, GAME, EVENTS, KEYBOARD_BINDINGS } from './game/const';
 import Engine from './game/engine';
 import GameState from './game/state';
 import GameTools from './game/tools';
@@ -40,6 +40,7 @@ const DEFAULT = {
 export default class Game {
   constructor(opts) {
     this.opts = { ...DEFAULT, ...opts };
+    this.events = new EventEmitter3();
     this.started = false;
     this.init();
     this.updateSize();
@@ -193,6 +194,9 @@ export default class Game {
     MainLoop.setDraw(this.onDraw.bind(this));
     MainLoop.setEnd(this.onEnd.bind(this));
     window.addEventListener('resize', this.updateSize.bind(this));
+    this.gameInput.events.on(KEYBOARD_BINDINGS.Pause, () => {
+      this.events.emit(EVENTS.GamePause);
+    });
   }
 
   updateSize() {
@@ -209,7 +213,7 @@ export default class Game {
 
     const { position: bodyPosition } = player.playerBody;
     const { position: meshPosition } = player.mesh;
-
+    gameInput.update();
     physics.update(delta);
     enemy.update(delta, engine.camera, bodyPosition);
     player.update(delta, gameInput.state);
