@@ -1,5 +1,10 @@
 <template>
-  <ul class="GenericMenu" v-hotkey="keymap">
+  <ul class="GenericMenu">
+    <game-input
+      :keyboardBindings="keyboardBindings"
+      :gamepadBindings="gamepadBindings"
+    >
+    </game-input>
     <li class="GenericMenu-item"
       :class='getMenuItemModifiers(index)'
       v-for="(item, index) in items"
@@ -20,11 +25,13 @@
 
 <script>
 import MenuAnchor from './MenuAnchor';
+import GameInput from './GameInput';
 
 export default {
   name: 'GenericMenu',
   components: {
     MenuAnchor,
+    GameInput,
   },
   data() {
     return {
@@ -33,6 +40,10 @@ export default {
     };
   },
   props: {
+    vertical: {
+      type: Boolean,
+      default: false,
+    },
     items: {
       type: Array,
       default: () => [],
@@ -66,9 +77,13 @@ export default {
       const { selectedIndex } = this;
       const isSelected = idx === selectedIndex;
       return {
-        'GenericMenu-listItem--active': isSelected,
+        'GenericMenu-item--active': isSelected,
       };
     },
+    /*
+      A guard to avoid processing inputs when
+      current component is not active
+    */
     ifActive(fn) {
       return () => {
         // eslint-disable-next-line
@@ -77,15 +92,56 @@ export default {
         }
       };
     },
+    exit() {
+      this.$emit('exit');
+    },
   },
   computed: {
-    keymap() {
-      return {
-        up: this.ifActive(this.selectPrev),
-        down: this.ifActive(this.selectNext),
-        tab: this.ifActive(this.selectNext),
-        enter: this.ifActive(this.selectCurrent),
+    gamepadBindings() {
+      const { vertical } = this;
+      let bindings = {
+        select: this.ifActive(this.selectCurrent),
+        back: this.ifActive(this.exit),
+        a: this.ifActive(this.selectCurrent),
+        b: this.ifActive(this.exit),
       };
+
+      if (vertical) {
+        bindings = { ...bindings, ...{
+          dpad_down: this.ifActive(this.selectNext),
+          dpad_up: this.ifActive(this.selectPrev),
+          laxe_up: this.ifActive(this.selectPrev),
+          laxe_down: this.ifActive(this.selectNext),
+        } };
+      } else {
+        bindings = { ...bindings, ...{
+          dpad_right: this.ifActive(this.selectNext),
+          dpad_left: this.ifActive(this.selectPrev),
+          laxe_left: this.ifActive(this.selectPrev),
+          laxe_right: this.ifActive(this.selectNext),
+        } };
+      }
+      return bindings;
+    },
+    keyboardBindings() {
+      const { vertical } = this;
+      let bindings = {
+        enter: this.ifActive(this.selectCurrent),
+        esc: this.ifActive(this.exit),
+      };
+
+      if (vertical) {
+        bindings = { ...bindings, ...{
+          up: this.ifActive(this.selectPrev),
+          down: this.ifActive(this.selectNext),
+        } };
+      } else {
+        bindings = { ...bindings, ...{
+          left: this.ifActive(this.selectPrev),
+          right: this.ifActive(this.selectNext),
+        } };
+      }
+      return bindings;
     },
   },
 };

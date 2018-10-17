@@ -1,15 +1,30 @@
+@import '../vars'
+@import '../mixins'
+
+$borderSize = 2px
+
 .GenericMenu
+  transform translate3d(0, 0, 0px)
   padding 0
   list-style none
 
-.GenericMenu-listItem
+.GenericMenu-item
   overflow hidden
   > a:focus
     outline 0
+  > a:hover
+    color $WHITE
   > a
-    font-size 2.5rem
+    display block
+    line-height 1.5rem
+    border-radius 28px
+    border $borderSize solid transparent
+    padding 3px 10px 0px 10px 
+    font-size rem(24px)
     text-decoration none
 
-.GenericMenu-listItem--active
+.GenericMenu-item--active
   > a
+    color $VIOLET_RED
+    border-color rgba($VIOLET_RED, 0.6)
     opacity 1
