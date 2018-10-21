@@ -47,8 +47,12 @@ module.exports = {
       EventEmitter3: 'eventemitter3',
       TweenMax: [
         'gsap',
-        'TweenMax'
-      ]
+        'TweenMax',
+      ],
+      TimelineMax: [
+        'gsap',
+        'TimelineMax',
+      ],
     }),
     new CopyWebpackPlugin([
       {
