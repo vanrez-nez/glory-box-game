@@ -4,14 +4,23 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css?family=Teko:400" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
     <title>Glory Box</title>
     <style>
         body {
             background-color: #120C17;
         };
     </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js" async></script>
+    <script>
+      WebFontConfig = {
+        active: function() {
+          sessionStorage.fontsLoaded = true;
+        },
+        google: {
+          families: ['Teko:300', 'Oswald']
+        }
+      };
+    </script>
 </head>
 
 <body>
