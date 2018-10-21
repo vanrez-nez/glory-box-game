@@ -7,9 +7,6 @@ const DEFAULT = {
   playerHud: null,
   engine: null,
   player: null,
-  enemy: null,
-  word: null,
-  map: null,
 };
 
 export default class GameSfxManager {

@@ -1,59 +1,72 @@
-import Gamepad from '@/common/gamepad';
-import { KEYBOARD_BINDINGS as KB } from './const';
+import { InputManager } from '@/common/input-manager';
+import { KEYBOARD_CONTROLS, GAMEPAD_CONTROLS, EVENTS } from './const';
 
+const GAMEPAD_INDEX = 0;
 
 export default class GameInput {
   constructor() {
+    this.actionsState = {
+      Jump: false,
+      Left: false,
+      Right: false,
+    };
     this.events = new EventEmitter3();
-    this.gamepad = new Gamepad({
-      autoupdate: false,
-      onButtonChange: this.handleButtonEvent.bind(this),
-      // onAxesChange: this.handleInput,
-    });
-    this.initState();
-    this.bindKeyboard();
+    this.inputManager = new InputManager({});
+    this.onPauseDelegate = this.onPause.bind(this);
+    this.bind();
   }
 
-  initState() {
-    this.state = Object.keys(KB).reduce(
-      (o, k) => ({ ...o, [k]: false }), {});
+  bind() {
+    const { onPauseDelegate, inputManager } = this;
+    inputManager.opts.keyboardBindings = {
+      Escape: onPauseDelegate,
+    };
+    inputManager.opts.gamepadBindings = {
+      Select: onPauseDelegate,
+      Back: onPauseDelegate,
+    };
   }
 
-  setState(action, isDown) {
-    this.state[action] = isDown;
-    this.events.emit(KB[action], isDown);
+  onPause() {
+    this.events.emit(EVENTS.GamePause);
   }
 
-  getKeyActionByCode(code) {
-    return Object.keys(KB).find(
-      k => KB[k].indexOf(code) > -1);
+  isPressed(state, keySet) {
+    for (let i = 0; i < keySet.length; i++) {
+      if (state[keySet[i]]) {
+        return true;
+      }
+    }
+    return false;
   }
 
-  handleKeyEvent(event) {
-    const code = event.keyCode || event.which || event.charCode;
-    const action = this.getKeyActionByCode(code);
-    if (action) {
-      const isDown = event.type === 'keydown';
-      this.setState(action, isDown);
+  updateKeyboardState(propName, keySet) {
+    const { actionsState: aState } = this;
+    const { keyboard } = this.inputManager.state;
+    aState[propName] = this.isPressed(keyboard, keySet);
+  }
+
+  updateGamepadState(propName, keySet) {
+    const { actionsState: aState } = this;
+    const { gamepad } = this.inputManager.state;
+    const gp = gamepad[GAMEPAD_INDEX];
+    if (gp && gp.connected) {
+      const buttons = gp.buttons;
+      aState[propName] = aState[propName] || this.isPressed(buttons, keySet);
     }
   }
 
-  handleButtonEvent(e) {
-    const { detail } = e;
-    const action = this.getKeyActionByCode(detail.name);
-    if (action) {
-      this.setState(action, detail.isDown);
-    }
+  updateActionsState() {
+    this.updateKeyboardState('Jump', KEYBOARD_CONTROLS.Jump);
+    this.updateKeyboardState('Left', KEYBOARD_CONTROLS.Left);
+    this.updateKeyboardState('Right', KEYBOARD_CONTROLS.Right);
+    this.updateGamepadState('Jump', GAMEPAD_CONTROLS.Jump);
+    this.updateGamepadState('Left', GAMEPAD_CONTROLS.Left);
+    this.updateGamepadState('Right', GAMEPAD_CONTROLS.Right);
   }
 
-  bindKeyboard() {
-    Object.keys(KB).forEach(() => {
-      document.addEventListener('keydown', this.handleKeyEvent.bind(this), false);
-      document.addEventListener('keyup', this.handleKeyEvent.bind(this), false);
-    });
-  }
-
-  update() {
-    this.gamepad.update();
+  get state() {
+    this.updateActionsState();
+    return this.actionsState;
   }
 }

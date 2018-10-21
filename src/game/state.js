@@ -1,7 +1,10 @@
+import { PAUSE_GAME } from '@/store/modules/game';
 import { EVENTS } from './const';
 
 const DEFAULT = {
+  store: null,
   map: null,
+  enemy: null,
 };
 
 export default class GameState {
@@ -12,11 +15,28 @@ export default class GameState {
     this.attachEvents();
   }
 
+  onStoreMutation(mutationType, callback) {
+    const { store } = this.opts;
+    store.subscribe((mutation, state) => {
+      if (mutation.type === mutationType) {
+        callback(mutation.payload, state);
+      }
+    });
+  }
+
   attachEvents() {
     const { map, enemy } = this.opts;
     map.events.on(EVENTS.CollectiblePickup, this.onCollectiblePickup.bind(this));
     enemy.rayEvents.on(EVENTS.EnemyRayHit, this.onEnemyRayHit.bind(this));
     enemy.dragonEvents.on(EVENTS.EnemyDragonHit, this.onDragonHit.bind(this));
+    this.onStoreMutation(PAUSE_GAME, this.onPauseMutation.bind(this));
+  }
+
+  onPauseMutation(state) {
+    const { events } = this;
+    if (state === false) {
+      events.emit(EVENTS.GameResume);
+    }
   }
 
   onEnemyRayHit() {
@@ -42,5 +62,17 @@ export default class GameState {
     this.deaths = 0;
     this.attackPower = 0;
     this.collectHistory = [];
+  }
+
+  get paused() {
+    const { store } = this.opts;
+    return store.state.game.paused;
+  }
+
+  set paused(value) {
+    const { store } = this.opts;
+    if (this.paused !== value) {
+      store.commit(PAUSE_GAME, value);
+    }
   }
 }

@@ -1,3 +1,8 @@
+import {
+  KEYBOARD,
+  GAMEPAD_BUTTONS,
+} from '@/common/input-manager';
+
 export const QUALITY = {
   Low: 0,
   Medium: 1,
@@ -35,16 +40,23 @@ export const GAME = {
   BoundsTop: Infinity,
 };
 
-export const KEYBOARD_BINDINGS = {
-  Jump: [38, 32, 'A'], // space, arrow up
-  Left: [37, 'DPAD_LEFT'],
-  Right: [39, 'DPAD_RIGHT'],
-  Pause: [27, 'SELECT'],
+
+export const GAMEPAD_CONTROLS = {
+  Jump: [GAMEPAD_BUTTONS.A],
+  Left: [GAMEPAD_BUTTONS.DpadLeft],
+  Right: [GAMEPAD_BUTTONS.DpadRight],
+};
+
+export const KEYBOARD_CONTROLS = {
+  Jump: [KEYBOARD.Space, KEYBOARD.ArrowUp],
+  Left: [KEYBOARD.ArrowLeft],
+  Right: [KEYBOARD.ArrowRight],
 };
 
 export const EVENTS = {
   GamePause: 'EGamePause',
   GameRestart: 'EGameRestart',
+  GameResume: 'EGameResume',
   MapChunkLoaded: 'EMapChunkLoaded',
   MapChunkUnloaded: 'EMapChunkUnloaded',
   CollisionBegan: 'ECollisionBegan',
