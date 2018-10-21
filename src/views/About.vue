@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import GameInput from '@/components/GameInput';
+import GameInput from '@/components/game-input';
 
 export default {
   name: 'About',

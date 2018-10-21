@@ -99,4 +99,4 @@ export default {
 };
 </script>
 
-<style lang="stylus" src='@styles/components/ActionBar.styl'></style>
+<style lang="stylus" src='@styles/components/action-bar.styl'></style>

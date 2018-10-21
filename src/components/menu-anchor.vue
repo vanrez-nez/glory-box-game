@@ -42,4 +42,4 @@ export default {
 };
 </script>
 
-<style lang="stylus" src='@styles/components/MenuAnchor.styl'></style>
+<style lang="stylus" src='@styles/components/menu-anchor.styl'></style>

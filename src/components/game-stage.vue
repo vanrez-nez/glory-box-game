@@ -10,7 +10,6 @@
 </template>
 
 <script>
-import { EVENTS } from '@/game/const';
 import Game from '@/game';
 
 export default {
@@ -22,8 +21,6 @@ export default {
   },
   created() {
     this.$on('restart', this.restart);
-    this.$on('pause', this.pause);
-    this.$on('resume', this.resume);
   },
   mounted() {
     this.init();
@@ -35,26 +32,14 @@ export default {
         this.game = new Game({
           canvasElement: canvas,
           mapElement:  map,
-        });
-        this.game.events.on(EVENTS.Pause, () => {
-          console.log('paused!');
+          store: this.$store,
         });
       } else {
         this.restart();
       }
     },
-    onStagePause() {
-      this.$emit('stagePause');
-    },
-    resume() {
-      this.game.resume();
-    },
-    pause() {
-      this.game.pause();
-    },
     restart() {
       this.game.restart();
-      this.game.resume();
     },
   },
 };

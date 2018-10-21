@@ -24,8 +24,8 @@
 </template>
 
 <script>
-import MenuAnchor from './MenuAnchor';
-import GameInput from './GameInput';
+import MenuAnchor from './menu-anchor';
+import GameInput from './game-input';
 
 export default {
   name: 'GenericMenu',
@@ -100,25 +100,21 @@ export default {
     gamepadBindings() {
       const { vertical } = this;
       let bindings = {
-        select: this.ifActive(this.selectCurrent),
-        back: this.ifActive(this.exit),
-        a: this.ifActive(this.selectCurrent),
-        b: this.ifActive(this.exit),
+        Select: this.ifActive(this.selectCurrent),
+        Back: this.ifActive(this.exit),
+        A: this.ifActive(this.selectCurrent),
+        B: this.ifActive(this.exit),
       };
 
       if (vertical) {
         bindings = { ...bindings, ...{
-          dpad_down: this.ifActive(this.selectNext),
-          dpad_up: this.ifActive(this.selectPrev),
-          laxe_up: this.ifActive(this.selectPrev),
-          laxe_down: this.ifActive(this.selectNext),
+          DpadDown: this.ifActive(this.selectNext),
+          DpadUp: this.ifActive(this.selectPrev),
         } };
       } else {
         bindings = { ...bindings, ...{
-          dpad_right: this.ifActive(this.selectNext),
-          dpad_left: this.ifActive(this.selectPrev),
-          laxe_left: this.ifActive(this.selectPrev),
-          laxe_right: this.ifActive(this.selectNext),
+          DpadRight: this.ifActive(this.selectNext),
+          DpadLeft: this.ifActive(this.selectPrev),
         } };
       }
       return bindings;
@@ -126,19 +122,19 @@ export default {
     keyboardBindings() {
       const { vertical } = this;
       let bindings = {
-        enter: this.ifActive(this.selectCurrent),
-        esc: this.ifActive(this.exit),
+        Enter: this.ifActive(this.selectCurrent),
+        Escape: this.ifActive(this.exit),
       };
 
       if (vertical) {
         bindings = { ...bindings, ...{
-          up: this.ifActive(this.selectPrev),
-          down: this.ifActive(this.selectNext),
+          ArrowUp: this.ifActive(this.selectPrev),
+          ArrowDown: this.ifActive(this.selectNext),
         } };
       } else {
         bindings = { ...bindings, ...{
-          left: this.ifActive(this.selectPrev),
-          right: this.ifActive(this.selectNext),
+          ArrowLeft: this.ifActive(this.selectPrev),
+          ArrowRight: this.ifActive(this.selectNext),
         } };
       }
       return bindings;
@@ -147,4 +143,4 @@ export default {
 };
 </script>
 
-<style lang="stylus" src='@styles/components/GenericMenu.styl'></style>
+<style lang="stylus" src='@styles/components/generic-menu.styl'></style>

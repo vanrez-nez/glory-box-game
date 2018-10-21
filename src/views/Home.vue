@@ -23,9 +23,9 @@
 </template>
 
 <script>
-import ActionBar from '@/components/ActionBar';
-import GenericMenu from '@/components/GenericMenu';
-import GameLogo from '@/components/GameLogo';
+import ActionBar from '@/components/action-bar';
+import GenericMenu from '@/components/generic-menu';
+import GameLogo from '@/components/game-logo';
 
 const LOW_QUALITY = 0;
 const MEDIUM_QUALITY = 1;
@@ -85,4 +85,4 @@ export default {
 };
 </script>
 
-<style lang="stylus" src='@styles/views/Home.styl'></style>
+<style lang="stylus" src='@styles/views/home.styl'></style>

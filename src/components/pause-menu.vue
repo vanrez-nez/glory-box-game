@@ -3,15 +3,16 @@
     <generic-menu
       :vertical='true'
       :items='menuItems'
-      @exit='onMenuExit'
+      @exit='onResume'
     ></generic-menu>
     <action-bar></action-bar>
   </div>
 </template>
 
 <script>
-import GenericMenu from './GenericMenu';
-import ActionBar from './ActionBar';
+import { PAUSE_GAME } from '@/store/modules/game';
+import GenericMenu from './generic-menu';
+import ActionBar from './action-bar';
 
 export default {
   name: 'PauseMenu',
@@ -43,11 +44,8 @@ export default {
     };
   },
   methods: {
-    onMenuExit() {
-      this.$emit('menuExit');
-    },
     onResume() {
-      this.$emit('resume');
+      this.$store.commit(PAUSE_GAME, false);
     },
     onRestart() {
       this.$emit('restart');
@@ -56,4 +54,4 @@ export default {
 };
 </script>
 
-<style lang="stylus" src="@styles/components/PauseMenu.styl"></style>
+<style lang="stylus" src="@styles/components/pause-menu.styl"></style>

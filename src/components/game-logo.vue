@@ -18,4 +18,4 @@ export default {
 };
 </script>
 
-<style lang="stylus" src='@styles/components/GameLogo.styl'></style>
+<style lang="stylus" src='@styles/components/game-logo.styl'></style>
