@@ -4,7 +4,7 @@
 
 .Home
   @extends .view-wrapper
-  background $CINDER
+  background $REVOLVER
 
 .Home-menuTitle
   font-family 'Oswald', sans-serif
@@ -13,11 +13,13 @@
   letter-spacing rem(1px)
 
 .Home-menuContainer
-  top 40%
-  left 50%
-  position absolute
-  transform translate(-50%, -50%)
-  height 510px
+  absCenter()
+  top 65%
 
 .Home .GenericMenu-item
   display inline-block
+
+.Home-gameLogo
+  width 50vw
+  height 60%
+  absCenter(true, false)

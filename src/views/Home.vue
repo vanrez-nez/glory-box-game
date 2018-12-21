@@ -1,7 +1,7 @@
 <template>
   <div class="Home">
+    <game-logo class="Home-gameLogo"></game-logo>
     <div class="Home-menuContainer">
-      <game-logo></game-logo>
       <template v-if="activeMenu === 'main-menu'">
         <generic-menu
           class='Home-mainMenu'

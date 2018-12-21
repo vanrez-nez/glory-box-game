@@ -1,10 +1,15 @@
+@import '../mixins'
+
 .GameLogo
-  width 400px
-  height 400px
+  min-width 300px
+  min-height 300px
   pointer-events none
   margin auto
   > svg
-    padding 40px
-    size 100%
+    size 50%
+    absCenter()
   > canvas
     position: absolute
+    size 100%
+    left 0
+    top 0
