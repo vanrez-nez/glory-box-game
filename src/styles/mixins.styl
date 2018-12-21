@@ -6,3 +6,17 @@ rem(value) {
     return unit(value, u)
   }
 }
+
+absCenter(horizontal = true, vertical = true)
+  position absolute
+  display block
+  if (horizontal and vertical)
+    left 50%
+    top 50%
+    transform translate(-50%, -50%)
+  else if (horizontal)
+    left 50%
+    transform translateX(-50%)
+  else if (vertical)
+    top 50%
+    transform translateY(-50%)
