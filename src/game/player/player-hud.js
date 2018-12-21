@@ -1,5 +1,5 @@
+import { GetScreenCoords } from '@/common/three-utils';
 import { GAME, EVENTS } from '../const';
-import { GetScreenCoords } from '../utils';
 import GameSteeringTrailsSfx from '../sfx/steering-trails-sfx';
 import { MaterialFactoryInstance as MaterialFactory } from '../materials/material-factory';
 

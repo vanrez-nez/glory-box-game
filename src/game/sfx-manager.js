@@ -1,5 +1,5 @@
+import { GetScreenSize } from '@/common/three-utils';
 import { EVENTS } from './const';
-import { GetScreenSize } from './utils';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 
 const DEFAULT = {
