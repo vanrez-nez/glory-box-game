@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import Game from '@/game';
+import Game from '@/game/main';
 
 export default {
   name: 'GameStage',
@@ -35,11 +35,13 @@ export default {
           store: this.$store,
         });
       } else {
-        this.restart();
+        // this.restart();
       }
     },
     restart() {
-      this.game.restart();
+      const { game } = this;
+      // game.restart();
+      // game.resume();
     },
   },
 };
