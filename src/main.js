@@ -13,5 +13,6 @@ import 'three/examples/js/postprocessing/RenderPass';
 import 'three/examples/js/postprocessing/ShaderPass';
 import 'three/examples/js/postprocessing/UnrealBloomPass';
 import 'three/examples/js/loaders/GLTFLoader';
+import 'three/examples/js/controls/OrbitControls';
 
 import './vue-init';
