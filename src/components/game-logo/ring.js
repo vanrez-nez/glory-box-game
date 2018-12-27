@@ -1,9 +1,10 @@
+
 const DEFAULT = {
   radius: 1,
   speed: 1,
   thickness: 0.2,
-  segments: 10,
-  minSize: 0.1,
+  segments: 5,
+  minSize: 0.25,
   maxSize: 3,
   colors: [0xffffff],
 };
@@ -11,9 +12,7 @@ const DEFAULT = {
 export default class GameLogoRing {
   constructor(opts) {
     this.opts = { ...DEFAULT, ...opts };
-    this.group = new THREE.Group();
     this.mesh = this.createRing();
-    this.group.add(this.mesh);
   }
 
   createRing() {
@@ -24,23 +23,33 @@ export default class GameLogoRing {
     for (let i = 1; i < segments.length; i += 2) {
       thetaStart += segments[i - 1];
       const thetaLength = segments[i];
-      const segmentGeo = new THREE.RingGeometry(
-        /* innerRadius */ radius - thickness,
-        /* outerRadius */ radius,
-        /* thetaSegments */ Math.ceil(thetaLength * 10),
-        /* phiSegments */ 1,
-        /* thetaStart */ thetaStart,
-        /* thetaLength */ thetaLength,
-      );
+      const segmentGeo = this.arcGeometry(radius - thickness, radius, thetaStart, thetaLength);
       thetaStart += thetaLength;
       this.setRandomFacesColor(segmentGeo.faces);
       geo.merge(segmentGeo);
     }
-    const mat = new THREE.MeshBasicMaterial({
+    const mat = new THREE.MeshStandardMaterial({
       vertexColors: THREE.FaceColors,
       wireframe: false,
     });
-    return new THREE.Mesh(geo, mat);
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    return mesh;
+  }
+
+  arcGeometry(innerRadius, outerRadius, thetaStart, thetaLength) {
+    const buffGeometry = new THREE.Geometry();
+    const shape = new THREE.Shape();
+    shape.absarc(0, 0, outerRadius, thetaStart, thetaStart + thetaLength, false);
+    shape.absarc(0, 0, innerRadius, thetaStart + thetaLength, thetaStart, true);
+    const extrudeSettings = {
+      depth: 0.3,
+      bevelEnabled: false,
+      curveSegments: Math.ceil(thetaLength * 7),
+    };
+    const geo = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
+    return buffGeometry.fromBufferGeometry(geo);
   }
 
   setRandomFacesColor(faces) {
@@ -66,7 +75,7 @@ export default class GameLogoRing {
 
   update(delta) {
     const { speed } = this.opts;
-    const { group } = this;
-    group.rotation.z -= delta * speed * 0.0001;
+    const { mesh } = this;
+    mesh.rotation.z -= delta * speed * 0.0001;
   }
 }
