@@ -13,23 +13,19 @@ export default class GameLogo {
     this.init();
     this.bind();
     this.initLights();
-    this.initBackground();
-    this.initOrbitControls();
+    this.initLightsBackground();
+    this.initShadowsBackground();
     this.initRings();
   }
 
   init() {
     const { opts } = this;
-    this.clock = new THREE.Clock();
     this.renderer = new THREE.WebGLRenderer({
       canvas: opts.canvasElement,
       alpha: true,
       antialias: true,
     });
-    this.renderer.renderReverseSided = true;
-    this.renderer.renderSingleSided = true;
     this.renderer.shadowMap.enabled = true;
-    // this.renderer.shadowMap = THREE.PCFShadowMap;
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.camera = new THREE.PerspectiveCamera(45, 1, 1, 300);
     this.camera.position.z = 10;
@@ -54,37 +50,56 @@ export default class GameLogo {
     MainLoop.stop();
   }
 
-  initOrbitControls() {
-    const { scene, camera } = this;
-    const controls = new THREE.OrbitControls(camera);
-    scene.add(controls);
-    this.controls = controls;
-  }
-
   initLights() {
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-    const spotLight = new THREE.SpotLight(0xffffff, 3.5, 20, Math.PI / 9, 0.9, 2);
-    const spotLightHelper = new THREE.SpotLightHelper(spotLight);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+    const spotLight = new THREE.SpotLight(0xffffff, 0.9, 15, Math.PI / 8, 0.8, 1);
     spotLight.position.z = 10;
-    this.spotLightHelper = spotLightHelper;
-    const pointLight = new THREE.PointLight(0xffffff, 13, 20, 10);
+    const pointLight = new THREE.PointLight(0xffffff, 5, 25, 9);
     this.pointLight = pointLight;
     pointLight.castShadow = true;
-    pointLight.position.z = 0.13;
-    const pointLightHelper = new THREE.PointLightHelper(pointLight, 1);
-    this.scene.add(pointLightHelper, pointLight, spotLight, ambientLight);
+    pointLight.position.z = 0.5;
+    this.scene.add(pointLight, spotLight, ambientLight);
   }
 
-  initBackground() {
+  initLightsBackground() {
     const { scene, camera } = this;
-    const [w, h] = GetScreenSize(camera, 20);
-    const rad = Math.min(w, h) / 2;
-    const geo = new THREE.CircleBufferGeometry(rad, 30, 0, Math.PI * 2);
+    const [w, h] = GetScreenSize(camera, 10);
+    const geo = new THREE.PlaneBufferGeometry(w, h, 1, 1);
+    const mat = new THREE.MeshPhongMaterial({ color: 0x53315B, transparent: true });
+    mat.onBeforeCompile = (shader) => {
+      shader.fragmentShader = shader.fragmentShader.replace(
+        'gl_FragColor = vec4( outgoingLight, diffuseColor.a );',
+        `
+          // Subtract opacity with light distance decay
+          pointLight = pointLights[ 0 ];
+          vec3 viewPosition = - vViewPosition;
+          float lightDistance = length(pointLight.position - viewPosition);
+          float lightDecay = pow( saturate( -lightDistance / pointLight.distance + 1.0 ), pointLight.decay);
+          gl_FragColor = vec4(outgoingLight, lightDecay - 0.25);
+        `);
+    };
+    const mesh = new THREE.Mesh(geo, mat);
+    scene.add(mesh);
+  }
+
+  initShadowsBackground() {
+    const { scene, camera } = this;
+    const [w, h] = GetScreenSize(camera, 10);
+    const geo = new THREE.PlaneBufferGeometry(w, h, 1, 1);
     const mat = new THREE.ShadowMaterial({ color: 0x0 });
+    mat.onBeforeCompile = (shader) => {
+      shader.fragmentShader = shader.fragmentShader.replace(
+        'gl_FragColor = vec4( color, opacity * ( 1.0 - getShadowMask() ) );',
+        `
+          // Make shadows softer with distance
+          vec3 lightToPosition = vPointShadowCoord[ 0 ].xyz;
+          float shadowDecay = length(lightToPosition) * 0.25;
+          gl_FragColor = vec4( color, opacity * ( 1.0 - getShadowMask()) - shadowDecay );
+        `);
+    };
     const mesh = new THREE.Mesh(geo, mat);
     mesh.receiveShadow = true;
     mesh.castShadow = true;
-    mesh.position.z = 0;
     scene.add(mesh);
   }
 
@@ -98,9 +113,12 @@ export default class GameLogo {
       0x4C4E6E,
       0x422840,
     ];
-    const r1 = new GameLogoRing({ radius: rad * 0.6, thickness, colors, speed: 1.0 });
-    const r2 = new GameLogoRing({ radius: rad * 0.7, thickness, colors, speed: -0.7 });
-    const r3 = new GameLogoRing({ radius: rad * 0.8, thickness, colors, speed: 0.4 });
+    const r1 = new GameLogoRing({
+      radius: rad * 0.6, thickness, colors, depth: 0.4, speed: 1.0 });
+    const r2 = new GameLogoRing({
+      radius: rad * 0.72, thickness, colors, depth: 0.3, speed: -0.7 });
+    const r3 = new GameLogoRing({
+      radius: rad * 0.84, thickness, colors, depth: 0.2, speed: 0.4 });
     this.rings = [r1, r2, r3];
     scene.add(r1.mesh, r2.mesh, r3.mesh);
   }
@@ -116,14 +134,9 @@ export default class GameLogo {
   }
 
   onUpdate(delta) {
-    const { rings, pointLight, clock } = this;
-    // pointLight.position.z = Math.sin(clock.getElapsedTime() * 0.5) * 5 + 4;
+    const { rings } = this;
     for (let i = 0; i < rings.length; i++) {
       rings[i].update(delta);
-    }
-    if (this.controls) {
-      this.controls.update();
-      this.spotLightHelper.update();
     }
   }
 
