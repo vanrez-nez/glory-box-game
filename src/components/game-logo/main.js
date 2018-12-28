@@ -65,7 +65,7 @@ export default class GameLogo {
     const { scene, camera } = this;
     const [w, h] = GetScreenSize(camera, 10);
     const geo = new THREE.PlaneBufferGeometry(w, h, 1, 1);
-    const mat = new THREE.MeshPhongMaterial({ color: 0x53315B, transparent: true });
+    const mat = new THREE.MeshPhongMaterial({ color: 0x180E21, transparent: true });
     mat.onBeforeCompile = (shader) => {
       shader.fragmentShader = shader.fragmentShader.replace(
         'gl_FragColor = vec4( outgoingLight, diffuseColor.a );',
@@ -114,11 +114,11 @@ export default class GameLogo {
       0x422840,
     ];
     const r1 = new GameLogoRing({
-      radius: rad * 0.6, thickness, colors, depth: 0.4, speed: 1.0 });
+      radius: rad * 0.6, depth: 0.4, speed: 1.0, thickness, colors });
     const r2 = new GameLogoRing({
-      radius: rad * 0.72, thickness, colors, depth: 0.3, speed: -0.7 });
+      radius: rad * 0.72, depth: 0.3, speed: -0.7, thickness, colors });
     const r3 = new GameLogoRing({
-      radius: rad * 0.84, thickness, colors, depth: 0.2, speed: 0.4 });
+      radius: rad * 0.84, depth: 0.2, speed: 0.4, thickness, colors });
     this.rings = [r1, r2, r3];
     scene.add(r1.mesh, r2.mesh, r3.mesh);
   }
