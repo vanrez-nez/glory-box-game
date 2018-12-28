@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import GameLogo from './game-logo/main'
+import GameLogo from './game-logo/main';
 
 export default {
   name: 'GameLogo',
@@ -33,11 +33,11 @@ export default {
     },
     updateSize() {
       const { clientWidth: w, clientHeight: h } = this.$el;
-      const { instance } = this
+      const { instance } = this;
       if (instance !== null) {
         instance.resize(w, h);
       }
-    }
+    },
   },
 };
 </script>
