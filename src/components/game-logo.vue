@@ -35,7 +35,8 @@ export default {
       const { clientWidth: w, clientHeight: h } = this.$el;
       const { instance } = this;
       if (instance !== null) {
-        instance.resize(w, h);
+        const size = Math.max(w, h);
+        instance.resize(size, size);
       }
     },
   },
