@@ -3,6 +3,7 @@ const DEFAULT = {
   radius: 1,
   speed: 1,
   thickness: 0.2,
+  depth: 0.3,
   segments: 5,
   minSize: 0.25,
   maxSize: 3,
@@ -39,12 +40,13 @@ export default class GameLogoRing {
   }
 
   arcGeometry(innerRadius, outerRadius, thetaStart, thetaLength) {
+    const { depth } = this.opts;
     const buffGeometry = new THREE.Geometry();
     const shape = new THREE.Shape();
     shape.absarc(0, 0, outerRadius, thetaStart, thetaStart + thetaLength, false);
     shape.absarc(0, 0, innerRadius, thetaStart + thetaLength, thetaStart, true);
     const extrudeSettings = {
-      depth: 0.3,
+      depth,
       bevelEnabled: false,
       curveSegments: Math.ceil(thetaLength * 7),
     };
