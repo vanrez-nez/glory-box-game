@@ -4,8 +4,8 @@ const DEFAULT = {
   speed: 1,
   thickness: 0.2,
   depth: 0.3,
-  segments: 5,
-  minSize: 0.25,
+  segments: 8,
+  minSize: 0.15,
   maxSize: 3,
   colors: [0xffffff],
 };
