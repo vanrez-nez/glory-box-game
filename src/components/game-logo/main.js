@@ -1,4 +1,3 @@
-import MainLoop from 'mainloop.js';
 import { GetScreenSize } from '@/common/three-utils';
 import GameLogoRing from './ring';
 
@@ -10,8 +9,8 @@ export default class GameLogo {
   constructor(opts) {
     this.opts = { ...DEFAULT, ...opts };
     this.rings = [];
+    this.rafHandler = 0;
     this.init();
-    this.bind();
     this.initLights();
     this.initLightsBackground();
     this.initShadowsBackground();
@@ -33,21 +32,8 @@ export default class GameLogo {
     this.scene.background = new THREE.Color(0x170D19);
     this.scene.fog = new THREE.FogExp2(0x000000, 0.015);
     this.scene.add(this.camera);
+    this.clock = new THREE.Clock();
     global.renderer = this.renderer;
-  }
-
-  bind() {
-    MainLoop.setUpdate(this.onUpdate.bind(this));
-    MainLoop.setDraw(this.onDraw.bind(this));
-    MainLoop.setEnd(this.onEnd.bind(this));
-  }
-
-  resume() {
-    MainLoop.start();
-  }
-
-  pause() {
-    MainLoop.stop();
   }
 
   initLights() {
@@ -133,21 +119,27 @@ export default class GameLogo {
     this.height = h;
   }
 
+  onFrame() {
+    const { clock } = this;
+    const delta = clock.getDelta() * 1000;
+    this.rafHandler = requestAnimationFrame(this.onFrame.bind(this));
+    this.onUpdate(delta);
+  }
+
   onUpdate(delta) {
-    const { rings } = this;
+    const { renderer, scene, camera, rings } = this;
     for (let i = 0; i < rings.length; i++) {
       rings[i].update(delta);
     }
-  }
-
-  onDraw() {
-    const { renderer, scene, camera } = this;
     renderer.render(scene, camera);
   }
 
-  onEnd(fps, panic) {
-    if (panic) {
-      MainLoop.resetFrameDelta();
-    }
+  run() {
+    this.stop();
+    this.onFrame();
+  }
+
+  stop() {
+    cancelAnimationFrame(this.rafHandler);
   }
 }
