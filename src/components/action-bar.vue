@@ -5,9 +5,10 @@
       @click="button.onClick(button)"
       :key="index"
     >
-        <div class="ActionBar-svgIcon">
-          <svg><use :xlink:href="getIcon(button)"></use></svg>
-        </div>
+        <div class="ActionBar-text" v-text='getHint(button)'></div>
+        <svg class="ActionBar-svgIcon">
+          <use :xlink:href="getIcon(button)">
+        </use></svg>
     </div>
   </div>
 </template>
@@ -23,21 +24,21 @@ export default {
       buttons: [
         {
           name: 'controls',
-          active: false,
+          checked: false,
           on: { hint: 'Gamepad Controls', icon: 'gamepad' },
           off: { hint: 'Keyboard Controls', icon: 'keyboard' },
           onClick: this.onControls,
         },
         {
           name: 'audio',
-          active: true,
-          on: { hint: 'Unmute', icon: 'audio_enabled' },
-          off: { hint: 'Mute', icon: 'audio_disabled' },
+          checked: true,
+          on: { hint: 'Mute', icon: 'audio_enabled' },
+          off: { hint: 'Unmute', icon: 'audio_disabled' },
           onClick: this.onAudio,
         },
         {
           name: 'fullscreen',
-          active: false,
+          checked: false,
           on: { hint: 'Exit Full Screen', icon: 'fullscreen_disable' },
           off: { hint: 'Full Screen', icon: 'fullscreen_enable' },
           onClick: this.onFullscreen,
@@ -52,11 +53,14 @@ export default {
     this.updateFullScreen();
   },
   methods: {
+    getHint(button) {
+      return button.checked ? button.on.hint : button.off.hint;
+    },
     bindEvents() {
       screenfull.on('change', this.updateFullScreen);
     },
     getIcon(button) {
-      const iconName = button.active ? button.on.icon : button.off.icon;
+      const iconName = button.checked ? button.on.icon : button.off.icon;
       return `#icon-${iconName}`;
     },
     getButton(name) {
@@ -68,17 +72,17 @@ export default {
       if (json) {
         const audioButton = this.getButton('audio');
         const parsedConfig = JSON.parse(json);
-        audioButton.active = parsedConfig.audio;
+        audioButton.checked = parsedConfig.audio;
       }
     },
     writeConfig() {
       const audioButton = this.getButton('audio');
-      const json = { audio: audioButton.active };
+      const json = { audio: audioButton.checked };
       window.localStorage.setItem(STORAGE_KEY_NAME, JSON.stringify(json));
     },
     updateFullScreen() {
       const button = this.getButton('fullscreen');
-      button.active = screenfull.isFullscreen;
+      button.checked = screenfull.isFullscreen;
     },
     onFullscreen() {
       if (screenfull.enabled) {
@@ -91,7 +95,7 @@ export default {
       }
     },
     onAudio(button) {
-      button.active = !button.active;
+      button.checked = !button.checked;
       this.writeConfig();
     },
     onControls(button) {},

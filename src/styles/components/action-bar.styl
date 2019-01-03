@@ -9,13 +9,31 @@
   display inline-block
   padding 5px 10px
   cursor pointer
-  &:hover
-    svg
-      opacity: 1
+
+.ActionBar-button:hover
+  svg
+    opacity 1
+  .ActionBar-text
+    opacity 1
+    line-height 14px
+    margin-bottom 10px
 
 .ActionBar-svgIcon
-  > svg
-    height 20px
-    width 32px
-    opacity 0.5
-    fill $WHITE
+  height 20px
+  width 32px
+  opacity 0.5
+
+.ActionBar .ActionBar-svgIcon
+  fill $WHITE
+
+.ActionBar-text
+  transition all 0.25s
+  user-select none
+  width 51px
+  color rgba($WHITE, 0.9)
+  opacity 0
+  margin-bottom 16px
+  line-height 20px
+  font-size 13px
+  letter-spacing 1px
+  text-transform uppercase
