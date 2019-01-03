@@ -17,26 +17,28 @@ export default {
       instance: null,
     };
   },
-  mounted() {
-    this.init();
-  },
   methods: {
-    init() {
+    run() {
+      this.recreate();
+      this.instance.run();
+      this.updateSize();
+    },
+    stop() {
+      this.instance.stop();
+    },
+    recreate() {
       const { canvas } = this.$refs;
       if (this.instance === null) {
         this.instance = new GameLogo({
           canvasElement: canvas,
         });
       }
-      this.instance.resume();
-      this.updateSize();
     },
     updateSize() {
       const { clientWidth: w, clientHeight: h } = this.$el;
       const { instance } = this;
       if (instance !== null) {
-        const size = Math.max(w, h);
-        instance.resize(size, size);
+        instance.resize(w, h);
       }
     },
   },

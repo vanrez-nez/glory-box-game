@@ -1,6 +1,6 @@
 <template>
   <div class="Home">
-    <game-logo class="Home-gameLogo"></game-logo>
+    <game-logo ref="gameLogo" class="Home-gameLogo"></game-logo>
     <div class="Home-menuContainer">
       <template v-if="activeMenu === 'main-menu'">
         <generic-menu
@@ -57,7 +57,9 @@ export default {
     GameLogo,
   },
   activated() {
+    const { gameLogo } = this.$refs;
     this.reset();
+    gameLogo.run();
   },
   methods: {
     bindToQuality(quality) {
@@ -70,10 +72,12 @@ export default {
       // console.log('controls');
     },
     onQualitySelect(quality) {
+      const { gameLogo } = this.$refs;
       switch (quality) {
         case LOW_QUALITY:
         case MEDIUM_QUALITY:
         case HIGH_QUALITY:
+          gameLogo.stop();
           this.$router.push('game');
           break;
       }
