@@ -15,12 +15,12 @@ export const CONFIG = {
   EnableOrbitControls: false,
   EnableAxes: false,
   DebugCollisions: false,
-  UsePostProcessing: true,
-  EnableShadows: true,
+  UsePostProcessing: false,
+  EnableShadows: false,
   ToneMapping: THREE.LinearToneMapping,
-  EnableSkyShader: true,
-  MaterialQuality: QUALITY.High,
-  SceneQuality: QUALITY.High,
+  EnableSkyShader: false,
+  MaterialQuality: QUALITY.Low,
+  SceneQuality: QUALITY.Low,
 };
 
 export const GAME = {
@@ -54,6 +54,7 @@ export const KEYBOARD_CONTROLS = {
 };
 
 export const EVENTS = {
+  GameReady: 'EGameReady',
   GamePause: 'EGamePause',
   GameRestart: 'EGameRestart',
   GameResume: 'EGameResume',

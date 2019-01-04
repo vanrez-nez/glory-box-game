@@ -1,6 +1,6 @@
 <template>
   <div class="Game">
-    <game-stage ref="gameStage"></game-stage>
+    <game-stage ref="gameStage" @ready="onReady"></game-stage>
     <pause-menu
       v-if="paused"
       @restart="onRestart"
@@ -20,12 +20,18 @@ export default {
     PauseMenu,
   },
   activated() {
-    this.onRestart();
+    const { quality } = this.$route.params;
+    const { gameStage } = this.$refs;
+    gameStage.recreate(quality);
   },
   methods: {
+    onReady() {
+      const { gameStage } = this.$refs;
+      gameStage.restart();
+    },
     onRestart() {
       const { gameStage } = this.$refs;
-      gameStage.$emit('restart');
+      gameStage.restart();
     },
   },
   computed: {

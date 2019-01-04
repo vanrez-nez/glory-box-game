@@ -4,27 +4,24 @@
 $borderSize = 2px
 
 .GenericMenu
+  color rgba($WHITE, 0.4)
   transform translate3d(0, 0, 0px)
   padding 0
   list-style none
 
 .GenericMenu-item
-  overflow hidden
-  > a:focus
+  margin 0 4px
+  border-radius 28px
+  border $borderSize solid transparent
+  &:focus
     outline 0
-  > a:hover
+  &:hover
     color $WHITE
-  > a
-    display block
-    line-height 1.5rem
-    border-radius 28px
-    border $borderSize solid transparent
-    padding 3px 10px 0px 10px 
-    font-size rem(24px)
-    text-decoration none
 
-.GenericMenu-item--active
-  > a
-    color $MILAN
-    border-color rgba($MILAN, 0.6)
-    opacity 1
+.GenericMenu-item.GenericMenu-item--active
+  color $MILAN
+  border-color rgba($MILAN, 1.0)
+  opacity 1
+  &:hover
+    background $MILAN
+    color $REVOLVER

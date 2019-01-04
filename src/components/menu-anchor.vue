@@ -1,42 +1,45 @@
 <template>
-  <router-link
+  <component
+    :is="el"
     class="MenuAnchor"
-    v-if='isRouter'
-    :to="{name: routeName}"
-    @click.native="$emit('click')"
+    @click="click"
   >
     <slot></slot>
-  </router-link>
-  <a v-else
-    class="MenuAnchor"
-    :href="href"
-    @click="$emit('click')"
-    :target='target'
-  >
-    <slot></slot>
-  </a>
+  </component>
 </template>
 
 <script>
+import { isObjectLike } from 'lodash';
+
 export default {
   name: 'MenuAnchor',
   props: {
+    el: {
+      type: String,
+      default: 'li',
+    },
+    to: {
+      type: [Object, String],
+      default: '',
+    },
     target: {
       type: String,
       default: '_self',
     },
     href: {
       type: String,
-      default: '#',
-    },
-    routeName: {
-      type: String,
       default: '',
     },
   },
-  computed: {
-    isRouter() {
-      return this.routeName !== '';
+  methods: {
+    click(e) {
+      const { href, target, to } = this;
+      if (to !== '' || isObjectLike(to)) {
+        this.$router.push(to);
+      } else if (href !== '') {
+        window.open(href, target);
+      }
+      this.$emit('click', e);
     },
   },
 };

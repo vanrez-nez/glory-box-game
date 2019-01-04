@@ -10,6 +10,7 @@
 </template>
 
 <script>
+import { EVENTS } from '@/game/const';
 import Game from '@/game/main';
 
 export default {
@@ -17,31 +18,40 @@ export default {
   data() {
     return {
       game: null,
+      prevQuality: '',
     };
   },
-  created() {
-    this.$on('restart', this.restart);
-  },
-  mounted() {
-    this.init();
-  },
   methods: {
-    init() {
+    recreate(quality) {
       const { canvas, map } = this.$refs;
+      const { prevQuality } = this;
+      if (this.prevQuality !== quality) {
+        this.prevQuality = quality;
+        this.destroy();
+      }
       if (this.game === null) {
         this.game = new Game({
           canvasElement: canvas,
           mapElement:  map,
           store: this.$store,
+          quality,
+        });
+        this.game.events.on(EVENTS.GameReady, () => {
+          this.$emit('ready');
         });
       } else {
-        // this.restart();
+        this.$emit('ready');
+      }
+    },
+    destroy() {
+      if (this.game !== null) {
+        console.log('destroying old instance');
       }
     },
     restart() {
       const { game } = this;
-      // game.restart();
-      // game.resume();
+      game.restart();
+      game.resume();
     },
   },
 };

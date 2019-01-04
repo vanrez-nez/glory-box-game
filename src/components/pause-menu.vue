@@ -33,7 +33,7 @@ export default {
         },
         {
           text: 'MENU',
-          routeName: 'home',
+          to: { name: 'home' },
         },
         {
           text: 'GITHUB',

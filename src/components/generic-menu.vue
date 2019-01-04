@@ -5,21 +5,19 @@
       :gamepadBindings="gamepadBindings"
     >
     </game-input>
-    <li class="GenericMenu-item"
-      :class='getMenuItemModifiers(index)'
-      v-for="(item, index) in items"
-      :key="index"
-    >
-      <menu-anchor
-          ref="menuItem"
-          :href='item.href'
-          :routeName='item.routeName'
-          :target='item.target'
-          @click="(item.onClick || noop)()"
-        >
-          {{item.text}}
-        </menu-anchor>
-    </li>
+    <menu-anchor
+        ref="menuItem"
+        class="GenericMenu-item"
+        :class='getMenuItemModifiers(index)'
+        v-for="(item, index) in items"
+        :key="index"
+        :href='item.href'
+        :target='item.target'
+        :to='item.to'
+        @click="(item.onClick || noop)()"
+      >
+        {{item.text}}
+      </menu-anchor>
   </ul>
 </template>
 

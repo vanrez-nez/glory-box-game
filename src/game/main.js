@@ -40,7 +40,7 @@ export default class Game {
     CONFIG.EnableTools && this.addTools();
     CONFIG.EnableStats && this.addStats();
     this.initLoop();
-    this.start();
+    this.events.emit(EVENTS.GameReady);
   }
 
   initLoop() {

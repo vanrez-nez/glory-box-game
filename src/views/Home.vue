@@ -27,10 +27,6 @@ import ActionBar from '@/components/action-bar';
 import GenericMenu from '@/components/generic-menu';
 import GameLogo from '@/components/game-logo';
 
-const LOW_QUALITY = 0;
-const MEDIUM_QUALITY = 1;
-const HIGH_QUALITY = 2;
-
 const MAIN_MENU = 'main-menu';
 const QUALITY_MENU = 'quality-menu';
 
@@ -42,12 +38,24 @@ export default {
       mainMenu: [
         { text: 'START', onClick: this.onStartActivate },
         { text: 'CONTROLS', onClick: this.onControls },
-        { text: 'ABOUT', routeName: 'about' },
+        { text: 'ABOUT', to: { name: 'about' } },
       ],
       qualityMenu: [
-        { text: 'LOW', onClick: this.bindToQuality(LOW_QUALITY) },
-        { text: 'MEDIUM', onClick: this.bindToQuality(MEDIUM_QUALITY) },
-        { text: 'HIGH', onClick: this.bindToQuality(HIGH_QUALITY) },
+        {
+          text: 'LOW',
+          to: { name: 'game', params: { quality: 'low' } },
+          onClick: this.onQualitySelect,
+        },
+        {
+          text: 'MEDIUM',
+          to: { name: 'game', params: { quality: 'medium' } },
+          onClick: this.onQualitySelect,
+        },
+        {
+          text: 'HIGH',
+          to: { name: 'game', params: { quality: 'high' } },
+          onClick: this.onQualitySelect,
+        },
       ],
     };
   },
@@ -71,16 +79,9 @@ export default {
     onControls() {
       // console.log('controls');
     },
-    onQualitySelect(quality) {
+    onQualitySelect() {
       const { gameLogo } = this.$refs;
-      switch (quality) {
-        case LOW_QUALITY:
-        case MEDIUM_QUALITY:
-        case HIGH_QUALITY:
-          gameLogo.stop();
-          this.$router.push('game');
-          break;
-      }
+      gameLogo.stop();
     },
     reset() {
       this.activeMenu = MAIN_MENU;
