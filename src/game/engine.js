@@ -1,6 +1,6 @@
-
-import { CONFIG, GAME } from './const';
-import { CartesianToCylinder } from './utils';
+import { GameConfigInstance as GameConfig } from '@/game/config';
+import { GAME } from '@/game/const';
+import { CartesianToCylinder } from '@/game/utils';
 
 const DEFAULT = {};
 
@@ -11,7 +11,7 @@ export default class Engine {
     this.height = 0;
     this.initWorld();
     this.initLights();
-    if (CONFIG.UsePostProcessing) {
+    if (GameConfig.UsePostProcessing) {
       this.initComposer();
       this.setupPostProcessing();
     }
@@ -27,16 +27,16 @@ export default class Engine {
     const { opts } = this;
     this.renderer = new THREE.WebGLRenderer({
       canvas: opts.canvas,
-      antialias: !CONFIG.UsePostProcessing,
+      antialias: !GameConfig.UsePostProcessing,
     });
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(1, 1);
-    this.renderer.shadowMap.enabled = CONFIG.EnableShadows;
+    this.renderer.shadowMap.enabled = GameConfig.EnableShadows;
     this.renderer.gammaInput = true;
     this.renderer.gammaOutput = true;
     this.renderer.gammaFactor = 0.8;
     this.renderer.sortObjects = false;
-    this.renderer.toneMapping = CONFIG.ToneMapping;
+    this.renderer.toneMapping = GameConfig.ToneMapping;
     this.renderer.toneMappingExposure = 1.5;
     this.scene = new THREE.Scene();
     this.scene.matrixAutoUpdate = false;
@@ -71,7 +71,7 @@ export default class Engine {
 
   initHelpers() {
     const { scene, camera, renderer } = this;
-    if (CONFIG.EnableOrbitControls) {
+    if (GameConfig.EnableOrbitControls) {
       const c = new THREE.OrbitControls(camera, renderer.domElement);
       c.enableDamping = true;
       c.dampingFactor = 0.25;
@@ -80,10 +80,16 @@ export default class Engine {
       c.enableKeys = false;
       this.orbitControls = c;
     }
-    if (CONFIG.EnableAxes) {
+    if (GameConfig.EnableAxes) {
       this.axesHelper = new THREE.AxesHelper(500);
       scene.add(this.axesHelper);
     }
+  }
+
+  dispose() {
+    this.scene.remove(...this.scene.children);
+    this.renderer.dispose();
+    this.renderer = null;
   }
 
   resize(w, h) {
@@ -92,7 +98,7 @@ export default class Engine {
     camera.clearViewOffset();
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    if (CONFIG.UsePostProcessing) {
+    if (GameConfig.UsePostProcessing) {
       composer.setSize(w, h);
     }
     this.width = w;
@@ -123,13 +129,13 @@ export default class Engine {
 
   render() {
     const { renderer, scene, camera, composer } = this;
-    if (CONFIG.EnableOrbitControls) {
+    if (GameConfig.EnableOrbitControls) {
       this.orbitControls.update();
       this.orbitControls.target = this.cameraTarget;
     } else {
       this.followTarget();
     }
-    if (CONFIG.UsePostProcessing) {
+    if (GameConfig.UsePostProcessing) {
       composer.render();
     } else {
       renderer.render(scene, camera);

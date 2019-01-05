@@ -9,20 +9,6 @@ export const QUALITY = {
   High: 2,
 };
 
-export const CONFIG = {
-  EnableTools: false,
-  EnableStats: true,
-  EnableOrbitControls: false,
-  EnableAxes: false,
-  DebugCollisions: false,
-  UsePostProcessing: false,
-  EnableShadows: false,
-  ToneMapping: THREE.LinearToneMapping,
-  EnableSkyShader: false,
-  MaterialQuality: QUALITY.Low,
-  SceneQuality: QUALITY.Low,
-};
-
 export const GAME = {
   CilynderRadius: 35,
   HudDistanceFromCamera: 10,

@@ -16,6 +16,14 @@ export default class GameLoop {
     MainLoop.setEnd(this.onEnd.bind(this));
   }
 
+  unbind() {
+    const NOOP = () => {};
+    this.pause();
+    MainLoop.setUpdate(NOOP);
+    MainLoop.setDraw(NOOP);
+    MainLoop.setEnd(NOOP);
+  }
+
   pause() {
     MainLoop.stop();
   }

@@ -24,7 +24,6 @@ export default {
   methods: {
     recreate(quality) {
       const { canvas, map } = this.$refs;
-      const { prevQuality } = this;
       if (this.prevQuality !== quality) {
         this.prevQuality = quality;
         this.destroy();
@@ -45,7 +44,8 @@ export default {
     },
     destroy() {
       if (this.game !== null) {
-        console.log('destroying old instance');
+        this.game.dispose();
+        this.game = null;
       }
     },
     restart() {

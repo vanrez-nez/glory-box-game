@@ -1,11 +1,10 @@
-
+import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { range, shuffle } from 'lodash';
-import { EVENTS, MAP, DIRECTIONS, LEVELS } from './const';
-import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
-import GameMapParser from './map-parser';
-import GamePlatform from './platform';
-import GameCollectible from './collectible';
-import GameMapChunk from './map-chunk';
+import { EVENTS, MAP, DIRECTIONS, LEVELS } from '@/game/const';
+import GameMapParser from '@/game/map-parser';
+import GamePlatform from '@/game/platform';
+import GameCollectible from '@/game/collectible';
+import GameMapChunk from '@/game/map-chunk';
 
 const MAP_OFFSET_Y = -10;
 const MAP_CHUNK_SIZE = 128;
@@ -45,6 +44,13 @@ export default class GameMap {
         },
       });
     });
+  }
+
+  dispose() {
+    this.prevPicks = null;
+    this.masterChunks = null;
+    this.chunkStates = null;
+    this.randomPicks = null;
   }
 
   initChunks() {
