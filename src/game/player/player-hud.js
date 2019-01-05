@@ -1,7 +1,7 @@
+import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { GetScreenCoords } from '@/common/three-utils';
-import { GAME, EVENTS } from '../const';
-import GameSteeringTrailsSfx from '../sfx/steering-trails-sfx';
-import { MaterialFactoryInstance as MaterialFactory } from '../materials/material-factory';
+import { GAME, EVENTS } from '@/game/const';
+import GameSteeringTrailsSfx from '@/game/sfx/steering-trails-sfx';
 
 const DEFAULT = {
   camera: null,

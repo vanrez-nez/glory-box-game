@@ -1,7 +1,6 @@
-
+import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
+import { GameConfigInstance as GameConfig } from '@/game/config';
 import * as dat from 'dat.gui';
-import { CONFIG } from './const';
-import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
 
 export default class GameTools {
   constructor() {
@@ -62,7 +61,7 @@ export default class GameTools {
     f0.add(renderer, 'toneMappingExposure', 0.0, 10);
     f0.add(renderer, 'toneMappingWhitePoint', 0.0, 10);
     f0.add(renderer, 'gammaFactor', 0.5, 5);
-    if (CONFIG.UsePostProcessing) {
+    if (GameConfig.UsePostProcessing) {
       // Bloom Pass
       const f1 = rootFolder.addFolder('BloomPass');
       gui.remember(obj.bloomPass);

@@ -1,6 +1,6 @@
-import GameEnemyDragon from './enemy-dragon';
-import GameEnemyRays from './enemy-rays';
-import GameEnemyVortex from './enemy-vortex';
+import GameEnemyDragon from '@/game/enemy/enemy-dragon';
+import GameEnemyRays from '@/game/enemy/enemy-rays';
+import GameEnemyVortex from '@/game/enemy/enemy-vortex';
 
 const DEFAULT = {};
 

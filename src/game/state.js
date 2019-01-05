@@ -1,5 +1,5 @@
 import { PAUSE_GAME } from '@/store/modules/game';
-import { EVENTS } from './const';
+import { EVENTS } from '@/game/const';
 
 const DEFAULT = {
   store: null,

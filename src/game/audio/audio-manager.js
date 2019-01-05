@@ -1,6 +1,6 @@
-// import { AUDIO_ASSETS } from '../assets';
-import GameAudioTrack from './audio-track';
-import GameAudioMix from './audio-mix';
+// import { AUDIO_ASSETS } from '@/game/assets';
+import GameAudioTrack from '@/game/audio/audio-track';
+import GameAudioMix from '@/game/audio/audio-mix';
 
 const DEFAULT = {};
 
@@ -32,7 +32,7 @@ export class GameAudioManager {
   preload(items) {
     const { loader } = this;
     this.itemsLeft = items.length;
-    //items.forEach(item => loader.load(item, this.onItemLoaded.bind(this, item)));
+    // items.forEach(item => loader.load(item, this.onItemLoaded.bind(this, item)));
   }
 
   onItemLoaded(src, buffer) {

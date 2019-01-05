@@ -1,7 +1,9 @@
-
+import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
+import { AudioManagerInstance as AudioManager } from '@/game/audio/audio-manager';
+import { GameConfigInstance as GameConfig } from '@/game/config';
 import Stats from 'stats.js';
 import GameLoop from '@/game/loop';
-import { CONFIG, GAME, EVENTS } from '@/game/const';
+import { GAME, EVENTS } from '@/game/const';
 import Engine from '@/game/engine';
 import GameLoader from '@/game/loader';
 import GameState from '@/game/state';
@@ -16,12 +18,12 @@ import GameMoodManager from '@/game/mood-manager';
 import GameEnemy from '@/game/enemy/enemy';
 import GamePlayerHud from '@/game/player/player-hud';
 import GameEnemyHud from '@/game/enemy/enemy-hud';
-import { AudioManagerInstance as AudioManager } from '@/game/audio/audio-manager';
 
 const DEFAULT = {
   canvasElement: null,
   mapElement: null,
   store: null,
+  quality: null,
 };
 
 export default class Game {
@@ -33,12 +35,17 @@ export default class Game {
   }
 
   async init() {
+    /*
+      Initializes config based on selected quality,
+      GameConfig is shared as a singleton through all the modules
+    */
+    GameConfig.set(this.opts.quality, false);
     this.initComponents();
     this.updateSize();
     this.attachEvents();
     await this.initLoad();
-    CONFIG.EnableTools && this.addTools();
-    CONFIG.EnableStats && this.addStats();
+    this.addTools();
+    this.addStats();
     this.initLoop();
     this.events.emit(EVENTS.GameReady);
   }
@@ -144,6 +151,14 @@ export default class Game {
     this.loop.pause();
   }
 
+  dispose() {
+    const { components } = this;
+    this.loop.unbind();
+    MaterialFactory.clear();
+    components.engine.dispose();
+    debugger;
+  }
+
   onPlayerDeath() {
     const { sfxManager } = this.components;
     sfxManager.destroyPlayer();
@@ -155,18 +170,22 @@ export default class Game {
   }
 
   addStats() {
-    this.stats = new Stats();
-    document.body.appendChild(this.stats.domElement);
+    if (GameConfig.EnableStats) {
+      this.stats = new Stats();
+      document.body.appendChild(this.stats.domElement);
+    }
   }
 
   addTools() {
     const { physics, engine, player, world } = this.components;
-    const tools = new GameTools();
-    tools.addScreen('physics', physics);
-    tools.addScreen('engine', engine);
-    tools.addScreen('player', player);
-    tools.addScreen('world', world);
-    tools.addScreen('materials');
+    if (GameConfig.EnableTools) {
+      const tools = new GameTools();
+      tools.addScreen('physics', physics);
+      tools.addScreen('engine', engine);
+      tools.addScreen('player', player);
+      tools.addScreen('world', world);
+      tools.addScreen('materials');
+    }
   }
 
   updateSize() {

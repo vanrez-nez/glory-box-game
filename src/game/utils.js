@@ -1,4 +1,5 @@
-import { GAME, CONFIG } from './const';
+import { GameConfigInstance as GameConfig } from '@/game/config';
+import { GAME } from '@/game/const';
 
 const PI_WIDTH = 128 / Math.PI;
 
@@ -61,7 +62,7 @@ const vPositionZero = new THREE.Vector2();
 const vScaleZero = new THREE.Vector3();
 export function SyncBodyPhysicsMesh(mesh, body) {
   if (mesh) {
-    if (CONFIG.DebugCollisions && mesh.material) {
+    if (GameConfig.DebugCollisions && mesh.material) {
       mesh.material.wireframe = body.collidingEdges.isColliding();
     }
     const positionOffset = mesh.positionOffset || vPositionZero;

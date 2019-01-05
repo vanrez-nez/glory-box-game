@@ -1,4 +1,4 @@
-import GameAudioTrack from './audio-track';
+import GameAudioTrack from '@/game/audio/audio-track';
 
 const DEFAULT = {
   listener: null,

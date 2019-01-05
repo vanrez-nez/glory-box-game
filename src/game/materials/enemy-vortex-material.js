@@ -1,5 +1,5 @@
-import GameMetaMaterial from './meta-material';
-import EnemyVortexShader from '../../shaders/enemy-vortex-shader';
+import GameMetaMaterial from '@/game/materials/meta-material';
+import EnemyVortexShader from '@/shaders/enemy-vortex-shader';
 
 export default class EnemyVortexMaterial extends GameMetaMaterial {
   constructor(opts) {

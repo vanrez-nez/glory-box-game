@@ -1,6 +1,5 @@
-
-import { EVENTS, PHYSICS } from '../const';
-import CollisionEdges from './collision-edges';
+import { EVENTS, PHYSICS } from '@/game/const';
+import CollisionEdges from '@/game/physics/collision-edges';
 
 const DEFAULT = {
   label: 'body',

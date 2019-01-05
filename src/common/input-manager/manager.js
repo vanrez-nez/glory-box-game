@@ -4,9 +4,9 @@ import {
   GAMEPAD_BUTTONS,
   GAMEPAD_AXES,
   GAMEPAD_EVENTS,
-} from './input-const';
-import KeyboardInput from './keyboard';
-import GamepadInput from './gamepad';
+} from '@/common/input-manager/input-const';
+import KeyboardInput from '@/common/input-manager/keyboard';
+import GamepadInput from '@/common/input-manager/gamepad';
 
 const DEFAULT = {
   keyboardBindings: {},

@@ -1,4 +1,4 @@
-import GameMetaMaterial from './meta-material';
+import GameMetaMaterial from '@/game/materials/meta-material';
 
 export default class PlayerMaterial extends GameMetaMaterial {
   constructor(opts) {

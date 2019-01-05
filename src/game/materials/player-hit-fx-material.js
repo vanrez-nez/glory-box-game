@@ -1,5 +1,5 @@
-import GameMetaMaterial from './meta-material';
-import ShineFxShader from '../../shaders/shine-fx';
+import GameMetaMaterial from '@/game/materials/meta-material';
+import ShineFxShader from '@/shaders/shine-fx';
 
 export default class PlayerHitFxMaterial extends GameMetaMaterial {
   constructor(opts) {

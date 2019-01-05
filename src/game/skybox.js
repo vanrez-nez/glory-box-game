@@ -1,5 +1,4 @@
-
-import { IMAGE_ASSETS } from './assets';
+import { IMAGE_ASSETS } from '@/game/assets';
 
 export default class GameSkybox {
   constructor() {

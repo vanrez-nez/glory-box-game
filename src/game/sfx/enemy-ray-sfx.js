@@ -1,8 +1,8 @@
-import { GAME, PHYSICS } from '../const';
-import { CartesianToCylinder } from '../utils';
-import GamePhysicsBody from '../physics/physics-body';
-import { MaterialFactoryInstance as MaterialFactory } from '../materials/material-factory';
-import { AudioManagerInstance as AudioManager } from '../audio/audio-manager';
+import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
+import { AudioManagerInstance as AudioManager } from '@/game/audio/audio-manager';
+import { GAME, PHYSICS } from '@/game/const';
+import { CartesianToCylinder } from '@/game/utils';
+import GamePhysicsBody from '@/game/physics/physics-body';
 
 const DEFAULT = {
   parent: null,

@@ -1,11 +1,11 @@
-import { GAME, PHYSICS, EVENTS, COLLECTIBLE } from './const';
-import { SyncBodyPhysicsMesh } from './utils';
-import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
-import { AudioManagerInstance as AudioManager } from './audio/audio-manager';
-import CollectibleGlyph from './collectible-glyph';
-import LineTrail from './line-trail';
-import GamePhysicsBody from './physics/physics-body';
-import GameObjectState from './object-state';
+import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
+import { AudioManagerInstance as AudioManager } from '@/game/audio/audio-manager';
+import { GAME, PHYSICS, EVENTS, COLLECTIBLE } from '@/game/const';
+import { SyncBodyPhysicsMesh } from '@/game/utils';
+import CollectibleGlyph from '@/game/collectible-glyph';
+import GamePhysicsBody from '@/game/physics/physics-body';
+import GameObjectState from '@/game/object-state';
+import LineTrail from '@/game/line-trail';
 
 const DEFAULT = {
   x: 0,

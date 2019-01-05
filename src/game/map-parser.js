@@ -1,5 +1,5 @@
 import threads from 'threads';
-import { MAP, DIRECTIONS } from './const';
+import { MAP, DIRECTIONS } from '@/game/const';
 
 const DEFAULT = {
   imageElement: null,

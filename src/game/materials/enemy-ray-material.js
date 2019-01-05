@@ -1,5 +1,5 @@
-import GameMetaMaterial from './meta-material';
-import EnemyRayShader from '../../shaders/enemy-ray-shader';
+import GameMetaMaterial from '@/game/materials/meta-material';
+import EnemyRayShader from '@/shaders/enemy-ray-shader';
 
 export default class EnemyRayMaterial extends GameMetaMaterial {
   constructor(opts) {

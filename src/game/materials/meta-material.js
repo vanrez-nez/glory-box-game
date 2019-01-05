@@ -1,6 +1,6 @@
 import { MeshLineMaterial } from 'three.meshline';
-import { QUALITY } from '../const';
-import { GetTextureRepeat } from '../utils';
+import { GetTextureRepeat } from '@/game/utils';
+import { QUALITY } from '@/game/const';
 
 
 const DEFAULTS = {
@@ -78,6 +78,15 @@ export default class GameMetaMaterial {
         args[k] = args[k]();
       }
     });
+  }
+
+  dispose() {
+    this.high && this.high.dispose();
+    this.medium && this.medium.dispose();
+    this.low && this.low.dispose();
+    this.high = null;
+    this.medium = null;
+    this.low = null;
   }
 
   createMaterial(profile) {

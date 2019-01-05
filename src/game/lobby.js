@@ -1,7 +1,7 @@
-import { GAME } from './const';
-import { IMAGE_ASSETS } from './assets';
-import { CartesianToCylinder, GetTextureRepeat } from './utils';
-import { StaticInstance as Skybox } from './skybox';
+import { StaticInstance as Skybox } from '@/game/skybox';
+import { GAME } from '@/game/const';
+import { IMAGE_ASSETS } from '@/game/assets';
+import { CartesianToCylinder, GetTextureRepeat } from '@/game/utils';
 
 const GlyphsOffsetX = -21.3;
 const GlyphsOffsetY = -1;

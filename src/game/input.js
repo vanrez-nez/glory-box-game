@@ -1,5 +1,5 @@
 import { InputManager } from '@/common/input-manager';
-import { KEYBOARD_CONTROLS, GAMEPAD_CONTROLS, EVENTS } from './const';
+import { KEYBOARD_CONTROLS, GAMEPAD_CONTROLS, EVENTS } from '@/game/const';
 
 const GAMEPAD_INDEX = 0;
 

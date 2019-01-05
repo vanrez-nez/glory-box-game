@@ -1,5 +1,5 @@
-import GameMetaMaterial from './meta-material';
-import CylinderFxShader from '../../shaders/cylinder-fx';
+import GameMetaMaterial from '@/game/materials/meta-material';
+import CylinderFxShader from '@/shaders/cylinder-fx';
 
 export default class WorldFxCylinderMaterial extends GameMetaMaterial {
   constructor(opts) {

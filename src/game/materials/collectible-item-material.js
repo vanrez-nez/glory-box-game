@@ -1,4 +1,4 @@
-import GameMetaMaterial from './meta-material';
+import GameMetaMaterial from '@/game/materials/meta-material';
 
 export default class CollectibleItemMaterial extends GameMetaMaterial {
   constructor(opts) {

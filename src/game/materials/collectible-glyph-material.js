@@ -1,6 +1,6 @@
-import { IMAGE_ASSETS } from '../assets';
-import GameMetaMaterial from './meta-material';
-import { StaticInstance as Skybox } from '../skybox';
+import { StaticInstance as Skybox } from '@/game/skybox';
+import { IMAGE_ASSETS } from '@/game/assets';
+import GameMetaMaterial from '@/game/materials/meta-material';
 
 const XRepeat = 1 / 9;
 const YRepeat = 1 / 9;

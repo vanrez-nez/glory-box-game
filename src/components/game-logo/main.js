@@ -1,5 +1,5 @@
 import { GetScreenSize } from '@/common/three-utils';
-import GameLogoRing from './ring';
+import GameLogoRing from '@/components/game-logo/ring';
 
 const DEFAULT = {
   canvasElement: null,
@@ -33,7 +33,7 @@ export default class GameLogo {
     this.scene.fog = new THREE.FogExp2(0x000000, 0.015);
     this.scene.add(this.camera);
     this.clock = new THREE.Clock();
-    global.renderer = this.renderer;
+    // global.renderer = this.renderer;
   }
 
   initLights() {

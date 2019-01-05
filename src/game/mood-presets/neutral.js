@@ -1,5 +1,5 @@
 import deepmerge from 'deepmerge';
-import DefaultMood from './default';
+import DefaultMood from '@/game/mood-presets/default';
 
 const NeutralMood = deepmerge(DefaultMood, {
   Engine: {

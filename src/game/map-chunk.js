@@ -1,4 +1,4 @@
-import { EVENTS } from './const';
+import { EVENTS } from '@/game/const';
 
 const DEFAULT = {
   index: -1,

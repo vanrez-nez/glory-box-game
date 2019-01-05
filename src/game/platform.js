@@ -1,8 +1,7 @@
-
-import { PHYSICS, MAP, EVENTS, GAME } from './const';
-import { CartesianToCylinder, SyncBodyPhysicsMesh } from './utils';
-import GamePhysicsBody from './physics/physics-body';
-import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
+import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
+import { PHYSICS, MAP, EVENTS, GAME } from '@/game/const';
+import { CartesianToCylinder, SyncBodyPhysicsMesh } from '@/game/utils';
+import GamePhysicsBody from '@/game/physics/physics-body';
 
 const DEFAULT = {
   x: 0,

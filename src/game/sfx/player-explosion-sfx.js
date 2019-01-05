@@ -1,8 +1,8 @@
-import { PHYSICS, GAME } from '../const';
-import { SyncBodyPhysicsMesh, CartesianToCylinder } from '../utils';
-import GamePhysicsBody from '../physics/physics-body';
-import LineTrail from '../line-trail';
-import { MaterialFactoryInstance as MaterialFactory } from '../materials/material-factory';
+import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
+import { PHYSICS, GAME } from '@/game/const';
+import { SyncBodyPhysicsMesh, CartesianToCylinder } from '@/game/utils';
+import GamePhysicsBody from '@/game/physics/physics-body';
+import LineTrail from '@/game/line-trail';
 
 const DEFAULT = {
   parent: null,

@@ -1,6 +1,6 @@
-import { GAME } from './const';
-import { CartesianToCylinder } from './utils';
-import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
+import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
+import { GAME } from '@/game/const';
+import { CartesianToCylinder } from '@/game/utils';
 
 const Offsets = [
   { x: 0.17, y: 0.83 },

@@ -1,6 +1,6 @@
-import { IMAGE_ASSETS } from '../assets';
-import { StaticInstance as Skybox } from '../skybox';
-import GameMetaMaterial from './meta-material';
+import { IMAGE_ASSETS } from '@/game/assets';
+import { StaticInstance as Skybox } from '@/game/skybox';
+import GameMetaMaterial from '@/game/materials/meta-material';
 
 export default class WorldCylinderMaterial extends GameMetaMaterial {
   constructor(opts) {

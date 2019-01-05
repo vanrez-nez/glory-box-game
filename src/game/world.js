@@ -1,6 +1,7 @@
-import { GAME, CONFIG } from './const';
-import GameLobby from './lobby';
-import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
+import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
+import { GameConfigInstance as GameConfig } from '@/game/config';
+import { GAME } from '@/game/const';
+import GameLobby from '@/game/lobby';
 
 const CYLINDER_HEIGHT = 128;
 
@@ -24,7 +25,7 @@ export default class GameWorld {
   }
 
   addSkyCylinder() {
-    if (CONFIG.EnableSkyShader) {
+    if (GameConfig.EnableSkyShader) {
       const geo = new THREE.CylinderGeometry(200, 200, 250, 16, 1, true);
       const mat = MaterialFactory.getMaterial('WorldSkyCylinder', {
         name: 'w_skyc',
@@ -157,7 +158,7 @@ export default class GameWorld {
   update(delta, playerPosition) {
     const { skyCylinder, mainCylinder, cylinderBase, noise } = this;
 
-    if (CONFIG.EnableSkyShader) {
+    if (GameConfig.EnableSkyShader) {
       const { uniforms } = skyCylinder.material;
       uniforms.time.value += delta * 0.35;
       skyCylinder.position.y = playerPosition.y;

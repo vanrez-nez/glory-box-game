@@ -1,10 +1,10 @@
-import { GAME, PHYSICS, EVENTS } from '../const';
-import { MODEL_ASSETS } from '../assets';
-import { CartesianToCylinder, EaseExpoIn, EaseExpoOut } from '../utils';
-import { MaterialFactoryInstance as MaterialFactory } from '../materials/material-factory';
-import { AudioManagerInstance as AudioManager } from '../audio/audio-manager';
-import LineTrail from '../line-trail';
-import GamePhysicsBody from '../physics/physics-body';
+import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
+import { AudioManagerInstance as AudioManager } from '@/game/audio/audio-manager';
+import { GAME, PHYSICS, EVENTS } from '@/game/const';
+import { MODEL_ASSETS } from '@/game/assets';
+import { CartesianToCylinder, EaseExpoIn, EaseExpoOut } from '@/game/utils';
+import LineTrail from '@/game/line-trail';
+import GamePhysicsBody from '@/game/physics/physics-body';
 
 const DEFAULT = {
   parent: null,

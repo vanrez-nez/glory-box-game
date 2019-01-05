@@ -1,7 +1,7 @@
 import { GetScreenCoords } from '@/common/three-utils';
-import { GAME } from '../const';
-import { MODEL_ASSETS } from '../assets';
-import { MaterialFactoryInstance as MaterialFactory } from '../materials/material-factory';
+import { GAME } from '@/game/const';
+import { MODEL_ASSETS } from '@/game/assets';
+import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 
 const DEFAULT = {
   camera: null,

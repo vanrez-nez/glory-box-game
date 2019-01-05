@@ -1,7 +1,6 @@
-
-import { PHYSICS } from '../const';
-import SolveRectangleCollision from './collision';
-import GamePhysicsBody from './physics-body';
+import { PHYSICS } from '@/game/const';
+import SolveRectangleCollision from '@/game/physics/collision';
+import GamePhysicsBody from '@/game/physics/physics-body';
 
 const DEFAULT = {
   gravity: new THREE.Vector2(0, -0.25),

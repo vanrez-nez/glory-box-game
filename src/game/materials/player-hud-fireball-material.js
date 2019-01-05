@@ -1,5 +1,5 @@
-import GameMetaMaterial from './meta-material';
-import FireballShader from '../../shaders/fireball';
+import GameMetaMaterial from '@/game/materials/meta-material';
+import FireballShader from '@/shaders/fireball';
 
 export default class PlayerHudFireballMaterial extends GameMetaMaterial {
   constructor(opts) {

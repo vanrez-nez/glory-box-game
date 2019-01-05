@@ -1,7 +1,7 @@
-import { EVENTS } from '../const';
-import { MaterialFactoryInstance as MaterialFactory } from '../materials/material-factory';
-import SteeringParticle from './common/steering-particle';
-import LineTrail from '../line-trail';
+import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
+import { EVENTS } from '@/game/const';
+import LineTrail from '@/game/line-trail';
+import SteeringParticle from '@/game/sfx/common/steering-particle';
 
 const cachedVec = new THREE.Vector3();
 const DEFAULT = {

@@ -1,5 +1,5 @@
-import GameMetaMaterial from './meta-material';
-import { StaticInstance as Skybox } from '../skybox';
+import GameMetaMaterial from '@/game/materials/meta-material';
+import { StaticInstance as Skybox } from '@/game/skybox';
 
 export default class EnemyHeadMaterial extends GameMetaMaterial {
   constructor(opts) {

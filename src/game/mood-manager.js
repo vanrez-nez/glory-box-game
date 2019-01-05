@@ -1,7 +1,9 @@
-import { CONFIG, QUALITY } from './const';
-import DefaultMood from './mood-presets/default';
-// import NeutralMood from './mood-presets/neutral';
-import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
+import { QUALITY } from '@/game/const';
+import DefaultMood from '@/game/mood-presets/default';
+// import NeutralMood from '@/game/mood-presets/neutral';
+import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
+import { GameConfigInstance as GameConfig } from '@/game/config';
+
 
 const DEFAULT = {
   engine: null,
@@ -163,7 +165,7 @@ export default class GameMoodManager {
 
   getQualityNode(presetNode) {
     const qualities = Object.keys(QUALITY);
-    return presetNode[qualities[CONFIG.SceneQuality]];
+    return presetNode[qualities[GameConfig.SceneQuality]];
   }
 
   async transitionTo(moodPreset, time) {
