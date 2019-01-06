@@ -8,6 +8,7 @@ export default class GameLoop {
   constructor(opts) {
     this.opts = { ...DEFAULT, ...opts };
     this.bind();
+    this.deltaLeft = 0;
   }
 
   bind() {
@@ -33,27 +34,28 @@ export default class GameLoop {
   }
 
   onUpdate(delta) {
+    delta /= 1000;
+    this.deltaLeft += delta;
+    this.opts.components.physics.update(delta);
+  }
+
+  onDraw() {
     const {
       engine, gameInput, enemy, player, map,
-      world, physics, playerHud, enemyHud,
+      world, playerHud, enemyHud,
     } = this.opts.components;
-    delta /= 1000;
-
+    const { stats } = this.opts;
     const { position: bodyPosition } = player.playerBody;
     const { position: meshPosition } = player.mesh;
-    physics.update(delta);
+    const delta = this.deltaLeft;
+    this.deltaLeft = 0;
+    stats && stats.begin();
     enemy.update(delta, engine.camera, bodyPosition);
     player.update(delta, gameInput.state);
     world.update(delta, meshPosition);
     playerHud.update(delta);
     enemyHud.update(delta);
     map.update(delta, bodyPosition);
-  }
-
-  onDraw() {
-    const { stats } = this.opts;
-    const { engine } = this.opts.components;
-    stats && stats.begin();
     engine.render();
     stats && stats.end();
   }
