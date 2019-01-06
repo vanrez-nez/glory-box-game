@@ -29,7 +29,8 @@ export default class Engine {
       canvas: opts.canvas,
       antialias: !GameConfig.UsePostProcessing,
     });
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    const pxRatio = window.devicePixelRatio * GameConfig.PixelRatioMultiplier;
+    this.renderer.setPixelRatio(pxRatio);
     this.renderer.setSize(1, 1);
     this.renderer.shadowMap.enabled = GameConfig.EnableShadows;
     this.renderer.gammaInput = true;

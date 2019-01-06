@@ -16,6 +16,7 @@ const QUALITY_LEVELS = {
     EnableSkyShader: false,
     MaterialQuality: QUALITY.Low,
     SceneQuality: QUALITY.Low,
+    PixelRatioMultiplier: 0.5,
   },
   medium: {
     UsePostProcessing: false,
@@ -24,6 +25,7 @@ const QUALITY_LEVELS = {
     EnableSkyShader: false,
     MaterialQuality: QUALITY.Medium,
     SceneQuality: QUALITY.Medium,
+    PixelRatioMultiplier: 0.8,
   },
   high: {
     UsePostProcessing: true,
@@ -32,6 +34,7 @@ const QUALITY_LEVELS = {
     EnableSkyShader: true,
     MaterialQuality: QUALITY.High,
     SceneQuality: QUALITY.High,
+    PixelRatioMultiplier: 1,
   },
 };
 
