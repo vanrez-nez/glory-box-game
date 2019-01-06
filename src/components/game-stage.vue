@@ -10,6 +10,7 @@
 </template>
 
 <script>
+import { isObject, isEmpty } from 'lodash';
 import { EVENTS } from '@/game/const';
 import Game from '@/game/main';
 
@@ -17,7 +18,6 @@ export default {
   name: 'GameStage',
   data() {
     return {
-      game: null,
       prevQuality: '',
     };
   },
@@ -28,7 +28,7 @@ export default {
         this.prevQuality = quality;
         this.destroy();
       }
-      if (this.game === null) {
+      if (isEmpty(this.game)) {
         this.game = new Game({
           canvasElement: canvas,
           mapElement:  map,
@@ -43,7 +43,7 @@ export default {
       }
     },
     destroy() {
-      if (this.game !== null) {
+      if (isObject(this.game)) {
         this.game.dispose();
         this.game = null;
       }
