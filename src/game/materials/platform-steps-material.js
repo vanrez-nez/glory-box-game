@@ -1,6 +1,5 @@
-import { IMAGE_ASSETS } from '@/game/assets';
-
 import { StaticInstance as Skybox } from '@/game/skybox';
+import { IMAGE_ASSETS } from '@/game/assets';
 import GameMetaMaterial from '@/game/materials/meta-material';
 
 export default class PlatformStepsMaterial extends GameMetaMaterial {
@@ -12,7 +11,7 @@ export default class PlatformStepsMaterial extends GameMetaMaterial {
         type: 'MeshBasicMaterial',
         args: {
           color: opts.color,
-          // map: GetTextureRepeatDefer(IMAGE_ASSETS.ImpFloorBase, width, 0.5),
+          // map: GetTextureRepeatDefer(IMAGE_ASSETS.GroundBase, width, 0.5),
         },
       },
       medium: {
@@ -26,9 +25,9 @@ export default class PlatformStepsMaterial extends GameMetaMaterial {
       high: {
         type: 'MeshStandardMaterial',
         args: {
-          map: GameMetaMaterial.GetTexture(IMAGE_ASSETS.ImpFloorBase, width, 0.5),
-          roughnessMap: GameMetaMaterial.GetTexture(IMAGE_ASSETS.ImpFloorRoughness, width, 0.5),
-          normalMap: GameMetaMaterial.GetTexture(IMAGE_ASSETS.ImpFloorNormal, width, 0.5),
+          map: GameMetaMaterial.GetTexture(IMAGE_ASSETS.GroundBase, width, 0.5),
+          roughnessMap: GameMetaMaterial.GetTexture(IMAGE_ASSETS.GroundRoughness, width, 0.5),
+          normalMap: GameMetaMaterial.GetTexture(IMAGE_ASSETS.GroundNormal, width, 0.5),
           envMap: Skybox.textureCube,
           envMapIntensity: 0.2,
           metalness: 0.5,
