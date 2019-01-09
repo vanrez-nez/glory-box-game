@@ -10,7 +10,7 @@ export const QUALITY = {
 };
 
 export const GAME = {
-  CilynderRadius: 35,
+  CylinderRadius: 35,
   HudDistanceFromCamera: 10,
   PlatformOffset: 2.45,
   CollectibleSocketOffset: 0,

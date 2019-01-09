@@ -68,7 +68,7 @@ export default class GameLobby {
 
   addGlobalLight() {
     const rectLight = new THREE.RectAreaLight(0x00eaff, 8, 20, 10);
-    CartesianToCylinder(rectLight.position, 0, 2, GAME.CilynderRadius - 10);
+    CartesianToCylinder(rectLight.position, 0, 2, GAME.CylinderRadius - 10);
     // this.group.add(rectLight);
     // const rectLightHelper = new THREE.RectAreaLightHelper( rectLight );
     // this.group.add(rectLightHelper);

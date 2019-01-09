@@ -120,9 +120,9 @@ export default class GameEnemyDragon {
   }
 
   setOrbitPosition(obj, theta) {
-    const x = (GAME.CilynderRadius + GAME.EnemyOffset) * Math.sin(theta);
+    const x = (GAME.CylinderRadius + GAME.EnemyOffset) * Math.sin(theta);
     const y = this.positionY;
-    const z = (GAME.CilynderRadius + GAME.EnemyOffset) * Math.cos(theta);
+    const z = (GAME.CylinderRadius + GAME.EnemyOffset) * Math.cos(theta);
     obj.position.set(x, y, z);
   }
 

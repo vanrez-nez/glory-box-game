@@ -17,7 +17,7 @@ export function GetTextureRepeat(url, repeatX, repeatY, offsetX = 0, offsetY = 0
 */
 export function CartesianToCylinder(vec3, x, y, project = 0) {
   const theta = x / PI_WIDTH;
-  const radius = GAME.CilynderRadius + project;
+  const radius = GAME.CylinderRadius + project;
   vec3.x = radius * Math.sin(theta);
   vec3.y = y;
   vec3.z = radius * Math.cos(theta);
