@@ -21,3 +21,18 @@ export function GetScreenCoords(x, y, camera, dst) {
   const yResult = h * -0.5 + (h * y);
   return [xResult, yResult];
 }
+
+
+export function ArcGeometry(innerRadius, outerRadius, thetaStart, thetaLength, depth) {
+  const buffGeometry = new THREE.Geometry();
+  const shape = new THREE.Shape();
+  shape.absarc(0, 0, outerRadius, thetaStart, thetaStart + thetaLength, false);
+  shape.absarc(0, 0, innerRadius, thetaStart + thetaLength, thetaStart, true);
+  const extrudeSettings = {
+    depth,
+    bevelEnabled: false,
+    curveSegments: Math.ceil(thetaLength * 7),
+  };
+  const geo = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
+  return buffGeometry.fromBufferGeometry(geo);
+}

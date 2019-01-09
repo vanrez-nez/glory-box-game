@@ -11,7 +11,7 @@ import GameTools from '@/game/tools';
 import GameInput from '@/game/input';
 import GamePhysics from '@/game/physics/physics';
 import GamePlayer from '@/game/player/player';
-import GameWorld from '@/game/world';
+import GameWorld from '@/game/world/world';
 import GameMap from '@/game/map';
 import GameSfxManager from '@/game/sfx-manager';
 import GameMoodManager from '@/game/mood-manager';
@@ -39,7 +39,7 @@ export default class Game {
       Initializes config based on selected quality,
       GameConfig is shared as a singleton through all the modules
     */
-    GameConfig.set(this.opts.quality, false);
+    GameConfig.set(this.opts.quality, true);
     this.initComponents();
     this.updateSize();
     this.attachEvents();

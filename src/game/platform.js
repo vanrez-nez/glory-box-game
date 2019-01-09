@@ -1,6 +1,7 @@
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { PHYSICS, MAP, EVENTS, GAME } from '@/game/const';
 import { CartesianToCylinder, SyncBodyPhysicsMesh } from '@/game/utils';
+import { ArcGeometry } from '@/common/three-utils';
 import GamePhysicsBody from '@/game/physics/physics-body';
 
 const DEFAULT = {
@@ -11,7 +12,6 @@ const DEFAULT = {
 };
 
 const CACHED_GEOMETRIES = {};
-const CACHED_SOCKET_MESHES = {};
 
 export default class GamePlatform {
   constructor(opts) {
@@ -48,50 +48,41 @@ export default class GamePlatform {
     return CACHED_GEOMETRIES[hash];
   }
 
-  static GetBspCylinder() {
-    const r = GAME.CilynderRadius + 0.5;
-    const geo = new THREE.CylinderGeometry(r, r, 10, 64, 1);
-    const mesh = new THREE.Mesh(geo);
-    return new ThreeBSP(mesh);
-  }
-
-  static GetBspBox(width, height, depth, project) {
-    const geo = new THREE.BoxGeometry(width, height, depth);
-    const mesh = new THREE.Mesh(geo);
-    CartesianToCylinder(mesh.position, 0, 0, GAME.PlatformOffset, project);
-    mesh.lookAt(0, 0, 0);
-    return new ThreeBSP(mesh);
-  }
-
-  static CreateSocketMesh(width) {
-    const BspCylinder = GamePlatform.GetBspCylinder();
-    const BspProjectedBox = GamePlatform.GetBspBox(width, 1.4, 10, -0.3);
-    const BspInnerProjectedBox = GamePlatform.GetBspBox(width - 0.8, 0.4, 10, 0);
-    const s1 = BspProjectedBox.intersect(BspCylinder);
-    const s2 = s1.subtract(BspInnerProjectedBox);
-    const mesh = s2.toMesh();
-    mesh.geometry.computeVertexNormals();
-    return mesh;
-  }
-
-  static GetSocketMesh(width) {
-    const hash = `socket_${width}`;
-    if (!CACHED_SOCKET_MESHES[hash]) {
-      CACHED_SOCKET_MESHES[hash] = GamePlatform.CreateSocketMesh(width);
-    }
-    return CACHED_SOCKET_MESHES[hash];
+  getSocketArcGeometry(x, y, length, depth, height) {
+    const geo = ArcGeometry(
+      GAME.CylinderRadius - 0.5,
+      GAME.CylinderRadius + 0.5,
+      -length * 0.5,
+      length,
+      height,
+    );
+    geo.center();
+    const pos = new THREE.Vector3();
+    // depending on the arc length the box will have a different depth
+    // so we translate the projection accordingly
+    const depthOffset = -geo.boundingBox.max.x + depth;
+    CartesianToCylinder(pos, x, y, depthOffset);
+    const a = new THREE.Vector2(pos.z, pos.x);
+    geo.rotateX(Math.PI / 2);
+    geo.rotateY(-Math.PI / 2 + a.angle());
+    geo.translate(pos.x, pos.y, pos.z);
+    return geo;
   }
 
   getSocketGeometry() {
     const { opts } = this;
     const width = this.isMovingPlatform() ? opts.width * 3 : opts.width;
-    const mesh = GamePlatform.GetSocketMesh(width);
-    const geo = mesh.geometry.clone();
-    CartesianToCylinder(mesh.position, opts.x, opts.y, GAME.PlatformOffset);
-    mesh.lookAt(0, opts.y, 0);
-    mesh.updateMatrix();
-    geo.applyMatrix(mesh.matrix);
-    return geo;
+    const length = (Math.PI / 128) * width;
+    const outerGeo = this.getSocketArcGeometry(opts.x, opts.y, length, 0.2, 1.2);
+    return outerGeo;
+  }
+
+  getSocketLightsGeometry() {
+    const { opts } = this;
+    const width = this.isMovingPlatform() ? opts.width * 3 : opts.width;
+    const length = (Math.PI / 128) * width;
+    const innerGeo = this.getSocketArcGeometry(opts.x, opts.y, length - 0.02, 0.35, 0.1);
+    return innerGeo;
   }
 
   isMovingPlatform() {
@@ -117,6 +108,7 @@ export default class GamePlatform {
     const meshLight = new THREE.Mesh(lightGeo, lightMat);
     meshSteps.position.y = 0.2;
     meshSteps.castShadow = true;
+    meshSteps.receiveShadow = true;
     meshLight.position.y = -0.2;
     meshLight.scale.set(0.95, 0.4, 0.95);
     meshSteps.matrixAutoUpdate = false;
@@ -126,7 +118,6 @@ export default class GamePlatform {
     this.lightMaterial = meshLight.material;
     g.add(meshSteps);
     g.add(meshLight);
-    g.positionCulled = true;
     return g;
   }
 
@@ -148,6 +139,7 @@ export default class GamePlatform {
       scale: new THREE.Vector2(opts.width, 1),
       distance: GAME.PlatformOffset,
       collisionTargets: [PHYSICS.Player],
+      syncLoockAt: false,
     });
   }
 

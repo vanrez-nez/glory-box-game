@@ -234,18 +234,29 @@ export default class GameMap {
   }
 
   mergePlatformSockets(platforms) {
-    const geo = new THREE.Geometry();
+    const group = new THREE.Group();
+    const geoSockets = new THREE.Geometry();
+    const geoLights = new THREE.Geometry();
     for (let i = 0; i < platforms.length; i++) {
       const p = platforms[i];
-      geo.merge(p.getSocketGeometry());
+      geoSockets.merge(p.getSocketGeometry());
+      geoLights.merge(p.getSocketLightsGeometry());
     }
-    const buffGeo = new THREE.BufferGeometry().fromGeometry(geo);
+    const buffSockets = new THREE.BufferGeometry().fromGeometry(geoSockets);
+    const buffLights = new THREE.BufferGeometry().fromGeometry(geoLights);
     const mat = MaterialFactory.getMaterial('PlatformSocket', {
       name: 'plt_socket',
-      color: 0x030508,
+      color: 0x2d2030,
     }, 'plt_socket');
-    const mesh = new THREE.Mesh(buffGeo, mat);
-    return mesh;
+    const lightsMat =  MaterialFactory.getMaterial('PlatformLight', {
+      name: 'plt_socket_light',
+      color: 0xffffff,
+    }, 'plt_socket_light');
+    const lights = new THREE.Mesh(buffLights, lightsMat);
+    const sockets = new THREE.Mesh(buffSockets, mat);
+    sockets.castShadow = true;
+    group.add(sockets, lights);
+    return group;
   }
 
   mergeCollectibleSockets(collectibles) {
