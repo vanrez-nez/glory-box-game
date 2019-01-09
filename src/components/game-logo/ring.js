@@ -1,3 +1,4 @@
+import { ArcGeometry } from '@/common/three-utils';
 
 const DEFAULT = {
   radius: 1,
@@ -17,14 +18,14 @@ export default class GameLogoRing {
   }
 
   createRing() {
-    const { radius, thickness } = this.opts;
+    const { radius, thickness, depth } = this.opts;
     const geo = new THREE.Geometry();
     const segments = this.generateSegments();
     let thetaStart = 0;
     for (let i = 1; i < segments.length; i += 2) {
       thetaStart += segments[i - 1];
       const thetaLength = segments[i];
-      const segmentGeo = this.arcGeometry(radius - thickness, radius, thetaStart, thetaLength);
+      const segmentGeo = ArcGeometry(radius - thickness, radius, thetaStart, thetaLength, depth);
       thetaStart += thetaLength;
       this.setRandomFacesColor(segmentGeo.faces);
       geo.merge(segmentGeo);
@@ -37,21 +38,6 @@ export default class GameLogoRing {
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     return mesh;
-  }
-
-  arcGeometry(innerRadius, outerRadius, thetaStart, thetaLength) {
-    const { depth } = this.opts;
-    const buffGeometry = new THREE.Geometry();
-    const shape = new THREE.Shape();
-    shape.absarc(0, 0, outerRadius, thetaStart, thetaStart + thetaLength, false);
-    shape.absarc(0, 0, innerRadius, thetaStart + thetaLength, thetaStart, true);
-    const extrudeSettings = {
-      depth,
-      bevelEnabled: false,
-      curveSegments: Math.ceil(thetaLength * 7),
-    };
-    const geo = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
-    return buffGeometry.fromBufferGeometry(geo);
   }
 
   setRandomFacesColor(faces) {
