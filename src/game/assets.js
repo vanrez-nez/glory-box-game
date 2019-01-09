@@ -3,9 +3,9 @@ import HullNormal from '@/assets/images/macro_hull_normal.jpg';
 import HullBase from '@/assets/images/macro_hull_basecolor.jpg';
 import HullRoughness from '@/assets/images/macro_hull_roughness.jpg';
 import SkyboxPX from '@/assets/images/universe_cube_0_cubef_cubert.jpg';
-import ImpFloorBase from '@/assets/images/ImperialHangarFloor_basecolor.jpg';
-import ImpFloorNormal from '@/assets/images/ImperialHangarFloor_normal.jpg';
-import ImpFloorRoughness from '@/assets/images/ImperialHangarFloor_roughness.jpg';
+import GroundBase from '@/assets/images/ground_basecolor.jpg';
+import GroundNormal from '@/assets/images/ground_normal.jpg';
+import GroundRoughness from '@/assets/images/ground_roughness.jpg';
 import GlyphsEmissive from '@/assets/images/glyphs_emissive.jpg';
 import PerlinNoise from '@/assets/images/noise.jpg';
 import Dragon from '@/assets/models/dragon.glb';
@@ -18,9 +18,9 @@ export const IMAGE_ASSETS = {
   HullNormal,
   HullBase,
   HullRoughness,
-  ImpFloorBase,
-  ImpFloorNormal,
-  ImpFloorRoughness,
+  GroundBase,
+  GroundNormal,
+  GroundRoughness,
   GlyphsEmissive,
   PerlinNoise,
   SkyboxPX,
