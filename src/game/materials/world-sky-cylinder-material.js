@@ -1,5 +1,5 @@
 import GameMetaMaterial from '@/game/materials/meta-material';
-import NebulaShader from '@/shaders/nebula';
+import Shader from '@/shaders/nebula';
 
 export default class WorldSkyCylinderMaterial extends GameMetaMaterial {
   constructor(opts) {
@@ -9,9 +9,9 @@ export default class WorldSkyCylinderMaterial extends GameMetaMaterial {
         type: 'ShaderMaterial',
         args: {
           side: THREE.BackSide,
-          fragmentShader: NebulaShader.fragmentShader,
-          vertexShader: NebulaShader.vertexShader,
-          uniforms: NebulaShader.uniforms,
+          fragmentShader: Shader.fragment,
+          vertexShader: Shader.vertex,
+          uniforms: Shader.uniforms,
         },
       },
     });

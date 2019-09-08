@@ -94,7 +94,7 @@ export default class GameEnemyVortex {
     const { mesh, particles, clock } = this;
     const { uniforms } = this.material;
     mesh.rotation.y += delta;
-    uniforms.uTime.value += delta;
+    uniforms.u_time.value += delta;
     mesh.position.y = positionY + 20;
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];

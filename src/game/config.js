@@ -1,7 +1,7 @@
 import { QUALITY } from '@/game/const';
 
 const DEV_CONFIG = {
-  EnableTools: false,
+  EnableTools: true,
   EnableStats: true,
   EnableOrbitControls: false,
   EnableAxes: false,

@@ -23,7 +23,7 @@ export default class WorldCylinder {
     this.c1 = this.getCylinder();
     this.c2 = this.c1.clone();
     this.base = this.getBaseCylinder();
-    group.add(this.c1, this.c2, this.base, this.ring.group);
+    group.add(/*this.c1,*/ this.c2, this.base, this.ring.group);
   }
 
   getCylinder() {
@@ -62,39 +62,46 @@ export default class WorldCylinder {
     return mesh;
   }
 
+  getSnappedPosition(playerPosition, offset) {
+    const h = CYLINDER_HEIGHT + CYLINDER_GAP;
+    const snap = Math.round(playerPosition.y / h);
+    return (snap + offset) * h;
+  }
+
+  getClosestSnappedPosition(playerPosition) {
+    const sT = this.getSnappedPosition(playerPosition, 1);
+    const sB = this.getSnappedPosition(playerPosition, -1);
+    // get distances from top and bottom
+    const dstTop = Math.abs(playerPosition.y - sT);
+    const dstBottom = Math.abs(playerPosition.y - sB);
+    // return closest
+    return dstBottom > dstTop ? sT : sB;
+  }
+
   updateRingPosition(playerPosition) {
-    const { ring, c1 } = this;
-    const h = CYLINDER_HEIGHT;
-    const { y } = playerPosition;
-    const q = Math.round(y / h);
-    const topCylinder = q * h + h * 0.5;
-    ring.updatePosition(topCylinder + CYLINDER_GAP * 0.5);
+    const { ring } = this;
+    // reposition the ring to the closest edge (top or bottom)
+    // of the current cylinder
+    const closerPos = this.getSnappedPosition(playerPosition, 0);
+    const halfCylinder = CYLINDER_HEIGHT * 0.5;
+    const halfGap = CYLINDER_GAP * 0.5;
+    const top = closerPos + halfCylinder + halfGap;
+    const bottom = closerPos - halfCylinder - halfGap;
+    const dstTop = Math.abs(playerPosition.y - top);
+    const dstBottom = Math.abs(playerPosition.y - bottom);
+    const closer = dstTop > dstBottom ? bottom : top;
+    ring.updatePosition(closer);
   }
 
   /*
-  Adjust (y) position from both cylinders so there are tiled one
+  Adjust (y) position of both cylinders to be tiled one
   in top of the another, so they are always covering the
   view height from current player's position.
   */
   updateMainCylindersTiling(playerPosition) {
     const { c1, c2 } = this;
-    const { y } = playerPosition;
-    const h = CYLINDER_HEIGHT + CYLINDER_GAP;
-    const q = Math.round(y / h);
-
-    // get middle, top and bottom snapped positions
-    const qM = q * h;
-    const qT = (q + 1) * h;
-    const qB = (q - 1) * h;
-
-    // get distances from top and bottom
-    const dstTop = Math.abs(y - qT);
-    const dstBottom = Math.abs(y - qB);
-
-    // use closest as next
-    const qNext = dstBottom > dstTop ? qT : qB;
-    c1.position.y = qM;
-    c2.position.y = qNext;
+    c1.position.y = this.getSnappedPosition(playerPosition, 0);
+    c2.position.y = this.getClosestSnappedPosition(playerPosition);
   }
 
   update(delta, playerPosition) {

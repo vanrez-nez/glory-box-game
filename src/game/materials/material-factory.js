@@ -21,6 +21,7 @@ import EnemyRayMaterial from '@/game/materials/enemy-ray-material';
 import PlayerHitFxMaterial from '@/game/materials/player-hit-fx-material';
 import PlayerMaterial from '@/game/materials/player-material';
 import PlayerHudFireballMaterial from '@/game/materials/player-hud-fireball-material';
+import WorldCheckpointRingMaterial from '@/game/materials/world-checkpoint-ring-material';
 
 const DEFAULT = {};
 const MATERIALS = {
@@ -28,6 +29,7 @@ const MATERIALS = {
   WorldFloor: WorldFloorMaterial,
   WorldSkyCylinder: WorldSkyCylinderMaterial,
   WorldFxCylinder: WorldFxCylinderMaterial,
+  WorldCheckpointRing: WorldCheckpointRingMaterial,
   PlatformLight: PlatformLightMaterial,
   PlatformSteps: PlatformStepsMaterial,
   PlatformSocket: PlatformSocketMaterial,

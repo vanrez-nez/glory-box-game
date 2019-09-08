@@ -26,7 +26,8 @@ export default class GameLoop {
   }
 
   pause() {
-    MainLoop.stop();
+    // MainLoop.stop();
+    this.paused = true;
   }
 
   resume() {
@@ -47,9 +48,12 @@ export default class GameLoop {
     const { stats } = this.opts;
     const { position: bodyPosition } = player.playerBody;
     const { position: meshPosition } = player.mesh;
-    const delta = this.deltaLeft;
+    let delta = this.deltaLeft;
     this.deltaLeft = 0;
     stats && stats.begin();
+    if (this.paused) {
+      delta = 0;
+    }
     enemy.update(delta, engine.camera, bodyPosition);
     player.update(delta, gameInput.state);
     world.update(delta, meshPosition);

@@ -33,18 +33,15 @@ export default class Engine {
     this.renderer.setPixelRatio(pxRatio);
     this.renderer.setSize(1, 1);
     this.renderer.shadowMap.enabled = GameConfig.EnableShadows;
-    this.renderer.gammaInput = true;
-    this.renderer.gammaOutput = true;
-    this.renderer.gammaFactor = 0.8;
     this.renderer.sortObjects = false;
     this.renderer.toneMapping = GameConfig.ToneMapping;
-    this.renderer.toneMappingExposure = 1.5;
     this.scene = new THREE.Scene();
-    this.scene.matrixAutoUpdate = false;
+    this.scene.matrixAutoUpdate = true;
     this.scene.fog = new THREE.FogExp2(0x000000, 0.015);
     this.camera = new THREE.PerspectiveCamera(65, 1, 1, 300);
     this.camera.position.z = GAME.ZoomCameraDistance;
     this.scene.add(this.camera);
+    global.renderer = this.renderer;
   }
 
   initLights() {
@@ -109,7 +106,7 @@ export default class Engine {
   resetCamera() {
     this.cameraOffset.set(0, 0, 0);
     this.cameraTargetTo.set(0, 0, 0);
-    this.camera.position.set(0, -30, GAME.ZoomCameraDistance);
+    this.camera.position.set(0, 30, GAME.ZoomCameraDistance);
   }
 
   followTarget() {

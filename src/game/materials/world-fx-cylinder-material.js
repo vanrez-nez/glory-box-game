@@ -1,5 +1,5 @@
 import GameMetaMaterial from '@/game/materials/meta-material';
-import CylinderFxShader from '@/shaders/cylinder-fx';
+import Shader from '@/shaders/pickup-burst';
 
 export default class WorldFxCylinderMaterial extends GameMetaMaterial {
   constructor(opts) {
@@ -8,9 +8,9 @@ export default class WorldFxCylinderMaterial extends GameMetaMaterial {
       low: {
         type: 'ShaderMaterial',
         args: {
-          fragmentShader: CylinderFxShader.fragmentShader,
-          vertexShader: CylinderFxShader.vertexShader,
-          uniforms: CylinderFxShader.uniforms,
+          fragmentShader: Shader.fragment,
+          vertexShader: Shader.vertex,
+          uniforms: Shader.uniforms,
           blending: THREE.AdditiveBlending,
           transparent: true,
           depthWrite: false,

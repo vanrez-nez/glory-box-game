@@ -66,18 +66,18 @@ export default class GameWorld {
   addCylinderBurstTweens(tl, position, color) {
     const { fxCylinder } = this;
     const { uniforms } = fxCylinder.material;
-    uniforms.innerRadius.value = 0;
-    uniforms.outterRadius.value = 0.01;
-    uniforms.borderSoftness.value = 0;
-    uniforms.tint.value.set(color);
+    uniforms.u_innerRadius.value = 0;
+    uniforms.u_outterRadius.value = 0.01;
+    uniforms.u_borderSoftness.value = 0;
+    uniforms.u_tint.value.set(color);
     fxCylinder.position.y = position.y;
     // Find cylinder rotation so the center matches the position
     const defaultRot = (-Math.PI / 2);
     this.fxCylinder.rotation.y = defaultRot + (Math.PI / 2) * ((position.x * 1.08) / 64);
     tl.addCallback(() => { fxCylinder.visible = true; });
-    tl.to(uniforms.innerRadius, 2, { value: 1, ease: Power1.easeOut });
-    tl.to(uniforms.outterRadius, 1, { value: 1, ease: Power2.easeOut }, 0);
-    tl.to(uniforms.borderSoftness, 1, { value: 1.0, ease: Power1.easeOut }, 0);
+    tl.to(uniforms.u_innerRadius, 2, { value: 1, ease: Power1.easeOut });
+    tl.to(uniforms.u_outterRadius, 1, { value: 1, ease: Power2.easeOut }, 0);
+    tl.to(uniforms.u_borderSoftness, 1, { value: 1.0, ease: Power1.easeOut }, 0);
     tl.addCallback(() => { fxCylinder.visible = false; });
   }
 
@@ -86,7 +86,7 @@ export default class GameWorld {
     mainCylinder.update(delta, playerPosition);
     if (GameConfig.EnableSkyShader) {
       const { uniforms } = skyCylinder.material;
-      uniforms.time.value += delta * 0.35;
+      uniforms.u_time.value += delta * 0.35;
       skyCylinder.position.y = playerPosition.y;
     }
   }

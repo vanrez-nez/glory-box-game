@@ -1,5 +1,5 @@
 import GameMetaMaterial from '@/game/materials/meta-material';
-import ShineFxShader from '@/shaders/shine-fx';
+import Shader from '@/shaders/shining';
 
 export default class PlayerHitFxMaterial extends GameMetaMaterial {
   constructor(opts) {
@@ -8,9 +8,9 @@ export default class PlayerHitFxMaterial extends GameMetaMaterial {
       low: {
         type: 'ShaderMaterial',
         args: {
-          fragmentShader: ShineFxShader.fragmentShader,
-          vertexShader: ShineFxShader.vertexShader,
-          uniforms: ShineFxShader.uniforms,
+          fragmentShader: Shader.fragment,
+          vertexShader: Shader.vertex,
+          uniforms: Shader.uniforms,
           blending: THREE.AdditiveBlending,
           transparent: true,
           depthWrite: false,

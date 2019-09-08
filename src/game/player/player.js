@@ -52,7 +52,6 @@ export default class GamePlayer {
     const mesh = new THREE.Mesh(geo, mat);
     mesh.positionOffset = new THREE.Vector2();
     mesh.scaleOffset = new THREE.Vector3();
-    mesh.castShadow = true;
     this.group.add(mesh);
     return mesh;
   }
@@ -65,10 +64,10 @@ export default class GamePlayer {
   }
 
   initLights() {
-    this.light = new THREE.PointLight(0xffffff, 7, 20);
+    this.light = new THREE.PointLight(0xffffff, 7, 25, 1);
     this.light.castShadow = true;
-    this.light.shadow.mapSize = new THREE.Vector2(128, 128);
-    this.light.power = 2.45 * Math.PI * 4;
+    this.light.shadow.mapSize = new THREE.Vector2(512, 512);
+    // this.light.power = 4;
     this.group.add(this.light);
   }
 
@@ -238,8 +237,7 @@ export default class GamePlayer {
   updateLights() {
     const { light, playerBody } = this;
     CartesianToCylinder(light.position, playerBody.position.x, playerBody.position.y,
-      GAME.PlayerDistance);
-    light.position.addScalar(0.15);
+      GAME.PlayerOffset);
   }
 
   update(delta, inputState) {

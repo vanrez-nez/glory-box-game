@@ -1,5 +1,5 @@
 import GameMetaMaterial from '@/game/materials/meta-material';
-import EnemyVortexShader from '@/shaders/enemy-vortex-shader';
+import Shader from '@/shaders/vortex';
 
 export default class EnemyVortexMaterial extends GameMetaMaterial {
   constructor(opts) {
@@ -8,9 +8,9 @@ export default class EnemyVortexMaterial extends GameMetaMaterial {
       low: {
         type: 'ShaderMaterial',
         args: {
-          fragmentShader: EnemyVortexShader.fragmentShader,
-          vertexShader: EnemyVortexShader.vertexShader,
-          uniforms: EnemyVortexShader.uniforms,
+          fragmentShader: Shader.fragment,
+          vertexShader: Shader.vertex,
+          uniforms: Shader.uniforms,
           transparent: true,
           depthWrite: false,
           wireframe: false,

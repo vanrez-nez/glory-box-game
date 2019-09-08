@@ -55,18 +55,18 @@ export default class GameEnemyRaySfx {
       Debris Levels - [x]: Speed, [y]: Density, [z]: Width, [w]: Intensity
     */
 
-    tl.set(u.rayLevels.value, { x: 0, y: 0.5, z: 0.0, w: 0.0 });
-    tl.set(u.thinDebrisLevels.value, { x: 0.5, y: 0.1, z: 0,  w: 0 });
-    tl.set(u.fatDebrisLevels.value, { x: 0, y: 0, z: 0, w: 0 });
+    tl.set(u.u_rayLevels.value, { x: 0, y: 0.5, z: 0.0, w: 0.0 });
+    tl.set(u.u_thinDebrisLevels.value, { x: 0.5, y: 0.1, z: 0,  w: 0 });
+    tl.set(u.u_fatDebrisLevels.value, { x: 0, y: 0, z: 0, w: 0 });
     tl.add(() => {
       body.enabled = false;
     });
 
     tl.add('warning');
-    tl.to(u.rayLevels.value, 0.25, { z: 0.4 }, 'warning');
-    tl.to(u.rayLevels.value, 0.35, { x: 0.2, ease: Power2.easeOut }, 'warning');
-    tl.to(u.thinDebrisLevels.value, 1, { z: 0.5, w: 0.5 }, 'warning');
-    tl.to(u.fatDebrisLevels.value, 0.6, { x: 0.5, y: 1.0, z: 0.4, w: 0.2 }, 'warning');
+    tl.to(u.u_rayLevels.value, 0.25, { z: 0.4 }, 'warning');
+    tl.to(u.u_rayLevels.value, 0.35, { x: 0.2, ease: Power2.easeOut }, 'warning');
+    tl.to(u.u_thinDebrisLevels.value, 1, { z: 0.5, w: 0.5 }, 'warning');
+    tl.to(u.u_fatDebrisLevels.value, 0.6, { x: 0.5, y: 1.0, z: 0.4, w: 0.2 }, 'warning');
 
     tl.add('fire', 1.45);
     tl.set(body.scale, { x: 0.1 }, 'fire');
@@ -75,19 +75,19 @@ export default class GameEnemyRaySfx {
       body.enabled = true;
     });
     tl.to(body.scale, 0.35, { x: 7, ease: Power2.easeOut }, 'fire');
-    tl.to(u.rayLevels.value, 0.35, { x: 1.0, y: 0.2, z: 1.0, ease: Power2.easeOut }, 'fire');
-    tl.to(u.thinDebrisLevels.value, 0.35, { y: 0.5, z: 1.0, w: 1.0, ease: Power2.easeOut }, 'fire');
-    tl.to(u.fatDebrisLevels.value, 0.35, { y: 0.9, z: 1.0, w: 1.0, ease: Power2.easeOut }, 'fire');
+    tl.to(u.u_rayLevels.value, 0.35, { x: 1.0, y: 0.2, z: 1.0, ease: Power2.easeOut }, 'fire');
+    tl.to(u.u_thinDebrisLevels.value, 0.35, { y: 0.5, z: 1.0, w: 1.0, ease: Power2.easeOut }, 'fire');
+    tl.to(u.u_fatDebrisLevels.value, 0.35, { y: 0.9, z: 1.0, w: 1.0, ease: Power2.easeOut }, 'fire');
 
     tl.add('cool', 1.8);
-    tl.set(u.thinDebrisLevels.value, { x: 0.4, y: 1.0 }, 'cool');
-    tl.set(u.fatDebrisLevels.value, { x: 1.0, y: 1.0 }, 'cool');
-    tl.to(u.fatDebrisLevels.value, 0.1, { y: 0, w: 0.0, ease: Power2.easeOut }, 'cool');
-    tl.to(u.rayLevels.value, 0.3, { w: 1.0, ease: Power4.easeOut }, 'cool');
+    tl.set(u.u_thinDebrisLevels.value, { x: 0.4, y: 1.0 }, 'cool');
+    tl.set(u.u_fatDebrisLevels.value, { x: 1.0, y: 1.0 }, 'cool');
+    tl.to(u.u_fatDebrisLevels.value, 0.1, { y: 0, w: 0.0, ease: Power2.easeOut }, 'cool');
+    tl.to(u.u_rayLevels.value, 0.3, { w: 1.0, ease: Power4.easeOut }, 'cool');
     tl.add(() => {
       body.enabled = false;
     }, 'cool');
-    tl.to(u.thinDebrisLevels.value, 0.8, { z: 0.0, y: 0.5, w: 0, ease: Power2.easeOut }, 'cool');
+    tl.to(u.u_thinDebrisLevels.value, 0.8, { z: 0.0, y: 0.5, w: 0, ease: Power2.easeOut }, 'cool');
 
     this.timeline = tl;
   }
@@ -119,11 +119,11 @@ export default class GameEnemyRaySfx {
       body.scale.y = mesh.scale.y;
       const project = GAME.PlayerOffset;
       CartesianToCylinder(mPos, positionX, mPos.y, project);
-      uniforms.time.value += delta;
-      uniforms.offsetY.value = offsetY;
+      uniforms.u_time.value += delta;
+      uniforms.u_offsetY.value = offsetY;
       const xRes = Math.sqrt(mPos.x * mPos.x + mPos.z * mPos.z);
       const yRes = mesh.scale.y;
-      uniforms.resolution.value.set(xRes, yRes);
+      uniforms.u_resolution.value.set(xRes, yRes);
       tl.time(tl.time() + delta);
       this.running = tl.progress() < 1;
     }

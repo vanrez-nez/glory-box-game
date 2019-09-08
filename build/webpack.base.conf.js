@@ -35,6 +35,7 @@ module.exports = {
       : config.dev.assetsPublicPath
   },
   resolve: {
+    mainFiles: ['index'],
     extensions: ['.js', '.vue', '.json'],
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
@@ -128,6 +129,14 @@ module.exports = {
         options: {
           name: utils.assetsPath('models/[name].[hash:7].[ext]'),
         },
+      },
+      {
+        test: /\.(glsl|vs|fs|vert|frag)$/,
+        exclude: /node_modules/,
+        use: [
+          'raw-loader',
+          'glslify-loader'
+        ]
       },
     ],
   },

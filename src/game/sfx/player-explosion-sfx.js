@@ -101,15 +101,15 @@ export default class PlayerExplosionSfx {
     this.ringPosition = position;
     ring.visible = true;
     const { uniforms } = ring.material;
-    uniforms.rotation.value = THREE.Math.randFloat(0, Math.PI);
-    uniforms.size.value = 0;
-    uniforms.opacity.value = 1;
-    uniforms.glowIntensity.value = 0;
-    tl.to(uniforms.glowIntensity, 0.5, { value: 1 });
-    tl.to(uniforms.glowIntensity, 0.3, { value: 0.2 }, 0.5);
-    tl.to(uniforms.size, 1, { value: 1.0 }, 0);
-    tl.to(uniforms.rotation, 1, { value: Math.PI }, 0);
-    tl.to(uniforms.opacity, 0.1, { value: 0 }, 1.0);
+    uniforms.u_rotation.value = THREE.Math.randFloat(0, Math.PI);
+    uniforms.u_size.value = 0;
+    uniforms.u_opacity.value = 1;
+    uniforms.u_glowIntensity.value = 0;
+    tl.to(uniforms.u_glowIntensity, 0.5, { value: 1 });
+    tl.to(uniforms.u_glowIntensity, 0.3, { value: 0.2 }, 0.5);
+    tl.to(uniforms.u_size, 1, { value: 1.0 }, 0);
+    tl.to(uniforms.u_rotation, 1, { value: Math.PI }, 0);
+    tl.to(uniforms.u_opacity, 0.1, { value: 0 }, 1.0);
     tl.timeScale(5.5);
   }
 

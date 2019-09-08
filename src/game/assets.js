@@ -12,6 +12,7 @@ import Dragon from '@/assets/models/dragon.glb';
 import FxSprite from '@/assets/audio/sprite.wav';
 import MainBackgroundWebm from '@/assets/audio/main_bg.webm';
 import MainBackgroundMp3 from '@/assets/audio/main_bg.mp3';
+import RingEmissive from '@/assets/images/ring_emissive.png';
 
 export const IMAGE_ASSETS = {
   HullEmissive,
@@ -29,6 +30,7 @@ export const IMAGE_ASSETS = {
   SkyboxNY: SkyboxPX,
   SkyboxPZ: SkyboxPX,
   SkyboxNZ: SkyboxPX,
+  RingEmissive,
 };
 
 export const MODEL_ASSETS = {

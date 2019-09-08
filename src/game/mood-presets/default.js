@@ -3,7 +3,7 @@ const DefaultMood = {
     Low: {
       Scene: {
         FogColor: 0x070011,
-        FogDensity: 0.022,
+        FogDensity: 0.0022,
       },
       ToneMapping: {
         Exposure: 1.5,
@@ -16,7 +16,7 @@ const DefaultMood = {
     Medium: {
       Scene: {
         FogColor: 0x070011,
-        FogDensity: 0.022,
+        FogDensity: 0.0022,
       },
       ToneMapping: {
         Exposure: 1.4,
@@ -29,19 +29,19 @@ const DefaultMood = {
     High: {
       Scene: {
         FogColor: 0x070011,
-        FogDensity: 0.022,
+        FogDensity: 0.0022,
       },
       ToneMapping: {
         Exposure: 1.4,
       },
       AmbientLight: {
         Color: 0xbdd5f7,
-        Intensity: 0.65,
+        Intensity: 0.25,
       },
       BloomPass: {
-        Strength: 2.07,
-        Threshold: 0.54,
-        Radius: 1.1,
+        Strength: 1.7,
+        Threshold: 0.37,
+        Radius: 1.35,
         HighPassColor: 0x0,
       },
     },
@@ -145,7 +145,7 @@ const DefaultMood = {
         emissive: 16731983,
       },
       plt_socket: {
-        color: 395793,
+        color: 0x2d2030,
       },
       cl_socket: {
         color: 461073,
@@ -337,10 +337,6 @@ const DefaultMood = {
         color: 16731983,
         lineWidth: 0.3,
       },
-      plt_socket: {
-        color: 0x0a0f16,
-        reflectivity: 1,
-      },
       cl_socket: {
         color: 0x1a293e,
         emissive: 0,
@@ -408,8 +404,12 @@ const DefaultMood = {
       },
     },
     High: {
+      player_main: {
+        color: 0xfff4ce,
+        reflectivity: 0.6531774281574114,
+      },
       player_particle: {
-        color: 5523605,
+        color: 0xfff4ce,
       },
       explode_trail: {
         color: 16777215,
@@ -421,21 +421,21 @@ const DefaultMood = {
         fatDebrisColor: 38399,
       },
       w_floor: {
-        color: 5993883,
+        color: 0xb6608e,
         emissive: 0,
         emissiveIntensity: 1,
-        metalness: 0.2181165919282511,
-        roughness: 0.32143497757847533,
-        envMapIntensity: 0.29847533632286993,
-        refractionRatio: 0.5395515695067264,
+        metalness: 0.76,
+        roughness: 0.1,
+        envMapIntensity: 0.92,
+        refractionRatio: 0.98,
       },
       w_main_cylinder: {
-        color: 7770550,
-        emissive: 3894728,
-        emissiveIntensity: 1.4754475703324808,
-        metalness: 0.4864815491413957,
-        roughness: 0.15911582024113993,
-        envMapIntensity: 0.7858969674826453,
+        color: 0x655368,
+        emissive: 6901616,
+        emissiveIntensity: 0.7437750165535473,
+        metalness: 1,
+        roughness: 1,
+        envMapIntensity: 1.8,
         refractionRatio: 0.8723054439166971,
       },
       w_fx_cylinder: {
@@ -444,28 +444,29 @@ const DefaultMood = {
       w_base_cylinder: {
         color: 13164543,
         emissive: 65535,
-        emissiveIntensity: 0.4585312385823895,
+        emissiveIntensity: 0.7437750165535473,
         metalness: 0.6267811472415052,
         roughness: 0.27603215199123127,
         envMapIntensity: 1.3470953598830837,
         refractionRatio: 0.7086225794665693,
       },
       w_skyc: {
-        color: 396606,
-        fade: 0.780627802690583,
-        zoom: 2.0204484304932735,
-        stepSize: 0.5969506726457399,
-        tile: 0.6428699551569507,
-        transverseSpeed: 3.1684304932735428,
+        color: 0x3e29c4,
+        fade: 1.79,
+        zoom: 1.7,
+        stepSize: 0.25,
+        tile: 0.65,
+        intensity: 0.01,
+        transverseSpeed: 1.1672277539372298,
       },
       ph_trail: {
-        color: 16731983,
+        color: 3140095,
         lineWidth: 0.2,
       },
       ph_fireball: {
         fissuresColor: 16744192,
         fissuresIntensity: 1.6,
-        glowColor: 16731983,
+        glowColor: 3140095,
         glowIntensity: {
           x: 1.5,
           y: 2.5,
@@ -496,54 +497,26 @@ const DefaultMood = {
         refractionRatio: 0.98,
       },
       enemy_col_trail: {
-        color: 0xf48080,
+        color: 16023680,
         lineWidth: 3,
       },
       plt_steps: {
-        color: 16777215,
+        color: 0x6a3f6b,
         emissive: 0,
         emissiveIntensity: 1,
-        metalness: 0.5,
-        roughness: 0.7,
-        envMapIntensity: 0.2,
-        refractionRatio: 0.98,
+        metalness: 0.3,
+        roughness: 0.96,
+        envMapIntensity: 2,
+        refractionRatio: 0,
+      },
+      plt_socket: {
+        color: 0x2d2030,
+      },
+      plt_socket_light: {
+        color: 0x311d32,
       },
       plt_static: {
-        color: 2404301,
-        reflectivity: 1,
-      },
-      collect_glyph_0: {
-        color: 592913,
-        emissive: 2171169,
-        emissiveIntensity: 0.32466990328094286,
-        reflectivity: 0.5,
-        refractionRatio: 0.98,
-      },
-      collect_item_0: {
-        color: 16731983,
-        reflectivity: 1,
-      },
-      collect_trail_0: {
-        color: 16731983,
-        lineWidth: 0.3,
-      },
-      collect_glyph_3: {
-        color: 592913,
-        emissive: 2171169,
-        emissiveIntensity: 0.52115099950572,
-        reflectivity: 0.5,
-        refractionRatio: 0.98,
-      },
-      collect_item_3: {
-        color: 16747567,
-        reflectivity: 1,
-      },
-      collect_trail_3: {
-        color: 16747567,
-        lineWidth: 0.3,
-      },
-      plt_dynamic: {
-        color: 16764810,
+        color: 13716082,
         reflectivity: 1,
       },
       collect_glyph_6: {
@@ -553,30 +526,30 @@ const DefaultMood = {
         reflectivity: 0.5,
         refractionRatio: 0.98,
       },
-      collect_glyph_1: {
+      collect_item_6: {
+        color: 16731983,
+        reflectivity: 1,
+      },
+      collect_trail_6: {
+        color: 16731983,
+        lineWidth: 0.3,
+      },
+      collect_glyph_8: {
         color: 592913,
         emissive: 2171169,
-        emissiveIntensity: 0.5321467835098485,
+        emissiveIntensity: 0.49387783903526455,
         reflectivity: 0.5,
         refractionRatio: 0.98,
       },
-      collect_item_1: {
-        color: 15937535,
+      plt_dynamic: {
+        color: 6129107,
         reflectivity: 1,
       },
-      collect_trail_1: {
-        color: 15937535,
-        lineWidth: 0.3,
-      },
-      plt_socket: {
-        color: 593430,
-        reflectivity: 1,
-      },
-      cl_socket: {
-        color: 1318189,
-        emissive: 0,
-        emissiveIntensity: 1,
-        reflectivity: 0.35,
+      collect_glyph_0: {
+        color: 592913,
+        emissive: 2171169,
+        emissiveIntensity: 0.32466990328094286,
+        reflectivity: 0.5,
         refractionRatio: 0.98,
       },
       collect_glyph_2: {
@@ -594,11 +567,11 @@ const DefaultMood = {
         color: 3140095,
         lineWidth: 0.3,
       },
-      collect_glyph_8: {
-        color: 592913,
-        emissive: 2171169,
-        emissiveIntensity: 0.49387783903526455,
-        reflectivity: 0.5,
+      cl_socket: {
+        color: 0xe2b8fc,
+        emissive: 0,
+        emissiveIntensity: 1,
+        reflectivity: 0.54,
         refractionRatio: 0.98,
       },
       collect_glyph_4: {
@@ -616,17 +589,47 @@ const DefaultMood = {
         color: 16645935,
         lineWidth: 0.3,
       },
-      collect_glyph_7: {
-        color: 592913,
-        emissive: 2171169,
-        emissiveIntensity: 0.414575482291875,
-        reflectivity: 0.5,
-        refractionRatio: 0.98,
-      },
       collect_glyph_5: {
         color: 592913,
         emissive: 2171169,
         emissiveIntensity: 0.5160725927598924,
+        reflectivity: 0.5,
+        refractionRatio: 0.98,
+      },
+      collect_glyph_3: {
+        color: 592913,
+        emissive: 16747567,
+        emissiveIntensity: 3.5391709655962833,
+        reflectivity: 0.5,
+        refractionRatio: 0.98,
+      },
+      collect_item_3: {
+        color: 16747567,
+        reflectivity: 1,
+      },
+      collect_trail_3: {
+        color: 16747567,
+        lineWidth: 0.3,
+      },
+      collect_glyph_1: {
+        color: 592913,
+        emissive: 2171169,
+        emissiveIntensity: 0.5321467835098485,
+        reflectivity: 0.5,
+        refractionRatio: 0.98,
+      },
+      collect_item_1: {
+        color: 15937535,
+        reflectivity: 1,
+      },
+      collect_trail_1: {
+        color: 15937535,
+        lineWidth: 0.3,
+      },
+      collect_glyph_7: {
+        color: 592913,
+        emissive: 2171169,
+        emissiveIntensity: 0.414575482291875,
         reflectivity: 0.5,
         refractionRatio: 0.98,
       },

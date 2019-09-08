@@ -112,82 +112,82 @@ export default class GameTools {
 
   addFireballShaderMaterial(folder, mat) {
     const u = mat.uniforms;
-    this.addColorField(folder, u.fissuresColor, 'value', 'Fissures Color');
-    folder.add(u.fissuresIntensity, 'value', 0, 10.0).name('Fissures Intensity');
-    this.addColorField(folder, u.glowColor, 'value', 'Glow Color');
-    folder.add(u.glowIntensity.value, 'x', 0.0, 10.0).name('Glow X (c)');
-    folder.add(u.glowIntensity.value, 'y', 0.0, 10.0).name('Glow Y (p)');
-    this.addColorField(folder, u.ringColor, 'value', 'Ring Color');
-    folder.add(u.ringThickness, 'value', 0, 1.2).name('Ring Thickness');
+    this.addColorField(folder, u.u_fissuresColor, 'value', 'Fissures Color');
+    folder.add(u.u_fissuresIntensity, 'value', 0, 10.0).name('Fissures Intensity');
+    this.addColorField(folder, u.u_glowColor, 'value', 'Glow Color');
+    folder.add(u.u_glowIntensity.value, 'x', 0.0, 10.0).name('Glow X (c)');
+    folder.add(u.u_glowIntensity.value, 'y', 0.0, 10.0).name('Glow Y (p)');
+    this.addColorField(folder, u.u_ringColor, 'value', 'Ring Color');
+    folder.add(u.u_ringThickness, 'value', 0, 1.2).name('Ring Thickness');
   }
 
   addEnemyRayMaterial(folder, mat) {
     const u = mat.uniforms;
     const rayFolder = folder.addFolder('Ray');
-    this.addColorField(rayFolder, u.rayColor, 'value', 'Ray Color');
-    rayFolder.add(u.rayLevels.value, 'x', 0.0, 1.0).name('Inner Glow');
-    rayFolder.add(u.rayLevels.value, 'y', 0.0, 1.0).name('Outer Glow');
-    rayFolder.add(u.rayLevels.value, 'z', 0.0, 1.0).name('Intensity');
-    rayFolder.add(u.rayLevels.value, 'w', 0.0, 1.0).name('Inner Fade');
+    this.addColorField(rayFolder, u.u_rayColor, 'value', 'Ray Color');
+    rayFolder.add(u.u_rayLevels.value, 'x', 0.0, 1.0).name('Inner Glow');
+    rayFolder.add(u.u_rayLevels.value, 'y', 0.0, 1.0).name('Outer Glow');
+    rayFolder.add(u.u_rayLevels.value, 'z', 0.0, 1.0).name('Intensity');
+    rayFolder.add(u.u_rayLevels.value, 'w', 0.0, 1.0).name('Inner Fade');
 
     const d1Folder = folder.addFolder('Thin Debris');
-    this.addColorField(d1Folder, u.thinDebrisColor, 'value', 'Color');
-    d1Folder.add(u.thinDebrisLevels.value, 'x', 0.0, 1.0).name('Speed');
-    d1Folder.add(u.thinDebrisLevels.value, 'y', 0.0, 1.0).name('Density');
-    d1Folder.add(u.thinDebrisLevels.value, 'z', 0.0, 1.0).name('Width');
-    d1Folder.add(u.thinDebrisLevels.value, 'w', 0.0, 1.0).name('Intensity');
+    this.addColorField(d1Folder, u.u_thinDebrisColor, 'value', 'Color');
+    d1Folder.add(u.u_thinDebrisLevels.value, 'x', 0.0, 1.0).name('Speed');
+    d1Folder.add(u.u_thinDebrisLevels.value, 'y', 0.0, 1.0).name('Density');
+    d1Folder.add(u.u_thinDebrisLevels.value, 'z', 0.0, 1.0).name('Width');
+    d1Folder.add(u.u_thinDebrisLevels.value, 'w', 0.0, 1.0).name('Intensity');
 
     const d2Folder = folder.addFolder('Fat Debris');
-    this.addColorField(d2Folder, u.fatDebrisColor, 'value', 'Color');
-    d2Folder.add(u.fatDebrisLevels.value, 'x', 0.0, 1.0).name('Speed');
-    d2Folder.add(u.fatDebrisLevels.value, 'y', 0.0, 1.0).name('Density');
-    d2Folder.add(u.fatDebrisLevels.value, 'z', 0.0, 1.0).name('Width');
-    d2Folder.add(u.fatDebrisLevels.value, 'w', 0.0, 1.0).name('Intensity');
+    this.addColorField(d2Folder, u.u_fatDebrisColor, 'value', 'Color');
+    d2Folder.add(u.u_fatDebrisLevels.value, 'x', 0.0, 1.0).name('Speed');
+    d2Folder.add(u.u_fatDebrisLevels.value, 'y', 0.0, 1.0).name('Density');
+    d2Folder.add(u.u_fatDebrisLevels.value, 'z', 0.0, 1.0).name('Width');
+    d2Folder.add(u.u_fatDebrisLevels.value, 'w', 0.0, 1.0).name('Intensity');
   }
 
   addEnemyVortexMaterial(folder, mat) {
     const u = mat.uniforms;
-    this.addColorField(folder, u.uColorFrom, 'value', 'Color From');
-    this.addColorField(folder, u.uColorTo, 'value', 'Color To');
-    folder.add(u.uTwist, 'value', 0, 4000).name('Twist');
-    folder.add(u.uDisplacementScale, 'value', 0.0, 100.0).name('Disp Scale');
-    folder.add(u.uDisplacementBias, 'value', 0.0, 100.0).name('Disp Bias');
-    folder.add(u.uFogDistance, 'value', 0, 500).name('Fog Dist');
+    this.addColorField(folder, u.u_colorFrom, 'value', 'Color From');
+    this.addColorField(folder, u.u_colorTo, 'value', 'Color To');
+    folder.add(u.u_twist, 'value', 0, 4000).name('Twist');
+    folder.add(u.u_displacementScale, 'value', 0.0, 100.0).name('Disp Scale');
+    folder.add(u.u_displacementBias, 'value', 0.0, 100.0).name('Disp Bias');
+    folder.add(u.u_fogDistance, 'value', 0, 500).name('Fog Dist');
   }
 
   addSkyShaderMaterial(folder, mat) {
     const u = mat.uniforms;
-    this.addColorField(folder, u.color, 'value', 'Color');
-    folder.add(u.intensity, 'value', 0, 1).name('Intensity');
-    folder.add(u.fade, 'value', 0, 2).name('Fade');
-    folder.add(u.zoom, 'value', 0, 4).name('Zoom');
-    folder.add(u.stepSize, 'value', 0, 1).name('Step Size');
-    folder.add(u.tile, 'value', 0, 1).name('Tile');
-    folder.add(u.transverseSpeed, 'value', 0, 4)
+    this.addColorField(folder, u.u_color, 'value', 'Color');
+    folder.add(u.u_intensity, 'value', 0, 1).name('Intensity');
+    folder.add(u.u_fade, 'value', 0, 2).name('Fade');
+    folder.add(u.u_zoom, 'value', 0, 4).name('Zoom');
+    folder.add(u.u_stepSize, 'value', 0, 1).name('Step Size');
+    folder.add(u.u_tile, 'value', 0, 1).name('Tile');
+    folder.add(u.u_transverseSpeed, 'value', 0, 4)
       .name('Transverse Speed');
   }
 
   getSkyShaderProps(mat) {
     const u = mat.uniforms;
     return {
-      color: u.color.value,
-      fade: u.fade.value,
-      zoom: u.zoom.value,
-      stepSize: u.stepSize.value,
-      tile: u.tile.value,
-      transverseSpeed: u.transverseSpeed.value,
+      color: u.u_color.value,
+      fade: u.u_fade.value,
+      zoom: u.u_zoom.value,
+      stepSize: u.u_stepSize.value,
+      tile: u.u_tile.value,
+      transverseSpeed: u.u_transverseSpeed.value,
     };
   }
 
   getFireballShaderProps(mat) {
     const u = mat.uniforms;
     return {
-      fissuresColor: u.fissuresColor.value,
-      fissuresIntensity: u.fissuresIntensity.value,
-      glowColor: u.glowColor.value,
-      glowIntensity: u.glowIntensity.value,
-      ringColor: u.ringColor.value,
-      ringThickness: u.ringThickness.value,
+      fissuresColor: u.u_fissuresColor.value,
+      fissuresIntensity: u.u_fissuresIntensity.value,
+      glowColor: u.u_glowColor.value,
+      glowIntensity: u.u_glowIntensity.value,
+      ringColor: u.u_ringColor.value,
+      ringThickness: u.u_ringThickness.value,
     };
   }
 
@@ -202,9 +202,9 @@ export default class GameTools {
   getMeshEnemyRayProps(mat) {
     const u = mat.uniforms;
     return {
-      rayColor: u.rayColor.value,
-      thinDebrisColor: u.thinDebrisColor.value,
-      fatDebrisColor: u.fatDebrisColor.value,
+      rayColor: u.u_rayColor.value,
+      thinDebrisColor: u.u_thinDebrisColor.value,
+      fatDebrisColor: u.u_fatDebrisColor.value,
     };
   }
 

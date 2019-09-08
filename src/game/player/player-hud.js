@@ -52,8 +52,8 @@ export default class GamePlayerHud {
       ease: Back.easeOut,
     });
     tl.to(fireball.scale, 0.2, { x: 1, y: 1, z: 1 });
-    tl.to(uniforms.glowIntensity.value, 0.3, { x: 1.5, y: 2.5 }, 0);
-    tl.to(uniforms.glowColor.value, 0.3, {
+    tl.to(uniforms.u_glowIntensity.value, 0.3, { x: 1.5, y: 2.5 }, 0);
+    tl.to(uniforms.u_glowColor.value, 0.3, {
       r: color.r,
       g: color.g,
       b: color.b,
@@ -79,7 +79,7 @@ export default class GamePlayerHud {
     const { uniforms } = fireball.material;
     const [x, y] = GetScreenCoords(0.5, 0.95, camera, GAME.HudDistanceFromCamera);
     fireball.position.set(x, y, -GAME.HudDistanceFromCamera);
-    uniforms.time.value += delta * 0.15;
+    uniforms.u_time.value += delta * 0.15;
     this.trailsSfx.update(fireball.position);
   }
 }
