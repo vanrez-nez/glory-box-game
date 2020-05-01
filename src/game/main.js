@@ -156,7 +156,6 @@ export default class Game {
     this.loop.unbind();
     MaterialFactory.clear();
     components.engine.dispose();
-    debugger;
   }
 
   onPlayerDeath() {

@@ -26,11 +26,12 @@ export default class GameLoop {
   }
 
   pause() {
-    // MainLoop.stop();
+    MainLoop.stop();
     this.paused = true;
   }
 
   resume() {
+    this.paused = false;
     MainLoop.start();
   }
 

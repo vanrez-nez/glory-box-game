@@ -170,24 +170,24 @@ export default class GameTools {
   getSkyShaderProps(mat) {
     const u = mat.uniforms;
     return {
-      color: u.u_color.value,
-      fade: u.u_fade.value,
-      zoom: u.u_zoom.value,
-      stepSize: u.u_stepSize.value,
-      tile: u.u_tile.value,
-      transverseSpeed: u.u_transverseSpeed.value,
+      u_color: u.u_color.value,
+      u_fade: u.u_fade.value,
+      u_zoom: u.u_zoom.value,
+      u_stepSize: u.u_stepSize.value,
+      u_tile: u.u_tile.value,
+      u_transverseSpeed: u.u_transverseSpeed.value,
     };
   }
 
   getFireballShaderProps(mat) {
     const u = mat.uniforms;
     return {
-      fissuresColor: u.u_fissuresColor.value,
-      fissuresIntensity: u.u_fissuresIntensity.value,
-      glowColor: u.u_glowColor.value,
-      glowIntensity: u.u_glowIntensity.value,
-      ringColor: u.u_ringColor.value,
-      ringThickness: u.u_ringThickness.value,
+      u_fissuresColor: u.u_fissuresColor.value,
+      u_fissuresIntensity: u.u_fissuresIntensity.value,
+      u_glowColor: u.u_glowColor.value,
+      u_glowIntensity: u.u_glowIntensity.value,
+      u_ringColor: u.u_ringColor.value,
+      u_ringThickness: u.u_ringThickness.value,
     };
   }
 
@@ -202,9 +202,9 @@ export default class GameTools {
   getMeshEnemyRayProps(mat) {
     const u = mat.uniforms;
     return {
-      rayColor: u.u_rayColor.value,
-      thinDebrisColor: u.u_thinDebrisColor.value,
-      fatDebrisColor: u.u_fatDebrisColor.value,
+      u_rayColor: u.u_rayColor.value,
+      u_thinDebrisColor: u.u_thinDebrisColor.value,
+      u_fatDebrisColor: u.u_fatDebrisColor.value,
     };
   }
 

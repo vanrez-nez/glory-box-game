@@ -127,6 +127,8 @@ export default class GameMoodManager {
       const targetValue = config[propName];
       if (target[propName]) {
         this.addPropertyTween(tl, target[propName], time, 'value', targetValue);
+      } else {
+        console.error('Property:', propName, 'doesn\'t exists on', target);
       }
     });
   }
@@ -135,6 +137,7 @@ export default class GameMoodManager {
     instances.forEach((instance) => {
       const mat = instance.activeMaterial;
       const type = instance.constructor.name;
+
       const tntParams = { tl, mat, time, config };
       switch (type) {
         case 'EnemyRayMaterial':

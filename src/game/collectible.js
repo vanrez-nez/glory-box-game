@@ -14,8 +14,8 @@ const DEFAULT = {
 
 const MaxParticles = 5;
 const Collectibles = [
-  { type: COLLECTIBLE.Honor, color: 0xff4f4f },
-  { type: COLLECTIBLE.Courage, color: 0xf32fff },
+  { type: COLLECTIBLE.Honor, color: 0xff9a9a },
+  { type: COLLECTIBLE.Courage, color: 0xfc7ad0 },
   { type: COLLECTIBLE.Destiny, color: 0x2fe9ff },
   { type: COLLECTIBLE.Strength, color: 0xff8c2f },
   { type: COLLECTIBLE.Peace, color: 0xfdff2f },

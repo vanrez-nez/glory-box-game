@@ -1,4 +1,4 @@
-// import { AUDIO_ASSETS } from '@/game/assets';
+import { AUDIO_ASSETS } from '@/game/assets';
 import GameAudioTrack from '@/game/audio/audio-track';
 import GameAudioMix from '@/game/audio/audio-mix';
 
@@ -15,24 +15,25 @@ export class GameAudioManager {
     this.loaded = false;
     this.queued = [];
     this.preload([
+      // AUDIO_ASSETS.FxJump,
       // 'static/audio/loop_drums.wav',
-      'static/audio/jump_alt.wav',
-      'static/audio/wind_loop.wav',
-      'static/audio/dragon_near.wav',
-      'static/audio/electric_charge_dim.wav',
-      'static/audio/electric_blast.wav',
-      'static/audio/collect.wav',
-      'static/audio/foot_step.wav',
-      'static/audio/player_hit.wav',
-      'static/audio/drama_end.wav',
-      'static/audio/dragon_roar.wav',
+      // 'static/audio/jump_alt.wav',
+      // 'static/audio/wind_loop.wav',
+      // 'static/audio/dragon_near.wav',
+      // 'static/audio/electric_charge_dim.wav',
+      // 'static/audio/electric_blast.wav',
+      // 'static/audio/collect.wav',
+      // 'static/audio/foot_step.wav',
+      // 'static/audio/player_hit.wav',
+      // 'static/audio/drama_end.wav',
+      // 'static/audio/dragon_roar.wav',
     ]);
   }
 
   preload(items) {
     const { loader } = this;
     this.itemsLeft = items.length;
-    // items.forEach(item => loader.load(item, this.onItemLoaded.bind(this, item)));
+    items.forEach(item => loader.load(item, this.onItemLoaded.bind(this, item)));
   }
 
   onItemLoaded(src, buffer) {
@@ -81,7 +82,7 @@ export class GameAudioManager {
     });
 
     this.loadTrack('jump_1', {
-      buffer: buffers['static/audio/jump_alt.wav'],
+      buffer: buffers[AUDIO_ASSETS.FxJump],
       volume: 0.7,
     });
 
