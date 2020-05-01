@@ -1,6 +1,6 @@
 import resize from 'vue-resize-directive';
 import Vue from 'vue';
-import App from '@/app';
+import App from '@/App';
 import router from '@/router';
 import store from '@/store';
 
