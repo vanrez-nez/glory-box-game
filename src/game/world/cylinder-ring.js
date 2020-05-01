@@ -17,7 +17,7 @@ export default class WorldCylinderRing {
   }
 
   addInnerCylinder() {
-    const ratio = CYLINDER_HEIGHT / (GAME.CylinderRadius * Math.PI * 2);
+    // const ratio = CYLINDER_HEIGHT / (GAME.CylinderRadius * Math.PI * 2);
 
     // calculate cylinder height to wrap with texture dimensions
     const [texWidth, texHeight] = [1024, 64];
@@ -36,7 +36,7 @@ export default class WorldCylinderRing {
   }
 
   addBevel() {
-    const ratio = CYLINDER_HEIGHT / (GAME.CylinderRadius * Math.PI * 2);
+    // const ratio = CYLINDER_HEIGHT / (GAME.CylinderRadius * Math.PI * 2);
     const xScale = 0.05;
     const yScale = 0.05;
     const geo = this.getGeometry();
@@ -45,7 +45,7 @@ export default class WorldCylinderRing {
       xScale,
       yScale,
     }, 'w_main_cylinder');
-    const mesh = new THREE.Mesh(geo, mat);//mat);
+    const mesh = new THREE.Mesh(geo, mat);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     this.group.add(mesh);
@@ -64,14 +64,14 @@ export default class WorldCylinderRing {
     const r2 = ring.clone().translate(0, height * -0.5, 0);
     // Cylinders
     const middle = new THREE.CylinderGeometry(depthRadius, depthRadius, height, 128, 1, true);
-    // geo.merge(middle);
+    geo.merge(middle);
     geo.merge(r1);
     geo.merge(r2);
     return geo;
   }
 
-  updatePosition(y) {
+  updatePosition() {
     this.group = 1;
-    //this.group.position.y = y;
+    // this.group.position.y = y;
   }
 }

@@ -3,7 +3,7 @@ import { GAME } from '@/game/const';
 import WorldCylinderRing from '@/game/world/cylinder-ring';
 
 const CYLINDER_HEIGHT = 128;
-const CYLINDER_GAP = 4;
+const CYLINDER_GAP = 0;
 
 const DEFAULT = {};
 
@@ -23,7 +23,7 @@ export default class WorldCylinder {
     this.c1 = this.getCylinder();
     this.c2 = this.c1.clone();
     this.base = this.getBaseCylinder();
-    group.add(/*this.c1,*/ this.c2, this.base, this.ring.group);
+    group.add(this.c1, this.c2, this.base, this.ring.group);
   }
 
   getCylinder() {
