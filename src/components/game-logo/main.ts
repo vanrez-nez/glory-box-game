@@ -117,12 +117,15 @@ export default class GameLogo {
 
   onUpdate(delta: any) {
     const { renderer, scene, camera, rings } = this;
+    // Skip rendering into a 0-sized canvas (e.g. mid-transition) — WebGPU errors
+    // with "swapchain texture of size 0".
+    if (!this.width || !this.height) {
+      return;
+    }
     for (let i = 0; i < rings.length; i++) {
       rings[i].update(delta);
     }
-    // WebGPURenderer renders asynchronously; the sync render() renders black
-    // after the first frame when driven from a plain rAF loop.
-    renderer.renderAsync(scene, camera);
+    renderer.render(scene, camera);
   }
 
   // WebGPURenderer needs async backend init before the first render.

@@ -20,7 +20,7 @@ export default class Engine {
   renderer!: THREE.WebGPURenderer;
   camera!: THREE.PerspectiveCamera;
   scene!: THREE.Scene;
-  postProcessing?: THREE.PostProcessing;
+  postProcessing?: THREE.RenderPipeline;
   // BloomNode from three/addons/tsl/display/BloomNode; its strength/radius/
   // threshold are TSL uniform nodes (animate via `.value`, see mood-manager).
   bloomPass?: any;
@@ -61,8 +61,10 @@ export default class Engine {
     await this.renderer.init();
     const { scene, camera, postProcessing } = this;
     await this.renderer.compileAsync(scene, camera);
+    // Warm up the post-processing pipeline once so the first loop frame isn't
+    // black while WGSL compiles. Sync render() is valid now that init() resolved.
     if (GameConfig.UsePostProcessing && postProcessing) {
-      await postProcessing.renderAsync();
+      postProcessing.render();
     }
   }
 
@@ -110,7 +112,7 @@ export default class Engine {
     const scenePassColor = scenePass.getTextureNode();
     const bloomPass = bloom(scenePassColor, 1.5, 0.4, 0.85);
     this.bloomPass = bloomPass;
-    const postProcessing = new THREE.PostProcessing(renderer);
+    const postProcessing = new THREE.RenderPipeline(renderer);
     // Composite bloom over the scene, then antialias. TSL node math methods
     // (.add) live on the Node prototype at runtime but are absent from the
     // PassTextureNode/BloomNode static types; cast to compose the output.
@@ -183,14 +185,12 @@ export default class Engine {
     } else {
       this.followTarget();
     }
-    // Use the async render path: WebGPURenderer drives GPU submission
-    // asynchronously, and the synchronous render() called every frame from the
-    // (non-setAnimationLoop) MainLoop renders black after the first frame.
-    // Fire-and-forget keeps the existing synchronous loop structure intact.
+    // Synchronous render is the supported path now that init() is awaited before
+    // the loop starts (renderAsync() is deprecated).
     if (GameConfig.UsePostProcessing && postProcessing) {
-      postProcessing.renderAsync();
+      postProcessing.render();
     } else {
-      renderer.renderAsync(scene, camera);
+      renderer.render(scene, camera);
     }
   }
 }

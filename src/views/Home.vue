@@ -70,6 +70,13 @@ export default defineComponent({
     this.reset();
     gameLogo.run();
   },
+  deactivated() {
+    // Stop the logo's render loop when leaving Home (e.g. to /about); otherwise
+    // it keeps rendering into a 0x0 canvas and the WebGPU backend errors with
+    // "swapchain texture of size 0".
+    const gameLogo = this.$refs.gameLogo as any;
+    gameLogo?.stop();
+  },
   methods: {
     bindToQuality(quality: any) {
       return this.onQualitySelect.bind(this, quality);

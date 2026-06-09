@@ -24,6 +24,20 @@ export function GetScreenCoords(x: any, y: any, camera: any, dst: any) {
 }
 
 
+/*
+  Adds a zero-filled `uv` attribute to a geometry that lacks one. WebGPU node
+  materials reference the `uv` attribute during setup (for potential maps) even
+  when no texture is assigned, logging "Vertex attribute uv not found" for
+  geometries without UVs (e.g. the dragon GLTF). These meshes don't sample any
+  map, so an unused zero UV set is harmless and silences the warning.
+*/
+export function EnsureUv(geometry: any) {
+  if (geometry?.attributes?.position && !geometry.attributes.uv) {
+    const count = geometry.attributes.position.count;
+    geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(count * 2), 2));
+  }
+}
+
 export function ArcGeometry(innerRadius: any, outerRadius: any, thetaStart: any, thetaLength: any, depth: any) {
   const shape = new THREE.Shape();
   shape.absarc(0, 0, outerRadius, thetaStart, thetaStart + thetaLength, false);

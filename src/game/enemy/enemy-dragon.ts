@@ -6,6 +6,7 @@ import { AudioManagerInstance as AudioManager } from '@/game/audio/audio-manager
 import { GAME, PHYSICS, EVENTS } from '@/game/const';
 import { MODEL_ASSETS } from '@/game/assets';
 import { CartesianToCylinder, EaseExpoIn, EaseExpoOut } from '@/game/utils';
+import { EnsureUv } from '@/common/three-utils';
 import LineTrail from '@/game/line-trail';
 import GamePhysicsBody from '@/game/physics/physics-body';
 
@@ -98,6 +99,10 @@ export default class GameEnemyDragon {
 
   initHead() {
     const { head, eyes } = this;
+    // The dragon GLTF ships without UVs; add zero UVs so the node materials
+    // don't warn about a missing `uv` attribute.
+    EnsureUv(head.geometry);
+    EnsureUv(eyes.geometry);
     head.scale.multiplyScalar(2);
     CartesianToCylinder(this.head.position, 0, 0, GAME.EnemyOffset);
     const headId = 'enemy_head';
@@ -115,6 +120,8 @@ export default class GameEnemyDragon {
   initTail() {
     const { opts, tailPositions, tailSegments, tailSegment } = this;
     const { tailSize } = this.opts;
+    // Shared geometry across all cloned tail segments — add zero UVs once.
+    EnsureUv(tailSegment.geometry);
     tailSegment.material = MaterialFactory.getMaterial('EnemyArmor', {
       name: 'enemy_armor',
       color: 0x131e,
