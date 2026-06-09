@@ -1,3 +1,5 @@
+import EventEmitter3 from 'eventemitter3';
+import * as THREE from 'three';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { AudioManagerInstance as AudioManager } from '@/game/audio/audio-manager';
 import { GameConfigInstance as GameConfig } from '@/game/config';

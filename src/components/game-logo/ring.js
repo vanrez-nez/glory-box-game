@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { ArcGeometry } from '@/common/three-utils';
 
 const DEFAULT = {
@@ -19,19 +21,20 @@ export default class GameLogoRing {
 
   createRing() {
     const { radius, thickness, depth } = this.opts;
-    const geo = new THREE.Geometry();
     const segments = this.generateSegments();
+    const geometries = [];
     let thetaStart = 0;
     for (let i = 1; i < segments.length; i += 2) {
       thetaStart += segments[i - 1];
       const thetaLength = segments[i];
       const segmentGeo = ArcGeometry(radius - thickness, radius, thetaStart, thetaLength, depth);
       thetaStart += thetaLength;
-      this.setRandomFacesColor(segmentGeo.faces);
-      geo.merge(segmentGeo);
+      this.setRandomColor(segmentGeo);
+      geometries.push(segmentGeo);
     }
+    const geo = mergeGeometries(geometries, false);
     const mat = new THREE.MeshStandardMaterial({
-      vertexColors: THREE.FaceColors,
+      vertexColors: true,
       wireframe: false,
     });
     const mesh = new THREE.Mesh(geo, mat);
@@ -40,13 +43,20 @@ export default class GameLogoRing {
     return mesh;
   }
 
-  setRandomFacesColor(faces) {
+  // Bake a single random color into every vertex of the segment as a `color`
+  // attribute (replaces the legacy Geometry face.color + FaceColors workflow).
+  setRandomColor(geo) {
     const { colors } = this.opts;
     const colorHex = colors[~~(Math.random() * colors.length)];
     const color = new THREE.Color(colorHex);
-    faces.forEach((f) => {
-      f.color = color;
-    });
+    const count = geo.attributes.position.count;
+    const colorArr = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      colorArr[i * 3] = color.r;
+      colorArr[i * 3 + 1] = color.g;
+      colorArr[i * 3 + 2] = color.b;
+    }
+    geo.setAttribute('color', new THREE.BufferAttribute(colorArr, 3));
   }
 
   generateSegments() {
@@ -54,7 +64,7 @@ export default class GameLogoRing {
     const res = [];
     let total = 0;
     for (let i = 0; i < segments * 2; i++) {
-      const segmentSize = THREE.Math.randFloat(minSize, maxSize);
+      const segmentSize = THREE.MathUtils.randFloat(minSize, maxSize);
       res.push(segmentSize);
       total += segmentSize;
     }

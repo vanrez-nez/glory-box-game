@@ -1,3 +1,5 @@
+import EventEmitter3 from 'eventemitter3';
+import * as THREE from 'three';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { GetScreenCoords } from '@/common/three-utils';
 import { GAME, EVENTS } from '@/game/const';
@@ -32,7 +34,7 @@ export default class GamePlayerHud {
   loadModel() {}
 
   addFireballMesh() {
-    const geo = new THREE.SphereBufferGeometry(0.4, 10, 10);
+    const geo = new THREE.SphereGeometry(0.4, 10, 10);
     const mat = MaterialFactory.getMaterial('PlayerHudFireball', {
       name: 'ph_fireball',
     });
@@ -45,15 +47,17 @@ export default class GamePlayerHud {
   addPowerCollectTweens(tl, amount, color) {
     const { fireball } = this;
     const { uniforms } = fireball.material;
-    tl.to(fireball.scale, 0.15, {
+    tl.to(fireball.scale, {
+      duration: 0.15,
       x: 1.3,
       y: 1.3,
       z: 1.3,
-      ease: Back.easeOut,
+      ease: 'back.out',
     });
-    tl.to(fireball.scale, 0.2, { x: 1, y: 1, z: 1 });
-    tl.to(uniforms.u_glowIntensity.value, 0.3, { x: 1.5, y: 2.5 }, 0);
-    tl.to(uniforms.u_glowColor.value, 0.3, {
+    tl.to(fireball.scale, { duration: 0.2, x: 1, y: 1, z: 1 });
+    tl.to(uniforms.u_glowIntensity.value, { duration: 0.3, x: 1.5, y: 2.5 }, 0);
+    tl.to(uniforms.u_glowColor.value, {
+      duration: 0.3,
       r: color.r,
       g: color.g,
       b: color.b,
@@ -66,7 +70,8 @@ export default class GamePlayerHud {
 
   resetPower(tl) {
     const { fireball } = this;
-    tl.to(fireball.scale, 0.5, {
+    tl.to(fireball.scale, {
+      duration: 0.5,
       x: 1,
       y: 1,
       z: 1,

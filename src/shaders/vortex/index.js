@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { GetTextureRepeat } from '@/game/utils';
 import { IMAGE_ASSETS } from '@/game/assets';
 import fragment from './vortex.fs';

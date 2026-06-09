@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { PHYSICS } from '@/game/const';
 import SolveRectangleCollision from '@/game/physics/collision';
 import GamePhysicsBody from '@/game/physics/physics-body';

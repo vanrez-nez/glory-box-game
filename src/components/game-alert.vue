@@ -17,6 +17,7 @@
 </template>
 
 <script>
+import gsap from 'gsap';
 import { mapState } from 'vuex';
 import { HIDE_ALERT } from '@/store/modules/alert';
 
@@ -30,8 +31,9 @@ export default {
   methods: {
     show(el, done) {
       const { $store } = this;
-      const tl = new TimelineMax();
-      tl.to(el, 0.5, {
+      const tl = gsap.timeline();
+      tl.to(el, {
+        duration: 0.5,
         opacity: 1,
         onComplete: done,
       });
@@ -40,7 +42,8 @@ export default {
       }, this.time);
     },
     hide(el, done) {
-      TweenMax.to(el, 0.25, {
+      gsap.to(el, {
+        duration: 0.25,
         opacity: 0,
         onComplete: done,
       });

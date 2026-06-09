@@ -1,3 +1,10 @@
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { FXAAShader } from 'three/addons/shaders/FXAAShader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GameConfigInstance as GameConfig } from '@/game/config';
 import { GAME } from '@/game/const';
 import { CartesianToCylinder } from '@/game/utils';
@@ -52,17 +59,17 @@ export default class Engine {
 
   initComposer() {
     const { renderer, camera, scene } = this;
-    this.composer = new THREE.EffectComposer(renderer);
-    this.composer.addPass(new THREE.RenderPass(scene, camera));
+    this.composer = new EffectComposer(renderer);
+    this.composer.addPass(new RenderPass(scene, camera));
   }
 
   setupPostProcessing() {
     const { composer } = this;
     const { innerWidth: w, innerHeight: h } = window;
-    this.effectFXAA = new THREE.ShaderPass(THREE.FXAAShader);
+    this.effectFXAA = new ShaderPass(FXAAShader);
     this.effectFXAA.uniforms.resolution.value.set(1 / w, 1 / h);
     composer.addPass(this.effectFXAA);
-    this.bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(w, h), 1.5, 0.4, 0.85);
+    this.bloomPass = new UnrealBloomPass(new THREE.Vector2(w, h), 1.5, 0.4, 0.85);
     this.bloomPass.renderToScreen = true;
     composer.addPass(this.bloomPass);
   }
@@ -70,7 +77,7 @@ export default class Engine {
   initHelpers() {
     const { scene, camera, renderer } = this;
     if (GameConfig.EnableOrbitControls) {
-      const c = new THREE.OrbitControls(camera, renderer.domElement);
+      const c = new OrbitControls(camera, renderer.domElement);
       c.enableDamping = true;
       c.dampingFactor = 0.25;
       c.minDistance = 1;

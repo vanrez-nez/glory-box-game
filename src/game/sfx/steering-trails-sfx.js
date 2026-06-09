@@ -1,3 +1,5 @@
+import EventEmitter3 from 'eventemitter3';
+import * as THREE from 'three';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { EVENTS } from '@/game/const';
 import LineTrail from '@/game/line-trail';
@@ -56,8 +58,8 @@ export default class GameSteeringTrailsSfx {
       trail.mesh.visible = true;
       const p = new SteeringParticle({});
       // Give a start acceleration to particle
-      const x = Math.sin(rotStep * i + 2) * THREE.Math.randFloat(2, 5);
-      const y = Math.cos(rotStep * i + 2) * THREE.Math.randFloat(2, 5);
+      const x = Math.sin(rotStep * i + 2) * THREE.MathUtils.randFloat(2, 5);
+      const y = Math.cos(rotStep * i + 2) * THREE.MathUtils.randFloat(2, 5);
       const z = 1;
       p.acceleration.set(x, y, z);
       // Translate position to local coords inside the parent

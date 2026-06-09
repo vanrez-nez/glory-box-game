@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+import gsap from 'gsap';
 import { QUALITY } from '@/game/const';
 import DefaultMood from '@/game/mood-presets/default';
 // import NeutralMood from '@/game/mood-presets/neutral';
@@ -47,7 +49,8 @@ export default class GameMoodManager {
 
   getColorTween(target, time, propName, targetVal) {
     const targetColor = new THREE.Color(targetVal);
-    return TweenMax.to(target[propName], time, {
+    return gsap.to(target[propName], {
+      duration: time,
       r: targetColor.r,
       g: targetColor.g,
       b: targetColor.b,
@@ -55,7 +58,8 @@ export default class GameMoodManager {
   }
 
   getValueTween(target, time, propName, targetVal) {
-    return TweenMax.to(target, time, {
+    return gsap.to(target, {
+      duration: time,
       [propName]: targetVal,
     });
   }
@@ -68,7 +72,7 @@ export default class GameMoodManager {
     if (targetVal.z) {
       targetProps.z = targetVal.z;
     }
-    return TweenMax.to(target[propName], time, targetProps);
+    return gsap.to(target[propName], { duration: time, ...targetProps });
   }
 
   addPropertyTween(tl, target, time, propName, targetVal) {
@@ -93,18 +97,19 @@ export default class GameMoodManager {
   transitionEngine(presetNode, time) {
     const { bloomPass, scene, ambientLight, renderer } = this.opts.engine;
     const { BloomPass, Scene, AmbientLight, ToneMapping } = presetNode;
-    const tl = new TimelineMax();
+    const tl = gsap.timeline();
     if (BloomPass && bloomPass) {
-      tl.to(bloomPass, time, {
+      tl.to(bloomPass, {
+        duration: time,
         strength: BloomPass.Strength,
         threshold: BloomPass.Threshold,
         radius: BloomPass.Radius,
       }, 0);
     }
-    tl.to(scene.fog, time, { density: Scene.FogDensity }, 0);
-    tl.to(ambientLight, time, { intensity: AmbientLight.Intensity }, 0);
+    tl.to(scene.fog, { duration: time, density: Scene.FogDensity }, 0);
+    tl.to(ambientLight, { duration: time, intensity: AmbientLight.Intensity }, 0);
     tl.add(this.getColorTween(ambientLight, time, 'color', AmbientLight.Color), 0);
-    tl.to(renderer, time, { toneMappingExposure: ToneMapping.Exposure }, 0);
+    tl.to(renderer, { duration: time, toneMappingExposure: ToneMapping.Exposure }, 0);
   }
 
   transitionDefaultMaterial(params) {
@@ -154,7 +159,7 @@ export default class GameMoodManager {
   }
 
   transitionMaterials(presetNode, time) {
-    const tl = new TimelineMax();
+    const tl = gsap.timeline();
     const matDict = MaterialFactory.getMaterialsByNodeName();
     const keys = Object.keys(presetNode);
     keys.forEach((key) => {

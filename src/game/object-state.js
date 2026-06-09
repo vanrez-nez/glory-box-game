@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 const DEFAULT = {
   getStateFn: () => {},
   setStateFn: () => {},
@@ -6,7 +8,7 @@ const DEFAULT = {
 export default class GameObjectState {
   constructor(opts) {
     this.opts = { ...DEFAULT, ...opts };
-    this.id = THREE.Math.generateUUID();
+    this.id = THREE.MathUtils.generateUUID();
     this.state = {};
   }
 

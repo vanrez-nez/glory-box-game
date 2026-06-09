@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import fragment from './shining.fs';
 import vertex from './shining.vs';
 

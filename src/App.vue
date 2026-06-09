@@ -11,6 +11,7 @@
 </template>
 
 <script>
+import gsap from 'gsap';
 import Until from '@/common/utils';
 import GameAlert from '@/components/game-alert';
 import GamepadMonitor from '@/components/gamepad-monitor';
@@ -27,7 +28,7 @@ export default {
   methods: {
     async show() {
       await Until(() => sessionStorage.fontsLoaded);
-      TweenMax.to(this.$el, 0.2, { opacity: 1, delay: 0.3 });
+      gsap.to(this.$el, { duration: 0.2, opacity: 1, delay: 0.3 });
     },
   },
 };

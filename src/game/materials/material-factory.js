@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { groupBy } from 'lodash';
 import { GameConfigInstance as GameConfig } from '@/game/config';
 import WorldFloorMaterial from '@/game/materials/world-floor-material';

@@ -8,7 +8,7 @@ export default class PlatformSocketMaterial extends GameMetaMaterial {
       low: {
         type: 'MeshBasicMaterial',
         args: {
-          vertexColors: THREE.FaceColors,
+          vertexColors: true,
           // wireframe: true,
         },
       },
@@ -17,7 +17,7 @@ export default class PlatformSocketMaterial extends GameMetaMaterial {
         args: {
           wireframe: false,
           map: GameMetaMaterial.GetTexture(IMAGE_ASSETS.HullBase, 0.1, 0.1),
-          // vertexColors: THREE.FaceColors,
+          // vertexColors: true,
           // emissive: 0xffffff,
           // emissiveIntensity: 0.3,
         },

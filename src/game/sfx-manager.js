@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+import gsap from 'gsap';
 import { GetScreenSize } from '@/common/three-utils';
 import { EVENTS } from '@/game/const';
 import { MaterialFactoryInstance as MaterialFactory } from './materials/material-factory';
@@ -23,7 +25,7 @@ export default class GameSfxManager {
   }
 
   initFadeMesh() {
-    const geo = new THREE.PlaneBufferGeometry();
+    const geo = new THREE.PlaneGeometry();
     const mat = MaterialFactory.getMaterial('GenericColor', {
       color: 0x0,
       depthWrite: false,
@@ -34,7 +36,8 @@ export default class GameSfxManager {
 
   shakeCamera(tl, force) {
     const { cameraOffset } = this.opts.engine;
-    const tween = tl.to({}, 0.1, {
+    const tween = tl.to({}, {
+      duration: 0.1,
       onUpdate: () => {
         const intensity = 1 - tween.totalProgress();
         const x = Math.random() - 0.5 * 2;
@@ -56,14 +59,16 @@ export default class GameSfxManager {
       fadeMesh.scale.set(w, h, 1.1);
       fadeMesh.position.z = -1.1;
     }, delay);
-    tl.to(fadeMesh.material, 0.15, {
+    tl.to(fadeMesh.material, {
+      duration: 0.15,
       opacity: 1,
     });
   }
 
   fadeIn(tl, delay = 0) {
     const { fadeMesh } = this;
-    tl.to(fadeMesh.material, 0.5, {
+    tl.to(fadeMesh.material, {
+      duration: 0.5,
       opacity: 0,
       delay,
     });
@@ -76,7 +81,7 @@ export default class GameSfxManager {
 
   destroyPlayer() {
     const { player } = this.opts;
-    const tl = new TimelineMax();
+    const tl = gsap.timeline();
     tl.add(() => {
       player.startExplodeSfx();
     });
@@ -88,13 +93,13 @@ export default class GameSfxManager {
   }
 
   restart() {
-    const tl = new TimelineMax();
+    const tl = gsap.timeline();
     this.fadeIn(tl, 0);
   }
 
   onCollectibleCollect(color) {
     const { playerHud, gameState } = this.opts;
-    const tl = new TimelineMax();
+    const tl = gsap.timeline();
     playerHud.addPowerCollectTweens(tl, gameState.attackPower, color);
   }
 
@@ -103,7 +108,7 @@ export default class GameSfxManager {
     if (this.collectiblePickTimeline) {
       this.collectiblePickTimeline.kill();
     }
-    const tl = new TimelineMax({});
+    const tl = gsap.timeline();
     // fire trails from collectible current position
     const trailPositions = collectible.getTrailPositions();
     playerHud.spawnTrailsFrom(trailPositions, collectible.color);

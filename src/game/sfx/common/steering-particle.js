@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 /*
   Simple Seek Steering Behaviour from Craig Reynolds as showed in
   http://www.red3d.com/cwr/steer/

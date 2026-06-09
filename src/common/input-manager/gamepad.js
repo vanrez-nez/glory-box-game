@@ -1,3 +1,5 @@
+import EventEmitter3 from 'eventemitter3';
+
 export default class GamepadInput {
   constructor() {
     this.events = new EventEmitter3();

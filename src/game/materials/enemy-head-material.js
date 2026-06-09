@@ -10,7 +10,7 @@ export default class EnemyHeadMaterial extends GameMetaMaterial {
         args: {
           color: opts.color,
           flatShading: true,
-          vertexColors: THREE.VertexColors,
+          vertexColors: true,
         },
       },
       medium: {
@@ -21,7 +21,7 @@ export default class EnemyHeadMaterial extends GameMetaMaterial {
           envMap: Skybox.textureCube,
           roughness: 0.5,
           metalness: 0.8,
-          vertexColors: THREE.VertexColors,
+          vertexColors: true,
         },
       },
     });

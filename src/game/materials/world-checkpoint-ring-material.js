@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import GameMetaMaterial from '@/game/materials/meta-material';
 import CheckpointRingFxShader from '@/shaders/checkpoint-ring';
 

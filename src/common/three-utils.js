@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 
 /*
   Returns the width and height units to cover the entire
@@ -24,7 +25,6 @@ export function GetScreenCoords(x, y, camera, dst) {
 
 
 export function ArcGeometry(innerRadius, outerRadius, thetaStart, thetaLength, depth) {
-  const buffGeometry = new THREE.Geometry();
   const shape = new THREE.Shape();
   shape.absarc(0, 0, outerRadius, thetaStart, thetaStart + thetaLength, false);
   shape.absarc(0, 0, innerRadius, thetaStart + thetaLength, thetaStart, true);
@@ -33,6 +33,8 @@ export function ArcGeometry(innerRadius, outerRadius, thetaStart, thetaLength, d
     bevelEnabled: false,
     curveSegments: Math.ceil(thetaLength * 7),
   };
-  const geo = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
-  return buffGeometry.fromBufferGeometry(geo);
+  const geo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+  // Non-indexed so each triangle has independent vertices (for flat per-face/
+  // per-segment vertex colors and clean merging via mergeGeometries).
+  return geo.toNonIndexed();
 }

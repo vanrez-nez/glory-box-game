@@ -1,3 +1,6 @@
+import EventEmitter3 from 'eventemitter3';
+import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { range, shuffle } from 'lodash';
 import { EVENTS, MAP, DIRECTIONS, LEVELS } from '@/game/const';
@@ -235,15 +238,17 @@ export default class GameMap {
 
   mergePlatformSockets(platforms) {
     const group = new THREE.Group();
-    const geoSockets = new THREE.Geometry();
-    const geoLights = new THREE.Geometry();
+    const socketGeos = [];
+    const lightGeos = [];
     for (let i = 0; i < platforms.length; i++) {
       const p = platforms[i];
-      geoSockets.merge(p.getSocketGeometry());
-      geoLights.merge(p.getSocketLightsGeometry());
+      socketGeos.push(p.getSocketGeometry());
+      lightGeos.push(p.getSocketLightsGeometry());
     }
-    const buffSockets = new THREE.BufferGeometry().fromGeometry(geoSockets);
-    const buffLights = new THREE.BufferGeometry().fromGeometry(geoLights);
+    const buffSockets = socketGeos.length
+      ? mergeGeometries(socketGeos) : new THREE.BufferGeometry();
+    const buffLights = lightGeos.length
+      ? mergeGeometries(lightGeos) : new THREE.BufferGeometry();
     const mat = MaterialFactory.getMaterial('PlatformSocket', {
       name: 'plt_socket',
       color: 0x2d2030,
@@ -260,12 +265,13 @@ export default class GameMap {
   }
 
   mergeCollectibleSockets(collectibles) {
-    const geo = new THREE.Geometry();
+    const socketGeos = [];
     for (let i = 0; i < collectibles.length; i++) {
       const c = collectibles[i];
-      geo.merge(c.glyph.getSocketGeometry());
+      socketGeos.push(c.glyph.getSocketGeometry());
     }
-    const buffGeo = new THREE.BufferGeometry().fromGeometry(geo);
+    const buffGeo = socketGeos.length
+      ? mergeGeometries(socketGeos) : new THREE.BufferGeometry();
     const mat = MaterialFactory.getMaterial('CollectibleSocket', {
       name: 'cl_socket',
       color: 0x030508,

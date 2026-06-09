@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import fragment from './enemy-ray.fs';
 import vertex from '../common/passthrough.vs';
 

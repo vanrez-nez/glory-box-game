@@ -1,3 +1,5 @@
+import Simple1DNoise from '@/vendor/Simple1DNoise';
+import * as THREE from 'three';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { GAME } from '@/game/const';
 import { CartesianToCylinder } from '@/game/utils';
@@ -101,7 +103,7 @@ export default class CollectibleGlyph {
     CartesianToCylinder(mesh.position, x, y, GAME.CollectibleSocketOffset);
     this.setInverseLookAt(mesh, y);
     mesh.updateMatrix();
-    geo.applyMatrix(mesh.matrix);
+    geo.applyMatrix4(mesh.matrix);
     return geo;
   }
 

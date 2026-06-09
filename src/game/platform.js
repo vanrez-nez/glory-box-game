@@ -1,5 +1,8 @@
+import * as THREE from 'three';
+import gsap from 'gsap';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { PHYSICS, MAP, EVENTS, GAME } from '@/game/const';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { CartesianToCylinder, SyncBodyPhysicsMesh } from '@/game/utils';
 import { ArcGeometry } from '@/common/three-utils';
 import GamePhysicsBody from '@/game/physics/physics-body';
@@ -39,11 +42,11 @@ export default class GamePlatform {
   static GetStepsGeometry(width) {
     const hash = `steps_${width}`;
     if (!CACHED_GEOMETRIES[hash]) {
-      const geoTop = GamePlatform.GetBoxGeomery(width, 0.5, GAME.PlatformZSize);
-      const geoBottom = GamePlatform.GetBoxGeomery(width * 0.8, 1, GAME.PlatformZSize * 0.8);
+      const geoTop = GamePlatform.GetBoxGeomery(width, 0.5, GAME.PlatformZSize).clone();
+      const geoBottom = GamePlatform
+        .GetBoxGeomery(width * 0.8, 1, GAME.PlatformZSize * 0.8).clone();
       geoBottom.translate(0, -0.5, 0);
-      geoTop.merge(geoBottom);
-      CACHED_GEOMETRIES[hash] = geoTop;
+      CACHED_GEOMETRIES[hash] = mergeGeometries([geoTop, geoBottom]);
     }
     return CACHED_GEOMETRIES[hash];
   }
@@ -145,10 +148,10 @@ export default class GamePlatform {
 
   onCollisionBegan(edges) {
     if (edges.top && edges.top.opts.type === PHYSICS.Player) {
-      const tl = new TimelineMax();
+      const tl = gsap.timeline();
       const pos = this.mesh.positionOffset;
-      tl.to(pos, 0.12, { y: -0.7, ease: Power2.easeOut });
-      tl.to(pos, 0.15, { y: 0, ease: Power2.easeOut });
+      tl.to(pos, { duration: 0.12, y: -0.7, ease: 'power2.out' });
+      tl.to(pos, { duration: 0.15, y: 0, ease: 'power2.out' });
     }
   }
 

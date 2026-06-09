@@ -59,8 +59,6 @@ export default class GameTools {
     const { renderer, bloomPass, scene, ambientLight } = obj;
     const f0 = rootFolder.addFolder('Renderer');
     f0.add(renderer, 'toneMappingExposure', 0.0, 10);
-    f0.add(renderer, 'toneMappingWhitePoint', 0.0, 10);
-    f0.add(renderer, 'gammaFactor', 0.5, 5);
     if (GameConfig.UsePostProcessing) {
       // Bloom Pass
       const f1 = rootFolder.addFolder('BloomPass');

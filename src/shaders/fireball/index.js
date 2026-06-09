@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import fragment from './fireball.fs';
 import vertex from './fireball.vs';
 

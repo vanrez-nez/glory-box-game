@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+import gsap from 'gsap';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { PHYSICS, GAME } from '@/game/const';
 import { SyncBodyPhysicsMesh, CartesianToCylinder } from '@/game/utils';
@@ -25,7 +27,7 @@ export default class PlayerExplosionSfx {
       transparent: true,
       color: 0xffffff,
     });
-    const geo = new THREE.PlaneBufferGeometry(35, 35);
+    const geo = new THREE.PlaneGeometry(35, 35);
     this.ring = new THREE.Mesh(geo, mat);
     this.opts.parent.add(this.ring);
     this.ring.visible = false;
@@ -37,11 +39,11 @@ export default class PlayerExplosionSfx {
       name: 'player_particle',
       color: 0x4544895,
     });
-    const geoCone = new THREE.ConeBufferGeometry(1, 1, 3);
-    const geoBox = new THREE.BoxBufferGeometry();
+    const geoCone = new THREE.ConeGeometry(1, 1, 3);
+    const geoBox = new THREE.BoxGeometry();
     let trailsCount = maxTrails;
     for (let i = 0; i < maxParticles; i++) {
-      const size = THREE.Math.randFloat(0.4, 0.8);
+      const size = THREE.MathUtils.randFloat(0.4, 0.8);
       const trail = size > 0.5 && trailsCount-- > 0 ? this.getTrail(size) : null;
       const geo = size > 0.5 ? geoBox : geoCone;
       const mesh = new THREE.Mesh(geo, mat);
@@ -97,19 +99,19 @@ export default class PlayerExplosionSfx {
 
   ringExplode(position) {
     const { ring } = this;
-    const tl = new TimelineMax();
+    const tl = gsap.timeline();
     this.ringPosition = position;
     ring.visible = true;
     const { uniforms } = ring.material;
-    uniforms.u_rotation.value = THREE.Math.randFloat(0, Math.PI);
+    uniforms.u_rotation.value = THREE.MathUtils.randFloat(0, Math.PI);
     uniforms.u_size.value = 0;
     uniforms.u_opacity.value = 1;
     uniforms.u_glowIntensity.value = 0;
-    tl.to(uniforms.u_glowIntensity, 0.5, { value: 1 });
-    tl.to(uniforms.u_glowIntensity, 0.3, { value: 0.2 }, 0.5);
-    tl.to(uniforms.u_size, 1, { value: 1.0 }, 0);
-    tl.to(uniforms.u_rotation, 1, { value: Math.PI }, 0);
-    tl.to(uniforms.u_opacity, 0.1, { value: 0 }, 1.0);
+    tl.to(uniforms.u_glowIntensity, { duration: 0.5, value: 1 });
+    tl.to(uniforms.u_glowIntensity, { duration: 0.3, value: 0.2 }, 0.5);
+    tl.to(uniforms.u_size, { duration: 1, value: 1.0 }, 0);
+    tl.to(uniforms.u_rotation, { duration: 1, value: Math.PI }, 0);
+    tl.to(uniforms.u_opacity, { duration: 0.1, value: 0 }, 1.0);
     tl.timeScale(5.5);
   }
 
@@ -125,8 +127,8 @@ export default class PlayerExplosionSfx {
         trail.mesh.visible = true;
       }
       mesh.visible = true;
-      const fX = THREE.Math.randFloat(-0.2, 0.2);
-      const fY = THREE.Math.randFloat(-0.1, 0.3);
+      const fX = THREE.MathUtils.randFloat(-0.2, 0.2);
+      const fY = THREE.MathUtils.randFloat(-0.1, 0.3);
       vForce.set(fX, fY);
       body.applyForce(vForce);
     }

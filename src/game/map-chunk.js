@@ -1,3 +1,5 @@
+import EventEmitter3 from 'eventemitter3';
+import * as THREE from 'three';
 import { EVENTS } from '@/game/const';
 
 const DEFAULT = {

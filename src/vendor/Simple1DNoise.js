@@ -1,5 +1,5 @@
 // https://www.michaelbromley.co.uk/blog/simple-1d-noise-in-javascript/
-window.Simple1DNoise = function() {
+export default function Simple1DNoise() {
     var MAX_VERTICES = 256;
     var MAX_VERTICES_MASK = MAX_VERTICES -1;
     var amplitude = 1;

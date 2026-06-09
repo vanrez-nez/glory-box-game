@@ -27,22 +27,6 @@ export default defineConfig({
       '@styles': fileURLToPath(new URL('./src/styles', import.meta.url)),
     },
   },
-  optimizeDeps: {
-    // The legacy example scripts read a global `THREE`; let esbuild pre-bundle
-    // them so they are served as a single optimized dependency.
-    include: [
-      'three',
-      'three/examples/js/postprocessing/EffectComposer',
-      'three/examples/js/shaders/CopyShader',
-      'three/examples/js/shaders/FXAAShader',
-      'three/examples/js/shaders/LuminosityHighPassShader',
-      'three/examples/js/postprocessing/RenderPass',
-      'three/examples/js/postprocessing/ShaderPass',
-      'three/examples/js/postprocessing/UnrealBloomPass',
-      'three/examples/js/loaders/GLTFLoader',
-      'three/examples/js/controls/OrbitControls',
-    ],
-  },
   server: {
     port: 8080,
   },

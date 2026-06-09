@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { MeshLineMaterial } from 'three.meshline';
 import { GetTextureRepeat } from '@/game/utils';
 import { QUALITY } from '@/game/const';

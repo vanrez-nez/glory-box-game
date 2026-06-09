@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { AudioManagerInstance as AudioManager } from '@/game/audio/audio-manager';
 
@@ -18,7 +19,7 @@ export default class GameEnemyVortex {
 
   addMesh() {
     const geo = new THREE.IcosahedronGeometry(35, 3);
-    geo.computeFaceNormals();
+    geo.computeVertexNormals();
     const mat = MaterialFactory.getMaterial('EnemyVortex', {});
     this.material = mat;
     this.mesh = new THREE.Mesh(geo, mat);
@@ -30,7 +31,7 @@ export default class GameEnemyVortex {
     const geo = new THREE.BufferGeometry();
     const vertices = this.getVertices(1000);
     const materials = this.getMaterials();
-    geo.addAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
     materials.forEach((mat) => {
       const points = new THREE.Points(geo, mat);
       this.particles.push(points);
@@ -80,9 +81,9 @@ export default class GameEnemyVortex {
     const cylindrical = new THREE.Cylindrical();
     for (let i = 0; i < count; i++) {
       cylindrical.set(
-        THREE.Math.randFloat(35, 60),
-        THREE.Math.randFloat(0, Math.PI * 2),
-        THREE.Math.randFloat(-40, 40),
+        THREE.MathUtils.randFloat(35, 60),
+        THREE.MathUtils.randFloat(0, Math.PI * 2),
+        THREE.MathUtils.randFloat(-40, 40),
       );
       v3.setFromCylindrical(cylindrical);
       vertices.push(v3.x, v3.y, v3.z);

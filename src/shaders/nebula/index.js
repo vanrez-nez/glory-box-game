@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import fragment from './nebula.fs';
 import vertex from '../common/passthrough.vs';
 

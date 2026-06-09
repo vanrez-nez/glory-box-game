@@ -1,9 +1,11 @@
+import * as THREE from 'three';
 
 // https://www.gamasutra.com/blogs/YoannPignole/20140103/207987/Platformer_controls_how_to_avoid_limpness_and_rigidity_feelings.php
 // https://www.gamasutra.com/blogs/LisaBrown/20171005/307063/GameMaker_Platformer_Jumping_Tips.php
 // https://zackbellgames.com/2014/10/27/how-to-make-a-platformer-feel-good/
 // https://kotaku.com/5420545/lets-talk-about-jumping
 
+import gsap from 'gsap';
 import { AudioManagerInstance as AudioManager } from '@/game/audio/audio-manager';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { PHYSICS, EVENTS, GAME } from '@/game/const';
@@ -44,7 +46,7 @@ export default class GamePlayer {
   }
 
   getPlayerMesh() {
-    const geo = new THREE.BoxBufferGeometry(1.5, 1.5, 1.5);
+    const geo = new THREE.BoxGeometry(1.5, 1.5, 1.5);
     const mat = MaterialFactory.getMaterial('PlayerMaterial', {
       name: 'player_main',
       color: 0xffffff,
@@ -94,15 +96,15 @@ export default class GamePlayer {
   onCollisionBegan(edges) {
     const { playerBody, mesh } = this;
     if (edges.bottom && (edges.bottom.isPlatform || edges.bottom.isWorldBounds)) {
-      const tl = new TimelineMax();
+      const tl = gsap.timeline();
       const pos = mesh.positionOffset;
       const scale = mesh.scaleOffset;
       const hitHard = playerBody.velocity.y < -0.8;
       const hitForce = hitHard ? 0.4 : 0.2;
-      tl.to(scale, 0.1, { x: hitForce, y: -hitForce, ease: Power2.easeOut });
-      tl.to(scale, 0.15, { x: 0, y: 0, ease: Power2.easeOut });
-      tl.to(pos, 0.1, { y: -hitForce, ease: Power2.easeOut }, 0);
-      tl.to(pos, 0.15, { y: 0, ease: Power2.easeOut });
+      tl.to(scale, { duration: 0.1, x: hitForce, y: -hitForce, ease: 'power2.out' });
+      tl.to(scale, { duration: 0.15, x: 0, y: 0, ease: 'power2.out' });
+      tl.to(pos, { duration: 0.1, y: -hitForce, ease: 'power2.out' }, 0);
+      tl.to(pos, { duration: 0.15, y: 0, ease: 'power2.out' });
       AudioManager.playTrack('foot_step');
     }
   }
@@ -227,9 +229,9 @@ export default class GamePlayer {
     }
     if (!grounded) {
       // Modify height mass with velocity
-      mesh.scaleOffset.y = THREE.Math.clamp(playerBody.velocity.y * 0.5, -0.1, 0.9);
+      mesh.scaleOffset.y = THREE.MathUtils.clamp(playerBody.velocity.y * 0.5, -0.1, 0.9);
       // Modity width mass with velocity
-      mesh.scaleOffset.x = THREE.Math.clamp(playerBody.velocity.y * -0.2, -0.4, 0.15);
+      mesh.scaleOffset.x = THREE.MathUtils.clamp(playerBody.velocity.y * -0.2, -0.4, 0.15);
       mesh.scaleOffset.z = mesh.scaleOffset.x;
     }
   }

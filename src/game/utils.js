@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { GameConfigInstance as GameConfig } from '@/game/config';
 import { GAME } from '@/game/const';
 
@@ -38,8 +39,9 @@ export function CylinderFromCartesian(vec3) {
 }
 
 export function AddDot(parent, position, size = 5) {
-  const geo = new THREE.Geometry();
-  geo.vertices.push(position.clone());
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(
+    new Float32Array([position.x, position.y, position.z]), 3));
   const mat = new THREE.PointsMaterial({
     size,
     sizeAttenuation: false,

@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { QUALITY } from '@/game/const';
 
 const DEV_CONFIG = {

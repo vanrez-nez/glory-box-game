@@ -20,17 +20,18 @@ module.exports = {
         map: [
           ['@', './src'],
           ['@styles', './src/styles'],
+          // three's `exports` map (./addons/* -> examples/jsm/*) isn't followed
+          // by the import resolver, so map it explicitly to the real files.
+          ['three/addons', './node_modules/three/examples/jsm'],
         ],
         extensions: ['.js', '.vue', '.json'],
       },
     },
   },
   rules: {
-    // don't require .vue extension when importing
-    'import/extensions': ['error', 'always', {
-      js: 'never',
-      vue: 'never',
-    }],
+    // Off: the codebase mixes extensionless local imports with three/addons/*.js
+    // imports that must keep their explicit extension (per three's exports map).
+    'import/extensions': 0,
     // allow optionalDependencies
     'import/no-extraneous-dependencies': ['error', {
       optionalDependencies: ['test/unit/index.js'],
@@ -67,18 +68,5 @@ module.exports = {
     'object-curly-newline': 0,
     'object-property-newline': 0,
   },
-  globals: {
-    THREE: false,
-    EventEmitter3: false,
-    TweenMax: false,
-    TimelineMax: false,
-    Power1: false,
-    Power2: false,
-    Power3: false,
-    Power4: false,
-    Back: false,
-    Expo: false,
-    ThreeBSP: false,
-    Simple1DNoise: false,
-  },
+  globals: {},
 };

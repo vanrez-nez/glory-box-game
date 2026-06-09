@@ -9,7 +9,7 @@ export default class EnemyEyesMaterial extends GameMetaMaterial {
         args: {
           color: opts.color,
           flatShading: true,
-          vertexColors: THREE.VertexColors,
+          vertexColors: true,
         },
       },
     });

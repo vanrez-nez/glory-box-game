@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { StaticInstance as Skybox } from '@/game/skybox';
 import { GAME } from '@/game/const';
 import { IMAGE_ASSETS } from '@/game/assets';
@@ -46,7 +47,7 @@ export default class GameLobby {
       paths.forEach((path) => {
         const shapes = path.toShapes(true);
         shapes.forEach((shape) => {
-          const geo = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
+          const geo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
           const mesh = new THREE.Mesh(geo, mat);
           mesh.scale.set(-0.1, -0.1, 1);
           CartesianToCylinder(mesh.position, glyph.x + GlyphsOffsetX, GlyphsOffsetY,

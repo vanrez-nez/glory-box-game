@@ -1,3 +1,5 @@
+import Simple1DNoise from '@/vendor/Simple1DNoise';
+import * as THREE from 'three';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { GAME } from '@/game/const';
 import WorldCylinderRing from '@/game/world/cylinder-ring';
@@ -30,7 +32,7 @@ export default class WorldCylinder {
     const ratio = CYLINDER_HEIGHT / (GAME.CylinderRadius * Math.PI * 2);
     const xScale = 7;
     const yScale = 7 * ratio;
-    const geo = new THREE.CylinderBufferGeometry(GAME.CylinderRadius, GAME.CylinderRadius,
+    const geo = new THREE.CylinderGeometry(GAME.CylinderRadius, GAME.CylinderRadius,
       CYLINDER_HEIGHT, 128, 1, true);
     const mat = MaterialFactory.getMaterial('WorldCylinder', {
       name: 'w_main_cylinder',
@@ -49,7 +51,7 @@ export default class WorldCylinder {
     const ratio = height / (GAME.CylinderRadius * Math.PI * 2);
     const xScale = 7;
     const yScale = 7 * ratio;
-    const geo = new THREE.CylinderBufferGeometry(GAME.CylinderRadius + 0.5,
+    const geo = new THREE.CylinderGeometry(GAME.CylinderRadius + 0.5,
       GAME.CylinderRadius + 1.8, height, 64, 1);
     const mat = MaterialFactory.getMaterial('WorldCylinder', {
       name: 'w_base_cylinder',

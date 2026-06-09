@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { MeshLineMaterial, MeshLine } from 'three.meshline';
 
 const DEFAULT = {
@@ -27,10 +28,9 @@ export default class LineTrail {
 
   getGeometry() {
     const { opts } = this;
-    const geo = new THREE.Geometry();
-    for (let i = 0; i < opts.maxPositions; i++) {
-      geo.vertices.push(new THREE.Vector3());
-    }
+    const geo = new THREE.BufferGeometry();
+    const positions = new Float32Array(opts.maxPositions * 3);
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     return geo;
   }
 

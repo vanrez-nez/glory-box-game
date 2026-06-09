@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { GetScreenSize } from '@/common/three-utils';
 import GameLogoRing from '@/components/game-logo/ring';
 
@@ -50,7 +51,7 @@ export default class GameLogo {
   initLightsBackground() {
     const { scene, camera } = this;
     const [w, h] = GetScreenSize(camera, 10);
-    const geo = new THREE.PlaneBufferGeometry(w, h, 1, 1);
+    const geo = new THREE.PlaneGeometry(w, h, 1, 1);
     const mat = new THREE.MeshPhongMaterial({ color: 0x180E21, transparent: true });
     mat.onBeforeCompile = (shader) => {
       shader.fragmentShader = shader.fragmentShader.replace(
@@ -71,7 +72,7 @@ export default class GameLogo {
   initShadowsBackground() {
     const { scene, camera } = this;
     const [w, h] = GetScreenSize(camera, 10);
-    const geo = new THREE.PlaneBufferGeometry(w, h, 1, 1);
+    const geo = new THREE.PlaneGeometry(w, h, 1, 1);
     const mat = new THREE.ShadowMaterial({ color: 0x0 });
     mat.onBeforeCompile = (shader) => {
       shader.fragmentShader = shader.fragmentShader.replace(

@@ -1,3 +1,5 @@
+import EventEmitter3 from 'eventemitter3';
+import * as THREE from 'three';
 import { EVENTS } from '@/game/const';
 import JobScheduler from '@/game/job-scheduler';
 import GameEnemyRaySfx from '@/game/sfx/enemy-ray-sfx';
@@ -57,7 +59,7 @@ export default class GameEnemyRays {
     const { clock, rays, scheduler } = this;
     const dt = clock.getElapsedTime() - this.lastRayTime;
     if (dt > 5) {
-      const count = THREE.Math.randInt(1, rays.length);
+      const count = THREE.MathUtils.randInt(1, rays.length);
       const offsets = [0, -15, 15];
       for (let i = 0; i < count; i++) {
         const r = rays[i];

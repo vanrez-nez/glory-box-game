@@ -1,3 +1,6 @@
+import EventEmitter3 from 'eventemitter3';
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { AudioManagerInstance as AudioManager } from '@/game/audio/audio-manager';
 import { GAME, PHYSICS, EVENTS } from '@/game/const';
@@ -54,7 +57,7 @@ export default class GameEnemyDragon {
   }
 
   loadModel() {
-    const loader = new THREE.GLTFLoader();
+    const loader = new GLTFLoader();
     loader.load(MODEL_ASSETS.Dragon, (glft) => {
       const scene = glft.scenes[0];
       this.head = scene.getObjectByName('head');

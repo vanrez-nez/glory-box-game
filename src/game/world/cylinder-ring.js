@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { GAME } from '@/game/const';
 import { ArcGeometry } from '@/common/three-utils';
@@ -25,7 +27,7 @@ export default class WorldCylinderRing {
     const circ = rad * Math.PI * 2;
     const height = texHeight * (circ / texWidth);
 
-    const geo = new THREE.CylinderBufferGeometry(rad, rad, height, 128, 1, true);
+    const geo = new THREE.CylinderGeometry(rad, rad, height, 128, 1, true);
     const mat = MaterialFactory.getMaterial('WorldCheckpointRing', {
       name: 'w_checkpoint_ring',
       xScale: 1,
@@ -55,7 +57,6 @@ export default class WorldCylinderRing {
     const depthRadius = GAME.CylinderRadius - 2;
     const bevelRadius = GAME.CylinderRadius + 1;
     const height = CYLINDER_HEIGHT / 3;
-    const geo = new THREE.Geometry();
     // Rings
     const ring = ArcGeometry(depthRadius, bevelRadius, 0, Math.PI * 2, height);
     ring.rotateX(Math.PI / 2);
@@ -63,11 +64,9 @@ export default class WorldCylinderRing {
     const r1 = ring.clone().translate(0, height * 1.5, 0);
     const r2 = ring.clone().translate(0, height * -0.5, 0);
     // Cylinders
-    const middle = new THREE.CylinderGeometry(depthRadius, depthRadius, height, 128, 1, true);
-    geo.merge(middle);
-    geo.merge(r1);
-    geo.merge(r2);
-    return geo;
+    const middle = new THREE.CylinderGeometry(depthRadius, depthRadius, height, 128, 1, true)
+      .toNonIndexed();
+    return mergeGeometries([middle, r1, r2]);
   }
 
   updatePosition() {

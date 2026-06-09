@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { GameConfigInstance as GameConfig } from '@/game/config';
 import { GAME } from '@/game/const';
@@ -36,7 +37,7 @@ export default class GameWorld {
   }
 
   addFloor() {
-    const geo = new THREE.PlaneBufferGeometry(500, 500);
+    const geo = new THREE.PlaneGeometry(500, 500);
     const mat = MaterialFactory.getMaterial('WorldFloor', {
       name: 'w_floor',
       scale: 20,
@@ -52,7 +53,7 @@ export default class GameWorld {
   addFxCylinder() {
     const height = (GAME.CylinderRadius * Math.PI * 2) / 2;
     const radius = GAME.CylinderRadius + 0.01;
-    const geo = new THREE.CylinderBufferGeometry(radius, radius,
+    const geo = new THREE.CylinderGeometry(radius, radius,
       height, 64, 1, true, 0, Math.PI);
     const mat = MaterialFactory.getMaterial('WorldFxCylinder', {
       name: 'w_fx_cylinder',
@@ -74,11 +75,11 @@ export default class GameWorld {
     // Find cylinder rotation so the center matches the position
     const defaultRot = (-Math.PI / 2);
     this.fxCylinder.rotation.y = defaultRot + (Math.PI / 2) * ((position.x * 1.08) / 64);
-    tl.addCallback(() => { fxCylinder.visible = true; });
-    tl.to(uniforms.u_innerRadius, 2, { value: 1, ease: Power1.easeOut });
-    tl.to(uniforms.u_outterRadius, 1, { value: 1, ease: Power2.easeOut }, 0);
-    tl.to(uniforms.u_borderSoftness, 1, { value: 1.0, ease: Power1.easeOut }, 0);
-    tl.addCallback(() => { fxCylinder.visible = false; });
+    tl.call(() => { fxCylinder.visible = true; });
+    tl.to(uniforms.u_innerRadius, { duration: 2, value: 1, ease: 'power1.out' });
+    tl.to(uniforms.u_outterRadius, { duration: 1, value: 1, ease: 'power2.out' }, 0);
+    tl.to(uniforms.u_borderSoftness, { duration: 1, value: 1.0, ease: 'power1.out' }, 0);
+    tl.call(() => { fxCylinder.visible = false; });
   }
 
   update(delta, playerPosition) {

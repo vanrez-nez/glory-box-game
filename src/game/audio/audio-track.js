@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 const DEFAULT = {
   buffer: null,
   listener: null,

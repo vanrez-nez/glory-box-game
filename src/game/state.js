@@ -1,3 +1,4 @@
+import EventEmitter3 from 'eventemitter3';
 import { PAUSE_GAME } from '@/store/modules/game';
 import { EVENTS } from '@/game/const';
 
