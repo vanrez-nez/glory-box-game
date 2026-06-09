@@ -14,7 +14,7 @@
     "lint": "eslint --ext .ts,.vue src"
   },
   "dependencies": {
-    "dat.gui": "^0.7.9",
+    "@tweakpane/core": "^2.0.5",
     "deepmerge": "^4.3.1",
     "eventemitter3": "^5.0.1",
     "gsap": "^3.15.0",
@@ -22,20 +22,18 @@
     "mainloop.js": "^1.0.4",
     "sanitize.css": "^13.0.0",
     "screenfull": "^3.3.3",
-    "stats.js": "^0.17.0",
     "threads": "^0.12.0",
     "three": "^0.184.0",
     "three.meshline": "1.4.0",
+    "tweakpane": "^4.0.5",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0",
     "vuex": "^4.1.0"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.25.0",
-    "@types/dat.gui": "^0.7.13",
     "@types/lodash": "^4.17.24",
     "@types/node": "^25.9.2",
-    "@types/stats.js": "^0.17.4",
     "@types/three": "^0.184.1",
     "@typescript-eslint/eslint-plugin": "^8.61.0",
     "@typescript-eslint/parser": "^8.61.0",

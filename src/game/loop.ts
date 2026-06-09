@@ -49,12 +49,12 @@ export default class GameLoop {
       engine, gameInput, enemy, player, map,
       world, playerHud, enemyHud,
     } = this.opts.components;
-    const { stats } = this.opts;
+    const { fpsGraph } = this.opts;
     const { position: bodyPosition } = player.playerBody;
     const { position: meshPosition } = player.mesh;
     let delta = this.deltaLeft;
     this.deltaLeft = 0;
-    stats && stats.begin();
+    fpsGraph && fpsGraph.begin();
     if (this.paused) {
       delta = 0;
     }
@@ -65,7 +65,7 @@ export default class GameLoop {
     enemyHud.update(delta);
     map.update(delta, bodyPosition);
     engine.render();
-    stats && stats.end();
+    fpsGraph && fpsGraph.end();
   }
 
   onEnd(fps: any, panic: any) {

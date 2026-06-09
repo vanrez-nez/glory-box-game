@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { AudioManagerInstance as AudioManager } from '@/game/audio/audio-manager';
 import { GameConfigInstance as GameConfig } from '@/game/config';
-import Stats from 'stats.js';
 import GameLoop from '@/game/loop';
 import { GAME, EVENTS } from '@/game/const';
 import Engine from '@/game/engine';
@@ -57,7 +56,7 @@ export default class Game {
   components!: GameComponents;
   loop!: GameLoop;
   gameLoader!: GameLoader;
-  stats?: Stats;
+  tools?: GameTools;
 
   constructor(opts: Partial<GameOptions> = {}) {
     this.opts = { ...DEFAULT, ...opts };
@@ -76,16 +75,15 @@ export default class Game {
     this.updateSize();
     this.attachEvents();
     await this.initLoad();
-    this.addTools();
-    this.addStats();
+    this.addDevTools();
     this.initLoop();
     this.events.emit(EVENTS.GameReady);
   }
 
   initLoop() {
-    const { components, stats } = this;
+    const { components, tools } = this;
     this.loop = new GameLoop({
-      stats,
+      fpsGraph: tools?.fpsGraph,
       components,
     });
   }
@@ -200,22 +198,22 @@ export default class Game {
     }, 3000);
   }
 
-  addStats() {
-    if (GameConfig.EnableStats) {
-      this.stats = new Stats();
-      document.body.appendChild(this.stats.dom);
+  addDevTools() {
+    if (!GameConfig.EnableTools && !GameConfig.EnableStats) {
+      return;
     }
-  }
-
-  addTools() {
     const { physics, engine, player, world } = this.components;
+    this.tools = new GameTools();
+    if (GameConfig.EnableStats) {
+      this.tools.addFpsGraph();
+    }
     if (GameConfig.EnableTools) {
-      const tools = new GameTools();
-      tools.addScreen('physics', physics);
-      tools.addScreen('engine', engine);
-      tools.addScreen('player', player);
-      tools.addScreen('world', world);
-      tools.addScreen('materials');
+      this.tools.addScreen('physics', physics);
+      this.tools.addScreen('engine', engine);
+      this.tools.addScreen('player', player);
+      this.tools.addScreen('world', world);
+      this.tools.addScreen('materials');
+      this.tools.persist(GameConfig.qualityNode);
     }
   }
 

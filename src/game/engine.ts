@@ -3,6 +3,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { FXAAShader } from 'three/addons/shaders/FXAAShader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GameConfigInstance as GameConfig } from '@/game/config';
@@ -25,6 +26,7 @@ export default class Engine {
   composer!: EffectComposer;
   effectFXAA!: ShaderPass;
   bloomPass!: UnrealBloomPass;
+  outputPass!: OutputPass;
   ambientLight!: THREE.AmbientLight;
   orbitControls!: OrbitControls;
   axesHelper!: THREE.AxesHelper;
@@ -80,7 +82,17 @@ export default class Engine {
 
   initComposer() {
     const { renderer, camera, scene } = this;
-    this.composer = new EffectComposer(renderer);
+    // Before r152 EffectComposer defaulted to an LDR (UnsignedByteType) buffer,
+    // which clamps the rendered scene to [0,1] before it reaches the bloom pass.
+    // Modern three defaults to an HDR HalfFloat buffer, letting bright sky and
+    // emissive values exceed 1.0 so UnrealBloomPass (tuned for the old clamped
+    // input) blows the whole frame out. Pin the buffer back to LDR to restore
+    // the original bloom response.
+    const size = renderer.getDrawingBufferSize(new THREE.Vector2());
+    const renderTarget = new THREE.WebGLRenderTarget(size.width, size.height, {
+      type: THREE.UnsignedByteType,
+    });
+    this.composer = new EffectComposer(renderer, renderTarget);
     this.composer.addPass(new RenderPass(scene, camera));
   }
 
@@ -91,8 +103,14 @@ export default class Engine {
     this.effectFXAA.uniforms.resolution.value.set(1 / w, 1 / h);
     composer.addPass(this.effectFXAA);
     this.bloomPass = new UnrealBloomPass(new THREE.Vector2(w, h), 1.5, 0.4, 0.85);
-    this.bloomPass.renderToScreen = true;
     composer.addPass(this.bloomPass);
+    // EffectComposer renders the scene into a linear HalfFloat buffer; without a
+    // final OutputPass the raw linear values are written straight to the canvas
+    // (no tone mapping / sRGB encoding), washing the image out and over-blooming.
+    // OutputPass applies renderer.toneMapping + sRGB so the post-processed path
+    // matches the direct renderer.render() path used at lower quality settings.
+    this.outputPass = new OutputPass();
+    composer.addPass(this.outputPass);
   }
 
   initHelpers() {

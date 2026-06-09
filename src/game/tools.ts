@@ -1,13 +1,19 @@
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { GameConfigInstance as GameConfig } from '@/game/config';
-import * as dat from 'dat.gui';
+import { Pane } from 'tweakpane';
+import { StatsPanePluginBundle, type StatsPaneApi } from '@/game/stats-blade';
 
 export default class GameTools {
-  gui!: any;
+  pane!: any;
+  fpsGraph?: StatsPaneApi;
   constructor() {
-    this.gui = new dat.GUI({
-      load: JSON,
-    });
+    this.pane = new Pane({ title: 'Dev Tools' });
+    this.pane.registerPlugin(StatsPanePluginBundle);
+  }
+
+  addFpsGraph() {
+    this.fpsGraph = this.pane.addBlade({ view: 'stats', label: 'FPS' }) as unknown as StatsPaneApi;
+    return this.fpsGraph;
   }
 
   addScreen(screenName: any, obj?: any) {
@@ -27,143 +33,161 @@ export default class GameTools {
     }
   }
 
+  /*
+    Persists the whole pane state to localStorage so dev tweaks survive reloads
+    (a lightweight replacement for dat.gui's named-preset "remember" system).
+    Keyed per quality level since each level exposes a different set of
+    materials/passes. Also adds a Reset button to clear the saved state.
+  */
+  persist(quality: string) {
+    const key = `glory-box:tools-state:${quality}`;
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      try {
+        this.pane.importState(JSON.parse(saved));
+      } catch {
+        localStorage.removeItem(key);
+      }
+    }
+    this.pane.on('change', () => {
+      localStorage.setItem(key, JSON.stringify(this.pane.exportState()));
+    });
+    this.pane.addButton({ title: 'Reset Tweaks' }).on('click', () => {
+      localStorage.removeItem(key);
+      window.location.reload();
+    });
+  }
+
   buildPhysicsScreen(obj: any) {
-    const { gui } = this;
-    const f1 = gui.addFolder('Generic Physics');
-    gui.remember(obj.opts.gravity);
-    f1.add(obj.opts.gravity, 'x', -0.5, 0.5).name('Gravity X');
-    f1.add(obj.opts.gravity, 'y', -0.5, 0.5).name('Gravity Y');
+    const f1 = this.pane.addFolder({ title: 'Generic Physics', expanded: false });
+    f1.addBinding(obj.opts.gravity, 'x', { min: -0.5, max: 0.5, label: 'Gravity X' });
+    f1.addBinding(obj.opts.gravity, 'y', { min: -0.5, max: 0.5, label: 'Gravity Y' });
   }
 
   buildPlayerScreen(obj: any) {
-    const { gui } = this;
-    const f1 = gui.addFolder('Player');
+    const f1 = this.pane.addFolder({ title: 'Player', expanded: false });
 
-    gui.remember(obj.playerBody.opts);
-    f1.add(obj.playerBody.opts, 'mass', 0.01, 0.3).name('Mass');
-    f1.add(obj.playerBody.opts, 'friction', 0.01, 0.3).name('Friction');
+    f1.addBinding(obj.playerBody.opts, 'mass', { min: 0.01, max: 0.3, label: 'Mass' });
+    f1.addBinding(obj.playerBody.opts, 'friction', { min: 0.01, max: 0.3, label: 'Friction' });
 
-    gui.remember(obj.playerBody.opts.maxVelocity);
-    f1.add(obj.playerBody.opts.maxVelocity, 'x', 0.1, 2).name('Max Velocity X');
-    f1.add(obj.playerBody.opts.maxVelocity, 'y', 0.1, 2).name('Max Velocity Y');
+    f1.addBinding(obj.playerBody.opts.maxVelocity, 'x', { min: 0.1, max: 2, label: 'Max Velocity X' });
+    f1.addBinding(obj.playerBody.opts.maxVelocity, 'y', { min: 0.1, max: 2, label: 'Max Velocity Y' });
 
-    gui.remember(obj.opts);
-    f1.add(obj.opts, 'gravity', -1, -0.01).name('Ascend Gravity');
-    f1.add(obj.opts, 'descentGravity', -1, -0.01).name('Descent Gravity');
-    f1.add(obj.opts, 'walkForce', 0.01, 2).name('Walk Force');
-    f1.add(obj.opts, 'jumpForce', 0.01, 2).name('Jump Force');
+    f1.addBinding(obj.opts, 'gravity', { min: -1, max: -0.01, label: 'Ascend Gravity' });
+    f1.addBinding(obj.opts, 'descentGravity', { min: -1, max: -0.01, label: 'Descent Gravity' });
+    f1.addBinding(obj.opts, 'walkForce', { min: 0.01, max: 2, label: 'Walk Force' });
+    f1.addBinding(obj.opts, 'jumpForce', { min: 0.01, max: 2, label: 'Jump Force' });
   }
 
   buildEngineScreen(obj: any) {
-    const { gui } = this;
-    const rootFolder = gui.addFolder('Engine');
+    const rootFolder = this.pane.addFolder({ title: 'Engine', expanded: false });
     const { renderer, bloomPass, scene, ambientLight } = obj;
-    const f0 = rootFolder.addFolder('Renderer');
-    f0.add(renderer, 'toneMappingExposure', 0.0, 10);
+    const f0 = rootFolder.addFolder({ title: 'Renderer' });
+    f0.addBinding(renderer, 'toneMappingExposure', { min: 0.0, max: 10 });
     if (GameConfig.UsePostProcessing) {
       // Bloom Pass
-      const f1 = rootFolder.addFolder('BloomPass');
-      gui.remember(obj.bloomPass);
-      f1.add(bloomPass, 'strength', 0.5, 4.5).name('Strength');
-      f1.add(bloomPass, 'radius', 0, 5).name(' Radius');
-      f1.add(bloomPass, 'threshold', 0.1, 1.5).name(' Threshold');
+      const f1 = rootFolder.addFolder({ title: 'BloomPass' });
+      f1.addBinding(bloomPass, 'strength', { min: 0.5, max: 4.5, label: 'Strength' });
+      f1.addBinding(bloomPass, 'radius', { min: 0, max: 5, label: 'Radius' });
+      f1.addBinding(bloomPass, 'threshold', { min: 0.1, max: 1.5, label: 'Threshold' });
       this.addColorField(f1, bloomPass.highPassUniforms.defaultColor, 'value', 'HighPass Color');
     }
     // Scene
-    const f2 = rootFolder.addFolder('Scene');
-    f2.add(scene.fog, 'density', 0, 0.025).name('Fog Density');
+    const f2 = rootFolder.addFolder({ title: 'Scene' });
+    f2.addBinding(scene.fog, 'density', { min: 0, max: 0.025, label: 'Fog Density' });
     this.addColorField(f2, scene.fog, 'color', 'Fog Color');
     // Ambient Light
-    const f3 = rootFolder.addFolder('Ambient Light');
-    f3.add(ambientLight, 'intensity', 0, 2).name('Intensity');
+    const f3 = rootFolder.addFolder({ title: 'Ambient Light' });
+    f3.addBinding(ambientLight, 'intensity', { min: 0, max: 2, label: 'Intensity' });
     this.addColorField(f3, ambientLight, 'color', 'Color');
   }
 
+  /*
+    Binds a THREE.Color directly: Tweakpane detects the {r,g,b} shape and
+    mutates the channels in place (it does not replace the object), so the
+    THREE.Color instance and its methods are preserved. With ColorManagement
+    disabled (see src/three-setup.ts) the channels are raw 0-1 sRGB values, so
+    the `float` picker maps the same way the old hex proxy did.
+  */
   addColorField(folder: any, obj: any, prop: any, name: any) {
-    const proxy = { color: `#${obj[prop].getHexString()}` };
-    const controller = folder.addColor(proxy, 'color').name(name);
-    const color = obj[prop];
-    controller.onChange((v: any) => {
-      color.setHex(v.replace('#', '0x'));
-    });
+    folder.addBinding(obj, prop, { label: name, color: { type: 'float' } });
   }
 
   addMaterialFields(folder: any, mat: any) {
     const has = (name: any) => Object.prototype.hasOwnProperty.call(mat, name);
     has('color') && this.addColorField(folder, mat, 'color', 'Color');
-    has('opacity') && folder.add(mat, 'opacity', 0, 1).name('Opacity');
+    has('opacity') && folder.addBinding(mat, 'opacity', { min: 0, max: 1, label: 'Opacity' });
     has('emissive') && this.addColorField(folder, mat, 'emissive', 'Emissive Color');
-    has('emissiveIntensity') && folder.add(mat, 'emissiveIntensity', 0, 2).name('Emissive Int');
-    has('reflectivity') && folder.add(mat, 'reflectivity', 0, 1).name('Reflectivity');
-    has('shininess') && folder.add(mat, 'shininess', 0, 60).name('Shininess');
-    has('refractionRatio') && folder.add(mat, 'refractionRatio', 0, 1).name('Refraction');
+    has('emissiveIntensity') && folder.addBinding(mat, 'emissiveIntensity', { min: 0, max: 2, label: 'Emissive Int' });
+    has('reflectivity') && folder.addBinding(mat, 'reflectivity', { min: 0, max: 1, label: 'Reflectivity' });
+    has('shininess') && folder.addBinding(mat, 'shininess', { min: 0, max: 60, label: 'Shininess' });
+    has('refractionRatio') && folder.addBinding(mat, 'refractionRatio', { min: 0, max: 1, label: 'Refraction' });
     has('specular') && this.addColorField(folder, mat, 'specular', 'Specular Color');
-    has('envMapIntensity') && folder.add(mat, 'envMapIntensity', 0, 2).name('Env Map Int');
-    has('metalness') && folder.add(mat, 'metalness', 0.0, 1).name('Metalness');
-    has('roughness') && folder.add(mat, 'roughness', 0.0, 1).name('Roughness');
+    has('envMapIntensity') && folder.addBinding(mat, 'envMapIntensity', { min: 0, max: 2, label: 'Env Map Int' });
+    has('metalness') && folder.addBinding(mat, 'metalness', { min: 0.0, max: 1, label: 'Metalness' });
+    has('roughness') && folder.addBinding(mat, 'roughness', { min: 0.0, max: 1, label: 'Roughness' });
   }
 
   addMeshLineMaterial(folder: any, mat: any) {
     const u = mat.uniforms;
     this.addColorField(folder, u.color, 'value', 'Color');
-    folder.add(u.lineWidth, 'value', 0.1, 10.0).name('Line Width');
+    folder.addBinding(u.lineWidth, 'value', { min: 0.1, max: 10.0, label: 'Line Width' });
   }
 
   addFireballShaderMaterial(folder: any, mat: any) {
     const u = mat.uniforms;
     this.addColorField(folder, u.u_fissuresColor, 'value', 'Fissures Color');
-    folder.add(u.u_fissuresIntensity, 'value', 0, 10.0).name('Fissures Intensity');
+    folder.addBinding(u.u_fissuresIntensity, 'value', { min: 0, max: 10.0, label: 'Fissures Intensity' });
     this.addColorField(folder, u.u_glowColor, 'value', 'Glow Color');
-    folder.add(u.u_glowIntensity.value, 'x', 0.0, 10.0).name('Glow X (c)');
-    folder.add(u.u_glowIntensity.value, 'y', 0.0, 10.0).name('Glow Y (p)');
+    folder.addBinding(u.u_glowIntensity.value, 'x', { min: 0.0, max: 10.0, label: 'Glow X (c)' });
+    folder.addBinding(u.u_glowIntensity.value, 'y', { min: 0.0, max: 10.0, label: 'Glow Y (p)' });
     this.addColorField(folder, u.u_ringColor, 'value', 'Ring Color');
-    folder.add(u.u_ringThickness, 'value', 0, 1.2).name('Ring Thickness');
+    folder.addBinding(u.u_ringThickness, 'value', { min: 0, max: 1.2, label: 'Ring Thickness' });
   }
 
   addEnemyRayMaterial(folder: any, mat: any) {
     const u = mat.uniforms;
-    const rayFolder = folder.addFolder('Ray');
+    const rayFolder = folder.addFolder({ title: 'Ray' });
     this.addColorField(rayFolder, u.u_rayColor, 'value', 'Ray Color');
-    rayFolder.add(u.u_rayLevels.value, 'x', 0.0, 1.0).name('Inner Glow');
-    rayFolder.add(u.u_rayLevels.value, 'y', 0.0, 1.0).name('Outer Glow');
-    rayFolder.add(u.u_rayLevels.value, 'z', 0.0, 1.0).name('Intensity');
-    rayFolder.add(u.u_rayLevels.value, 'w', 0.0, 1.0).name('Inner Fade');
+    rayFolder.addBinding(u.u_rayLevels.value, 'x', { min: 0.0, max: 1.0, label: 'Inner Glow' });
+    rayFolder.addBinding(u.u_rayLevels.value, 'y', { min: 0.0, max: 1.0, label: 'Outer Glow' });
+    rayFolder.addBinding(u.u_rayLevels.value, 'z', { min: 0.0, max: 1.0, label: 'Intensity' });
+    rayFolder.addBinding(u.u_rayLevels.value, 'w', { min: 0.0, max: 1.0, label: 'Inner Fade' });
 
-    const d1Folder = folder.addFolder('Thin Debris');
+    const d1Folder = folder.addFolder({ title: 'Thin Debris' });
     this.addColorField(d1Folder, u.u_thinDebrisColor, 'value', 'Color');
-    d1Folder.add(u.u_thinDebrisLevels.value, 'x', 0.0, 1.0).name('Speed');
-    d1Folder.add(u.u_thinDebrisLevels.value, 'y', 0.0, 1.0).name('Density');
-    d1Folder.add(u.u_thinDebrisLevels.value, 'z', 0.0, 1.0).name('Width');
-    d1Folder.add(u.u_thinDebrisLevels.value, 'w', 0.0, 1.0).name('Intensity');
+    d1Folder.addBinding(u.u_thinDebrisLevels.value, 'x', { min: 0.0, max: 1.0, label: 'Speed' });
+    d1Folder.addBinding(u.u_thinDebrisLevels.value, 'y', { min: 0.0, max: 1.0, label: 'Density' });
+    d1Folder.addBinding(u.u_thinDebrisLevels.value, 'z', { min: 0.0, max: 1.0, label: 'Width' });
+    d1Folder.addBinding(u.u_thinDebrisLevels.value, 'w', { min: 0.0, max: 1.0, label: 'Intensity' });
 
-    const d2Folder = folder.addFolder('Fat Debris');
+    const d2Folder = folder.addFolder({ title: 'Fat Debris' });
     this.addColorField(d2Folder, u.u_fatDebrisColor, 'value', 'Color');
-    d2Folder.add(u.u_fatDebrisLevels.value, 'x', 0.0, 1.0).name('Speed');
-    d2Folder.add(u.u_fatDebrisLevels.value, 'y', 0.0, 1.0).name('Density');
-    d2Folder.add(u.u_fatDebrisLevels.value, 'z', 0.0, 1.0).name('Width');
-    d2Folder.add(u.u_fatDebrisLevels.value, 'w', 0.0, 1.0).name('Intensity');
+    d2Folder.addBinding(u.u_fatDebrisLevels.value, 'x', { min: 0.0, max: 1.0, label: 'Speed' });
+    d2Folder.addBinding(u.u_fatDebrisLevels.value, 'y', { min: 0.0, max: 1.0, label: 'Density' });
+    d2Folder.addBinding(u.u_fatDebrisLevels.value, 'z', { min: 0.0, max: 1.0, label: 'Width' });
+    d2Folder.addBinding(u.u_fatDebrisLevels.value, 'w', { min: 0.0, max: 1.0, label: 'Intensity' });
   }
 
   addEnemyVortexMaterial(folder: any, mat: any) {
     const u = mat.uniforms;
     this.addColorField(folder, u.u_colorFrom, 'value', 'Color From');
     this.addColorField(folder, u.u_colorTo, 'value', 'Color To');
-    folder.add(u.u_twist, 'value', 0, 4000).name('Twist');
-    folder.add(u.u_displacementScale, 'value', 0.0, 100.0).name('Disp Scale');
-    folder.add(u.u_displacementBias, 'value', 0.0, 100.0).name('Disp Bias');
-    folder.add(u.u_fogDistance, 'value', 0, 500).name('Fog Dist');
+    folder.addBinding(u.u_twist, 'value', { min: 0, max: 4000, label: 'Twist' });
+    folder.addBinding(u.u_displacementScale, 'value', { min: 0.0, max: 100.0, label: 'Disp Scale' });
+    folder.addBinding(u.u_displacementBias, 'value', { min: 0.0, max: 100.0, label: 'Disp Bias' });
+    folder.addBinding(u.u_fogDistance, 'value', { min: 0, max: 500, label: 'Fog Dist' });
   }
 
   addSkyShaderMaterial(folder: any, mat: any) {
     const u = mat.uniforms;
     this.addColorField(folder, u.u_color, 'value', 'Color');
-    folder.add(u.u_intensity, 'value', 0, 1).name('Intensity');
-    folder.add(u.u_fade, 'value', 0, 2).name('Fade');
-    folder.add(u.u_zoom, 'value', 0, 4).name('Zoom');
-    folder.add(u.u_stepSize, 'value', 0, 1).name('Step Size');
-    folder.add(u.u_tile, 'value', 0, 1).name('Tile');
-    folder.add(u.u_transverseSpeed, 'value', 0, 4)
-      .name('Transverse Speed');
+    folder.addBinding(u.u_intensity, 'value', { min: 0, max: 1, label: 'Intensity' });
+    folder.addBinding(u.u_fade, 'value', { min: 0, max: 2, label: 'Fade' });
+    folder.addBinding(u.u_zoom, 'value', { min: 0, max: 4, label: 'Zoom' });
+    folder.addBinding(u.u_stepSize, 'value', { min: 0, max: 1, label: 'Step Size' });
+    folder.addBinding(u.u_tile, 'value', { min: 0, max: 1, label: 'Tile' });
+    folder.addBinding(u.u_transverseSpeed, 'value', { min: 0, max: 4, label: 'Transverse Speed' });
   }
 
   getSkyShaderProps(mat: any) {
@@ -229,7 +253,7 @@ export default class GameTools {
     return result;
   }
 
-  exportMaterialsNode(controller: any) {
+  exportMaterialsNode(exportOutput: any) {
     const result: Record<string, any> = {};
     const { instances } = MaterialFactory;
     instances.forEach((m) => {
@@ -258,33 +282,33 @@ export default class GameTools {
         // console.warn('Node Id not found for material:', m);
       }
     });
-    controller.setValue(JSON.stringify(result));
+    exportOutput.text = JSON.stringify(result);
+    this.pane.refresh();
   }
 
   buildMaterialsScreen() {
-    const { gui } = this;
-    const rootFolder = gui.addFolder('Materials');
+    const rootFolder = this.pane.addFolder({ title: 'Materials', expanded: false });
     const matDict = MaterialFactory.getMaterialsByMaterialType();
     Object.keys(matDict).forEach((k) => {
       this.buildMaterialGroup(rootFolder, k, matDict[k]);
     });
     const exportOutput = { text: '' };
-    const outputController = rootFolder.add(exportOutput, 'text').name('Output');
-    const exportFunc = this.exportMaterialsNode.bind(this, outputController);
-    rootFolder.add({ fn: exportFunc }, 'fn').name('Export Materials Node');
+    rootFolder.addBinding(exportOutput, 'text', { label: 'Output' });
+    const exportFunc = this.exportMaterialsNode.bind(this, exportOutput);
+    rootFolder.addButton({ title: 'Export Materials Node' }).on('click', exportFunc);
   }
 
   buildMaterialGroup(parentFolder: any, materialType: any, arr: any) {
-    const rootFolder = parentFolder.addFolder(materialType);
+    const rootFolder = parentFolder.addFolder({ title: materialType, expanded: false });
     arr.forEach((m: any, idx: any) => {
       const label = m.opts.label || materialType;
       let subfolder = null;
       if (arr.length > 1) {
-        subfolder = rootFolder.addFolder(`${label} (${idx})`);
+        subfolder = rootFolder.addFolder({ title: `${label} (${idx})`, expanded: false });
       }
       const mat = m.activeMaterial;
       const f = subfolder || rootFolder;
-      f.add({ t: mat.type }, 't').name('Type');
+      f.addBinding({ t: mat.type }, 't', { label: 'Type', readonly: true });
       switch (materialType) {
         case 'WorldSkyCylinderMaterial':
           this.addSkyShaderMaterial(f, mat);
