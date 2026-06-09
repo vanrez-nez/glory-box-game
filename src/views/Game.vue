@@ -42,4 +42,4 @@ export default {
 };
 </script>
 
-<style lang="stylus" src='@styles/views/game.styl'></style>
+<style src='@styles/views/game.css'></style>

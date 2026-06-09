@@ -1,16 +1,19 @@
-import resize from 'vue-resize-directive';
-import Vue from 'vue';
+import { createApp } from 'vue';
 import App from '@/App';
 import router from '@/router';
 import store from '@/store';
+import resize from '@/directives/resize';
 
-Vue.config.productionTip = false;
+// Global styles
+import 'sanitize.css';
+import '@styles/vars.css';
+import '@styles/common.css';
+
+const app = createApp(App);
 
 // VUE DIRECTIVES
-Vue.directive('resize', resize);
+app.directive('resize', resize);
 
-new Vue({
-  store,
-  router,
-  render: h => h(App),
-}).$mount('#app');
+app.use(router);
+app.use(store);
+app.mount('#app');

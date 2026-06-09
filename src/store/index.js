@@ -1,12 +1,9 @@
-import Vue from 'vue';
-import Vuex, { Store } from 'vuex';
+import { createStore } from 'vuex';
 import game from '@/store/modules/game';
 import alert from '@/store/modules/alert';
 
-Vue.use(Vuex);
-
 const state = {};
-export default new Store({
+export default createStore({
   state,
   modules: {
     game,

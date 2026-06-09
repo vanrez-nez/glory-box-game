@@ -58,4 +58,4 @@ export default {
 };
 </script>
 
-<style lang="stylus" src='@styles/components/game-alert.styl'></style>
+<style src='@styles/components/game-alert.css'></style>

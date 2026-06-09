@@ -103,4 +103,4 @@ export default {
 };
 </script>
 
-<style lang="stylus" src='@styles/components/action-bar.styl'></style>
+<style src='@styles/components/action-bar.css'></style>

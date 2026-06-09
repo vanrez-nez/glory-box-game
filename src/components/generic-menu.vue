@@ -35,6 +35,7 @@ export default {
     return {
       noop: () => {},
       selectedIndex: 0,
+      isActive: true,
     };
   },
   props: {
@@ -49,6 +50,10 @@ export default {
   },
   activated() {
     this.selectedIndex = 0;
+    this.isActive = true;
+  },
+  deactivated() {
+    this.isActive = false;
   },
   methods: {
     stepIndex(step) {
@@ -84,8 +89,7 @@ export default {
     */
     ifActive(fn) {
       return () => {
-        // eslint-disable-next-line
-        if (!this._inactive) {
+        if (this.isActive) {
           fn();
         }
       };
@@ -141,4 +145,4 @@ export default {
 };
 </script>
 
-<style lang="stylus" src='@styles/components/generic-menu.styl'></style>
+<style src='@styles/components/generic-menu.css'></style>

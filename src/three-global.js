@@ -1,10 +1,42 @@
-import * as THREE from 'three';
+import * as ThreeModule from 'three';
+import EventEmitter3 from 'eventemitter3';
+import {
+  TweenMax, TimelineMax, TweenLite, TimelineLite,
+  Power0, Power1, Power2, Power3, Power4, Linear,
+  Back, Elastic, Bounce, Circ, Expo, Sine,
+} from 'gsap';
+
 /*
-  Define THREE as global. This is different from use webpack's provide plugin
-  THREE in here will be on window so other dependencies can reach it
-  when being required. This is the case for examples js libraries of THREE.
-  See more info on: https://github.com/mrdoob/three.js/issues/9562
-  Note: This should have worked by using imports-loader but for some reason
-        the library three.meshline complains when we do so.
+  Expose dependencies as globals on `window`.
+
+  This replaces webpack's ProvidePlugin + `global.THREE` assignment that the
+  original toolchain relied on. The legacy `three/examples/js/*` scripts and the
+  vendored ThreeCSG/Simple1DNoise scripts mutate/read a global `THREE`, and the
+  game code references THREE / EventEmitter3 / gsap eases as free globals.
+
+  three.js ships an ES module namespace which is frozen, so the example scripts
+  cannot attach (EffectComposer, GLTFLoader, ...) to it directly. We copy it into
+  a plain, mutable object before exposing it.
 */
-global.THREE = THREE;
+const THREE = { ...ThreeModule };
+
+Object.assign(window, {
+  THREE,
+  EventEmitter3,
+  TweenMax,
+  TimelineMax,
+  TweenLite,
+  TimelineLite,
+  Power0,
+  Power1,
+  Power2,
+  Power3,
+  Power4,
+  Linear,
+  Back,
+  Elastic,
+  Bounce,
+  Circ,
+  Expo,
+  Sine,
+});

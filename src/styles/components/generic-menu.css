@@ -1,0 +1,31 @@
+.GenericMenu {
+  color: rgba(255, 255, 255, 0.4);
+  transform: translate3d(0, 0, 0px);
+  padding: 0;
+  list-style: none;
+}
+
+.GenericMenu-item {
+  margin: 0 4px;
+  border-radius: 28px;
+  border: 2px solid transparent;
+}
+
+.GenericMenu-item:focus {
+  outline: 0;
+}
+
+.GenericMenu-item:hover {
+  color: var(--white);
+}
+
+.GenericMenu-item.GenericMenu-item--active {
+  color: var(--milan);
+  border-color: var(--milan);
+  opacity: 1;
+}
+
+.GenericMenu-item.GenericMenu-item--active:hover {
+  background: var(--milan);
+  color: var(--revolver);
+}

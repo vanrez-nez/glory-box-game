@@ -1,8 +1,10 @@
 <template>
   <div id="app" :style='{ opacity: 0 }'>
-    <keep-alive>
-      <router-view/>
-    </keep-alive>
+    <router-view v-slot="{ Component }">
+      <keep-alive>
+        <component :is="Component" />
+      </keep-alive>
+    </router-view>
     <game-alert></game-alert>
     <gamepad-monitor></gamepad-monitor>
   </div>
@@ -31,4 +33,4 @@ export default {
 };
 </script>
 
-<style lang="stylus" src="@styles/app.styl"></style>
+<style src="@styles/app.css"></style>

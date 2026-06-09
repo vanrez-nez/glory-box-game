@@ -1,12 +1,9 @@
-import Vue from 'vue';
-import Router from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 import Home from './views/Home';
 import About from './views/About';
 
-Vue.use(Router);
-
-export default new Router({
-  mode: 'history',
+export default createRouter({
+  history: createWebHistory(),
   routes: [
     {
       path: '/',
@@ -22,9 +19,9 @@ export default new Router({
       path: '/game/:quality',
       name: 'game',
       // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
+      // this generates a separate chunk for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "game" */ './views/game'),
+      component: () => import('./views/Game'),
       beforeEnter: (to, from, next) => {
         const { quality } = to.params;
         // validate only valid qualities

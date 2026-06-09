@@ -8,6 +8,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue';
 import GameLogo from './game-logo/main';
 
 export default {
@@ -29,9 +30,11 @@ export default {
     recreate() {
       const { canvas } = this.$refs;
       if (this.instance === null) {
-        this.instance = new GameLogo({
+        // markRaw: keep the three.js engine out of Vue's reactivity proxy,
+        // otherwise three's non-configurable matrix props break the renderer.
+        this.instance = markRaw(new GameLogo({
           canvasElement: canvas,
-        });
+        }));
       }
     },
     updateSize() {
@@ -45,4 +48,4 @@ export default {
 };
 </script>
 
-<style lang="stylus" src='@styles/components/game-logo.styl'></style>
+<style src='@styles/components/game-logo.css'></style>

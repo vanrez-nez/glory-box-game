@@ -1,0 +1,42 @@
+.Home {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: 1400px;
+  margin: auto;
+  background: var(--revolver);
+}
+
+.Home-menuTitle {
+  font-family: 'Oswald', sans-serif;
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 1.125rem;
+  letter-spacing: 0.0625rem;
+}
+
+.Home-menuContainer {
+  position: absolute;
+  display: block;
+  left: 50%;
+  top: 65%;
+  transform: translate(-50%, -50%);
+}
+
+.Home .GenericMenu-item {
+  display: inline-block;
+}
+
+.Home-gameLogo {
+  width: 100vw;
+  height: 60%;
+  position: absolute;
+  display: block;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+@media (min-width: 1024px) {
+  .Home-gameLogo {
+    width: 50vw;
+  }
+}

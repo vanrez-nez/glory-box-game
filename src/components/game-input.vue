@@ -28,7 +28,7 @@ export default {
       gamepadBindings: this.gamepadBindings,
     });
   },
-  destroyed() {
+  unmounted() {
     this.inputManager.unbind();
   },
   // methods: {
@@ -70,7 +70,7 @@ export default {
   watch: {
     keyboardBindings: {
       immediate: true,
-      handler: (value) => {
+      handler(value) {
         if (this.inputManager) {
           const { opts } = this.inputManager;
           opts.keyboardBindings = value;
@@ -79,7 +79,7 @@ export default {
     },
     gamepadBindings: {
       immediate: true,
-      handler: (value) => {
+      handler(value) {
         if (this.inputManager) {
           const { opts } = this.inputManager;
           opts.gamepadBindings = value;

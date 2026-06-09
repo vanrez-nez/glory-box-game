@@ -90,4 +90,4 @@ export default {
 };
 </script>
 
-<style lang="stylus" src='@styles/views/home.styl'></style>
+<style src='@styles/views/home.css'></style>

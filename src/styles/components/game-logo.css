@@ -1,0 +1,24 @@
+.GameLogo {
+  min-width: 300px;
+  min-height: 300px;
+  pointer-events: none;
+  margin: auto;
+}
+
+.GameLogo > svg {
+  width: 50%;
+  height: 50%;
+  position: absolute;
+  display: block;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.GameLogo > canvas {
+  position: absolute;
+  display: block;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}

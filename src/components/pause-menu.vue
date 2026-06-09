@@ -54,4 +54,4 @@ export default {
 };
 </script>
 
-<style lang="stylus" src="@styles/components/pause-menu.styl"></style>
+<style src="@styles/components/pause-menu.css"></style>

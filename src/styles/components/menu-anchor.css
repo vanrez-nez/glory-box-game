@@ -1,0 +1,9 @@
+.MenuAnchor {
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  overflow: hidden;
+  display: block;
+  line-height: 1.5rem;
+  padding: 3px 10px 0px 10px;
+}
