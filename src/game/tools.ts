@@ -308,7 +308,11 @@ export default class GameTools {
       }
       const mat = m.activeMaterial;
       const f = subfolder || rootFolder;
-      f.addBinding({ t: mat.type }, 't', { label: 'Type', readonly: true });
+      // `interval: 0` → ManualTicker, so this readonly (monitor) binding is read
+      // once instead of polling every 200ms. Without it, each material's Type
+      // label spins an IntervalTicker that re-reads on a fresh buffer every tick
+      // and emits `change` continuously (≈20 of them ≈ a timer every ~10ms).
+      f.addBinding({ t: mat.type }, 't', { label: 'Type', readonly: true, interval: 0 });
       switch (materialType) {
         case 'WorldSkyCylinderMaterial':
           this.addSkyShaderMaterial(f, mat);
