@@ -10,13 +10,14 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue';
 import gsap from 'gsap';
 import Until from '@/common/utils';
-import GameAlert from '@/components/game-alert';
-import GamepadMonitor from '@/components/gamepad-monitor';
+import GameAlert from '@/components/game-alert.vue';
+import GamepadMonitor from '@/components/gamepad-monitor.vue';
 
-export default {
+export default defineComponent({
   name: 'app',
   components: {
     GameAlert,
@@ -31,7 +32,7 @@ export default {
       gsap.to(this.$el, { duration: 0.2, opacity: 1, delay: 0.3 });
     },
   },
-};
+});
 </script>
 
 <style src="@styles/app.css"></style>

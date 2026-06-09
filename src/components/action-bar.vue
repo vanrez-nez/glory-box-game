@@ -13,11 +13,12 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue';
 import screenfull from 'screenfull';
 
 const STORAGE_KEY_NAME = 'ActionBar';
-export default {
+export default defineComponent({
   name: 'ActionBar',
   data() {
     return {
@@ -53,35 +54,35 @@ export default {
     this.updateFullScreen();
   },
   methods: {
-    getHint(button) {
+    getHint(button: any) {
       return button.checked ? button.on.hint : button.off.hint;
     },
     bindEvents() {
       screenfull.on('change', this.updateFullScreen);
     },
-    getIcon(button) {
+    getIcon(button: any) {
       const iconName = button.checked ? button.on.icon : button.off.icon;
       return `#icon-${iconName}`;
     },
-    getButton(name) {
+    getButton(name: any) {
       const { buttons } = this;
       return buttons.find(b => b.name === name);
     },
     readConfig() {
       const json = window.localStorage.getItem(STORAGE_KEY_NAME);
       if (json) {
-        const audioButton = this.getButton('audio');
+        const audioButton = this.getButton('audio')!;
         const parsedConfig = JSON.parse(json);
         audioButton.checked = parsedConfig.audio;
       }
     },
     writeConfig() {
-      const audioButton = this.getButton('audio');
+      const audioButton = this.getButton('audio')!;
       const json = { audio: audioButton.checked };
       window.localStorage.setItem(STORAGE_KEY_NAME, JSON.stringify(json));
     },
     updateFullScreen() {
-      const button = this.getButton('fullscreen');
+      const button = this.getButton('fullscreen')!;
       button.checked = screenfull.isFullscreen;
     },
     onFullscreen() {
@@ -90,17 +91,17 @@ export default {
           screenfull.exit();
         } else {
           const el = document.getElementById('app');
-          screenfull.request(el);
+          screenfull.request(el!);
         }
       }
     },
-    onAudio(button) {
+    onAudio(button: any) {
       button.checked = !button.checked;
       this.writeConfig();
     },
-    onControls(button) {},
+    onControls(button: any) {},
   },
-};
+});
 </script>
 
 <style src='@styles/components/action-bar.css'></style>

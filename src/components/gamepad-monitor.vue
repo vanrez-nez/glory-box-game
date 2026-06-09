@@ -4,18 +4,19 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue';
 import { GAMEPAD } from '@/store/modules/game';
 import { SHOW_ALERT } from '@/store/modules/alert';
-import GameInput from '@/components/game-input';
+import GameInput from '@/components/game-input.vue';
 
-export default {
+export default defineComponent({
   name: 'GamepadMonitor',
   components: {
     GameInput,
   },
   methods: {
-    onGamepadConnected(e) {
+    onGamepadConnected(e: any) {
       const { $store } = this;
       const { gamepad } = e;
       $store.commit(GAMEPAD, true);
@@ -39,5 +40,5 @@ export default {
       };
     },
   },
-};
+});
 </script>

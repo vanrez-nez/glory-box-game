@@ -16,12 +16,13 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue';
 import gsap from 'gsap';
 import { mapState } from 'vuex';
 import { HIDE_ALERT } from '@/store/modules/alert';
 
-export default {
+export default defineComponent({
   name: 'GameAlert',
   data() {
     return {
@@ -29,7 +30,7 @@ export default {
     };
   },
   methods: {
-    show(el, done) {
+    show(el: any, done: any) {
       const { $store } = this;
       const tl = gsap.timeline();
       tl.to(el, {
@@ -41,7 +42,7 @@ export default {
         $store.commit(HIDE_ALERT);
       }, this.time);
     },
-    hide(el, done) {
+    hide(el: any, done: any) {
       gsap.to(el, {
         duration: 0.25,
         opacity: 0,
@@ -51,14 +52,14 @@ export default {
   },
   computed: {
     ...mapState({
-      visible: state => state.alert.visible,
-      title: state => state.alert.title,
-      text: state => state.alert.text,
-      icon: state => state.alert.icon,
-      time: state => state.alert.time,
+      visible: (state: any) => state.alert.visible,
+      title: (state: any) => state.alert.title,
+      text: (state: any) => state.alert.text,
+      icon: (state: any) => state.alert.icon,
+      time: (state: any) => state.alert.time,
     }),
   },
-};
+});
 </script>
 
 <style src='@styles/components/game-alert.css'></style>

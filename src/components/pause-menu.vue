@@ -9,12 +9,13 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue';
 import { PAUSE_GAME } from '@/store/modules/game';
-import GenericMenu from './generic-menu';
-import ActionBar from './action-bar';
+import GenericMenu from './generic-menu.vue';
+import ActionBar from './action-bar.vue';
 
-export default {
+export default defineComponent({
   name: 'PauseMenu',
   components: {
     GenericMenu,
@@ -51,7 +52,7 @@ export default {
       this.$emit('restart');
     },
   },
-};
+});
 </script>
 
 <style src="@styles/components/pause-menu.css"></style>

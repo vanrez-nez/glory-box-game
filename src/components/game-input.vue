@@ -2,14 +2,15 @@
   <div class="GameInput"></div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue';
 import { InputManager } from '@/common/input-manager';
 
-export default {
+export default defineComponent({
   name: 'GameInput',
   data() {
     return {
-      inputManager: null,
+      inputManager: null as InputManager | null,
     };
   },
   props: {
@@ -29,7 +30,7 @@ export default {
     });
   },
   unmounted() {
-    this.inputManager.unbind();
+    this.inputManager!.unbind();
   },
   // methods: {
   //   handleInput(e) {
@@ -87,5 +88,5 @@ export default {
       },
     },
   },
-};
+});
 </script>

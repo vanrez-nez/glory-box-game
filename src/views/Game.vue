@@ -8,12 +8,13 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue';
 import { mapState } from 'vuex';
-import GameStage from '@/components/game-stage';
-import PauseMenu from '@/components/pause-menu';
+import GameStage from '@/components/game-stage.vue';
+import PauseMenu from '@/components/pause-menu.vue';
 
-export default {
+export default defineComponent({
   name: 'Game',
   components: {
     GameStage,
@@ -21,25 +22,25 @@ export default {
   },
   activated() {
     const { quality } = this.$route.params;
-    const { gameStage } = this.$refs;
+    const gameStage = this.$refs.gameStage as any;
     gameStage.recreate(quality);
   },
   methods: {
     onReady() {
-      const { gameStage } = this.$refs;
+      const gameStage = this.$refs.gameStage as any;
       gameStage.restart();
     },
     onRestart() {
-      const { gameStage } = this.$refs;
+      const gameStage = this.$refs.gameStage as any;
       gameStage.restart();
     },
   },
   computed: {
     ...mapState({
-      paused: state => state.game.paused,
+      paused: (state: any) => state.game.paused,
     }),
   },
-};
+});
 </script>
 
 <style src='@styles/views/game.css'></style>

@@ -7,28 +7,29 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue';
 import { markRaw } from 'vue';
 import GameLogo from './game-logo/main';
 
-export default {
+export default defineComponent({
   name: 'GameLogo',
   data() {
     return {
-      instance: null,
+      instance: null as GameLogo | null,
     };
   },
   methods: {
     run() {
       this.recreate();
-      this.instance.run();
+      this.instance!.run();
       this.updateSize();
     },
     stop() {
-      this.instance.stop();
+      this.instance!.stop();
     },
     recreate() {
-      const { canvas } = this.$refs;
+      const canvas = this.$refs.canvas as HTMLCanvasElement;
       if (this.instance === null) {
         // markRaw: keep the three.js engine out of Vue's reactivity proxy,
         // otherwise three's non-configurable matrix props break the renderer.
@@ -45,7 +46,7 @@ export default {
       }
     },
   },
-};
+});
 </script>
 
 <style src='@styles/components/game-logo.css'></style>

@@ -21,11 +21,12 @@
   </ul>
 </template>
 
-<script>
-import MenuAnchor from './menu-anchor';
-import GameInput from './game-input';
+<script lang="ts">
+import { defineComponent, PropType } from 'vue';
+import MenuAnchor from './menu-anchor.vue';
+import GameInput from './game-input.vue';
 
-export default {
+export default defineComponent({
   name: 'GenericMenu',
   components: {
     MenuAnchor,
@@ -44,7 +45,7 @@ export default {
       default: false,
     },
     items: {
-      type: Array,
+      type: Array as PropType<any[]>,
       default: () => [],
     },
   },
@@ -56,8 +57,8 @@ export default {
     this.isActive = false;
   },
   methods: {
-    stepIndex(step) {
-      const { menuItem } = this.$refs;
+    stepIndex(step: any) {
+      const menuItem = this.$refs.menuItem as any[];
       const itemsCount = menuItem.length;
       let index = (this.selectedIndex + step) % itemsCount;
       if (index < 0) {
@@ -72,11 +73,11 @@ export default {
       this.stepIndex(-1);
     },
     selectCurrent() {
-      const { menuItem } = this.$refs;
+      const menuItem = this.$refs.menuItem as any[];
       const { selectedIndex } = this;
       menuItem[selectedIndex].$el.click();
     },
-    getMenuItemModifiers(idx) {
+    getMenuItemModifiers(idx: any) {
       const { selectedIndex } = this;
       const isSelected = idx === selectedIndex;
       return {
@@ -87,7 +88,7 @@ export default {
       A guard to avoid processing inputs when
       current component is not active
     */
-    ifActive(fn) {
+    ifActive(fn: any) {
       return () => {
         if (this.isActive) {
           fn();
@@ -142,7 +143,7 @@ export default {
       return bindings;
     },
   },
-};
+});
 </script>
 
 <style src='@styles/components/generic-menu.css'></style>

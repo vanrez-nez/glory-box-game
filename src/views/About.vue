@@ -5,10 +5,11 @@
   </div>
 </template>
 
-<script>
-import GameInput from '@/components/game-input';
+<script lang="ts">
+import { defineComponent } from 'vue';
+import GameInput from '@/components/game-input.vue';
 
-export default {
+export default defineComponent({
   name: 'About',
   components: {
     GameInput,
@@ -19,5 +20,5 @@ export default {
       };
     },
   },
-};
+});
 </script>

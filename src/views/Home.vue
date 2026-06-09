@@ -22,15 +22,16 @@
   </div>
 </template>
 
-<script>
-import ActionBar from '@/components/action-bar';
-import GenericMenu from '@/components/generic-menu';
-import GameLogo from '@/components/game-logo';
+<script lang="ts">
+import { defineComponent } from 'vue';
+import ActionBar from '@/components/action-bar.vue';
+import GenericMenu from '@/components/generic-menu.vue';
+import GameLogo from '@/components/game-logo.vue';
 
 const MAIN_MENU = 'main-menu';
 const QUALITY_MENU = 'quality-menu';
 
-export default {
+export default defineComponent({
   name: 'Home',
   data() {
     return {
@@ -65,12 +66,12 @@ export default {
     GameLogo,
   },
   activated() {
-    const { gameLogo } = this.$refs;
+    const gameLogo = this.$refs.gameLogo as any;
     this.reset();
     gameLogo.run();
   },
   methods: {
-    bindToQuality(quality) {
+    bindToQuality(quality: any) {
       return this.onQualitySelect.bind(this, quality);
     },
     onStartActivate() {
@@ -79,15 +80,15 @@ export default {
     onControls() {
       // console.log('controls');
     },
-    onQualitySelect() {
-      const { gameLogo } = this.$refs;
+    onQualitySelect(_quality?: any) {
+      const gameLogo = this.$refs.gameLogo as any;
       gameLogo.stop();
     },
     reset() {
       this.activeMenu = MAIN_MENU;
     },
   },
-};
+});
 </script>
 
 <style src='@styles/views/home.css'></style>

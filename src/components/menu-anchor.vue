@@ -8,10 +8,11 @@
   </component>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue';
 import { isObjectLike } from 'lodash';
 
-export default {
+export default defineComponent({
   name: 'MenuAnchor',
   props: {
     el: {
@@ -32,7 +33,7 @@ export default {
     },
   },
   methods: {
-    click(e) {
+    click(e: any) {
       const { href, target, to } = this;
       if (to !== '' || isObjectLike(to)) {
         this.$router.push(to);
@@ -42,7 +43,7 @@ export default {
       this.$emit('click', e);
     },
   },
-};
+});
 </script>
 
 <style src='@styles/components/menu-anchor.css'></style>
