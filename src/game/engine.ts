@@ -22,7 +22,6 @@ export default class Engine {
   renderer!: THREE.WebGLRenderer;
   camera!: THREE.PerspectiveCamera;
   scene!: THREE.Scene;
-  clock!: THREE.Clock;
   composer!: EffectComposer;
   effectFXAA!: ShaderPass;
   bloomPass!: UnrealBloomPass;

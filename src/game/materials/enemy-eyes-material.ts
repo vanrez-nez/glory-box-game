@@ -8,7 +8,6 @@ export default class EnemyEyesMaterial extends GameMetaMaterial {
         type: 'MeshBasicMaterial',
         args: {
           color: opts.color,
-          flatShading: true,
           vertexColors: true,
         },
       },

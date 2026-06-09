@@ -12,7 +12,6 @@ export default class WorldFloorMaterial extends GameMetaMaterial {
         args: {
           // envMap: Skybox.textureCube,
           color: 0x484b57,
-          flatShading: true,
           map: GameMetaMaterial.GetTexture(IMAGE_ASSETS.GroundBase, scale, scale),
           wireframe: false,
         },

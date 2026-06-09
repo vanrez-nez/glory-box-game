@@ -8,13 +8,13 @@ const DEFAULT = {
 
 export default class GameEnemyVortex {
   opts!: Record<string, any>;
-  clock!: THREE.Clock;
+  clock!: THREE.Timer;
   particles!: any[];
   material!: any;
   mesh!: THREE.Mesh;
   constructor(opts: any) {
     this.opts = { ...DEFAULT, ...opts };
-    this.clock = new THREE.Clock();
+    this.clock = new THREE.Timer();
     this.particles = [];
     this.addMesh();
     this.addParticles();
@@ -98,6 +98,7 @@ export default class GameEnemyVortex {
 
   update(delta: any, positionY: any) {
     const { mesh, particles, clock } = this;
+    clock.update();
     const { uniforms } = this.material;
     mesh.rotation.y += delta;
     uniforms.u_time.value += delta;
@@ -106,7 +107,7 @@ export default class GameEnemyVortex {
       const p = particles[i];
       p.position.copy(mesh.position);
       p.rotation.y += (1 - p.material.size) * 2 * delta;
-      p.rotation.x = Math.sin(clock.getElapsedTime() + i) * Math.PI / 8;
+      p.rotation.x = Math.sin(clock.getElapsed() + i) * Math.PI / 8;
     }
   }
 }

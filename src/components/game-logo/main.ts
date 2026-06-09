@@ -13,7 +13,7 @@ export default class GameLogo {
   renderer!: THREE.WebGLRenderer;
   camera!: THREE.PerspectiveCamera;
   scene!: THREE.Scene;
-  clock!: THREE.Clock;
+  clock!: THREE.Timer;
   pointLight!: any;
   width!: any;
   height!: any;
@@ -43,7 +43,7 @@ export default class GameLogo {
     this.scene.background = new THREE.Color(0x170D19);
     this.scene.fog = new THREE.FogExp2(0x000000, 0.015);
     this.scene.add(this.camera);
-    this.clock = new THREE.Clock();
+    this.clock = new THREE.Timer();
     // global.renderer = this.renderer;
   }
 
@@ -132,6 +132,7 @@ export default class GameLogo {
 
   onFrame() {
     const { clock } = this;
+    clock.update();
     const delta = clock.getDelta() * 1000;
     this.rafHandler = requestAnimationFrame(this.onFrame.bind(this));
     this.onUpdate(delta);

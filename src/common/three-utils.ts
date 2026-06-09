@@ -36,5 +36,7 @@ export function ArcGeometry(innerRadius: any, outerRadius: any, thetaStart: any,
   const geo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
   // Non-indexed so each triangle has independent vertices (for flat per-face/
   // per-segment vertex colors and clean merging via mergeGeometries).
-  return geo.toNonIndexed();
+  // ExtrudeGeometry is already non-indexed, so only convert when needed to
+  // avoid three's "BufferGeometry is already non-indexed" warning.
+  return geo.index ? geo.toNonIndexed() : geo;
 }

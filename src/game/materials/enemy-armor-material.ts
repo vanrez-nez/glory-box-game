@@ -9,7 +9,6 @@ export default class EnemyArmorMaterial extends GameMetaMaterial {
         type: 'MeshBasicMaterial',
         args: {
           color: opts.color,
-          flatShading: true,
           vertexColors: true,
         },
       },
