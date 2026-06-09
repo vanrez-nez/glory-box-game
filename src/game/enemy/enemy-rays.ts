@@ -1,5 +1,5 @@
 import EventEmitter3 from 'eventemitter3';
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import { EVENTS } from '@/game/const';
 import JobScheduler from '@/game/job-scheduler';
 import GameEnemyRaySfx from '@/game/sfx/enemy-ray-sfx';

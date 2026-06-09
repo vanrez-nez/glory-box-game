@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import GameMetaMaterial from '@/game/materials/meta-material';
 import Shader from '@/shaders/nebula';
 
@@ -7,13 +6,7 @@ export default class WorldSkyCylinderMaterial extends GameMetaMaterial {
     super({
       nodeName: opts.name,
       low: {
-        type: 'ShaderMaterial',
-        args: {
-          side: THREE.BackSide,
-          fragmentShader: Shader.fragment,
-          vertexShader: Shader.vertex,
-          uniforms: Shader.uniforms,
-        },
+        create: () => Shader.create(),
       },
     });
   }

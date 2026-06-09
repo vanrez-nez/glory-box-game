@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import gsap from 'gsap';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { PHYSICS, GAME } from '@/game/const';
@@ -80,13 +80,10 @@ export default class PlayerExplosionSfx {
 
   getTrail(lineWidth: any) {
     return new LineTrail({
-      material: MaterialFactory.getMaterial('GenericTrail', {
-        name: 'explode_trail',
-        opacity: 0.1,
-        transparent: true,
-        color: 0xffffff,
-        lineWidth,
-      }, 'explode_trail'),
+      opacity: 0.1,
+      transparent: true,
+      color: 0xffffff,
+      lineWidth,
     });
   }
 

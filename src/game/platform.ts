@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import gsap from 'gsap';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { PHYSICS, MAP, EVENTS, GAME } from '@/game/const';

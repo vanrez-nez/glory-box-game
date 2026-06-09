@@ -1,5 +1,5 @@
 import EventEmitter3 from 'eventemitter3';
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { AudioManagerInstance as AudioManager } from '@/game/audio/audio-manager';
@@ -130,20 +130,13 @@ export default class GameEnemyDragon {
 
   initSpine() {
     const { opts } = this;
-    let idx = 0;
     this.spine = new LineTrail({
       maxPositions: opts.tailSize,
-      material: MaterialFactory.getMaterial('GenericTrail', {
-        name: 'enemy_col_trail',
-        color: 0xffff00,
-        lineWidth: 2,
-      }),
-      sizeFn: () => {
-        const i = idx++ % opts.tailSize;
-        return EaseExpoOut(i / opts.tailSize);
-      },
+      color: 0xffff00,
+      lineWidth: 2,
+      // widthCallback receives the normalized position along the line (0..1).
+      sizeFn: (t: number) => EaseExpoOut(t),
     });
-    this.spine.line.geometry.boundingSphere!.radius = 100;
     opts.parent!.add(this.spine.mesh);
   }
 

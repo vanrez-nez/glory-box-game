@@ -1,5 +1,5 @@
 import EventEmitter3 from 'eventemitter3';
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { GetScreenCoords } from '@/common/three-utils';
 import { GAME, EVENTS } from '@/game/const';

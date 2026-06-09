@@ -1,4 +1,6 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
+import { MeshStandardNodeMaterial } from 'three/webgpu';
+import { attribute } from 'three/tsl';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { ArcGeometry } from '@/common/three-utils';
 
@@ -35,13 +37,12 @@ export default class GameLogoRing {
       geometries.push(segmentGeo);
     }
     const geo = mergeGeometries(geometries, false);
-    const mat = new THREE.MeshStandardMaterial({
-      vertexColors: true,
-      wireframe: false,
-    });
+    // Drive the lit albedo from the baked per-vertex `color` attribute. The node
+    // material path doesn't reliably honor `vertexColors: true`, so bind it
+    // explicitly via a TSL colorNode.
+    const mat = new MeshStandardNodeMaterial();
+    mat.colorNode = attribute('color', 'vec3');
     const mesh = new THREE.Mesh(geo, mat);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
     return mesh;
   }
 

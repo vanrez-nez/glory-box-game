@@ -1,5 +1,5 @@
 import Simple1DNoise from '@/vendor/Simple1DNoise';
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { GAME } from '@/game/const';
 import WorldCylinderRing from '@/game/world/cylinder-ring';

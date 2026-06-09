@@ -6,12 +6,7 @@ export default class PlayerHudFireballMaterial extends GameMetaMaterial {
     super({
       nodeName: opts.name,
       low: {
-        type: 'ShaderMaterial',
-        args: {
-          fragmentShader: Shader.fragment,
-          vertexShader: Shader.vertex,
-          uniforms: Shader.uniforms,
-        },
+        create: () => Shader.create(),
       },
     });
   }

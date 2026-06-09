@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import GameEnemyDragon from '@/game/enemy/enemy-dragon';
 import GameEnemyRays from '@/game/enemy/enemy-rays';
 import GameEnemyVortex from '@/game/enemy/enemy-vortex';

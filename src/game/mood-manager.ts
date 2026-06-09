@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import gsap from 'gsap';
 import { QUALITY } from '@/game/const';
 import DefaultMood from '@/game/mood-presets/default';
@@ -100,12 +100,11 @@ export default class GameMoodManager {
     const { BloomPass, Scene, AmbientLight, ToneMapping } = presetNode;
     const tl = gsap.timeline();
     if (BloomPass && bloomPass) {
-      tl.to(bloomPass, {
-        duration: time,
-        strength: BloomPass.Strength,
-        threshold: BloomPass.Threshold,
-        radius: BloomPass.Radius,
-      }, 0);
+      // BloomNode exposes strength/threshold/radius as TSL uniform nodes, so the
+      // animated value lives on `.value` rather than directly on the pass.
+      tl.to(bloomPass.strength, { duration: time, value: BloomPass.Strength }, 0);
+      tl.to(bloomPass.threshold, { duration: time, value: BloomPass.Threshold }, 0);
+      tl.to(bloomPass.radius, { duration: time, value: BloomPass.Radius }, 0);
     }
     tl.to(scene.fog, { duration: time, density: Scene.FogDensity }, 0);
     tl.to(ambientLight, { duration: time, intensity: AmbientLight.Intensity }, 0);

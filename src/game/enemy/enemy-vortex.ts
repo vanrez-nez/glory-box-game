@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { AudioManagerInstance as AudioManager } from '@/game/audio/audio-manager';
 

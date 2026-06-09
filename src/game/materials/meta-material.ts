@@ -1,5 +1,4 @@
-import * as THREE from 'three';
-import { MeshLineMaterial } from 'three.meshline';
+import * as THREE from 'three/webgpu';
 import { GetTextureRepeat } from '@/game/utils';
 import { QUALITY } from '@/game/const';
 
@@ -96,6 +95,19 @@ export default class GameMetaMaterial {
 
   createMaterial(profile: any): THREE.Material | null {
     let mat: THREE.Material | null = null;
+    /*
+      TSL node materials can't be built from a class-name string the way the
+      built-in materials are, so a profile may instead provide a `create`
+      factory that returns a ready node material (with its TSL `uniforms` dict
+      attached for runtime updates). Used by the custom-shader materials.
+    */
+    if (typeof profile.create === 'function') {
+      mat = profile.create();
+      if (mat) {
+        mat.userData = { nodeId: this.opts.nodeName };
+      }
+      return mat;
+    }
     if (profile.type) {
       const mType = profile.type;
       /*
@@ -108,8 +120,6 @@ export default class GameMetaMaterial {
       const Ctor = (THREE as any)[mType];
       if (Ctor) {
         mat = new Ctor(profile.args);
-      } else if (mType === 'MeshLineMaterial') {
-        mat = new MeshLineMaterial(profile.args) as unknown as THREE.Material;
       }
       if (mat) {
         mat.userData = {

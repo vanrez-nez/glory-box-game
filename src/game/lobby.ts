@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import { StaticInstance as Skybox } from '@/game/skybox';
 import { GAME } from '@/game/const';

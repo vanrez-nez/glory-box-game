@@ -2,20 +2,6 @@
 // NOTE: keep this file a *script* (no top-level import/export) so these
 // `declare module` blocks are global ambient declarations.
 
-declare module 'three.meshline' {
-  export class MeshLine {
-    geometry: import('three').BufferGeometry;
-    setGeometry(geometry: import('three').BufferGeometry, widthCallback?: (p: number) => number): void;
-    advance(position: { x: number; y: number; z: number }): void;
-    [key: string]: any;
-  }
-  export class MeshLineMaterial {
-    constructor(parameters?: Record<string, unknown>);
-    [key: string]: any;
-  }
-  export function MeshLineRaycast(...args: unknown[]): void;
-}
-
 declare module 'mainloop.js' {
   interface MainLoop {
     setUpdate(fn: (delta: number) => void): MainLoop;
@@ -50,11 +36,5 @@ declare module 'screenfull' {
   };
   export default screenfull;
 }
-
-declare module '*.glsl' { const value: string; export default value; }
-declare module '*.vert' { const value: string; export default value; }
-declare module '*.frag' { const value: string; export default value; }
-declare module '*.vs' { const value: string; export default value; }
-declare module '*.fs' { const value: string; export default value; }
 
 declare module '*.glb' { const value: string; export default value; }

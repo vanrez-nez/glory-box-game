@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import gsap from 'gsap';
 import { GetScreenSize } from '@/common/three-utils';
 import { EVENTS } from '@/game/const';

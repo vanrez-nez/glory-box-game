@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 
 /*
   Disable three.js automatic sRGB color management so the game keeps the same

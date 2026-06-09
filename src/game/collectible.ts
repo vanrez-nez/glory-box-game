@@ -1,5 +1,5 @@
 import EventEmitter3 from 'eventemitter3';
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { AudioManagerInstance as AudioManager } from '@/game/audio/audio-manager';
 import { GAME, PHYSICS, EVENTS, COLLECTIBLE } from '@/game/const';
@@ -134,13 +134,9 @@ export default class GameCollectible {
   }
 
   getTrailParticle(x: any, y: any, phi: any) {
-    const cacheId = this.color;
     const trail = new LineTrail({
-      material: MaterialFactory.getMaterial('GenericTrail', {
-        name: `collect_trail_${this.type}`,
-        color: this.color,
-        lineWidth: 0.3,
-      }, cacheId),
+      color: this.color,
+      lineWidth: 0.3,
     });
     return { trail, theta: Math.random() * Math.PI, phi, r: 1.5 };
   }
@@ -150,7 +146,7 @@ export default class GameCollectible {
   */
   getTrailPositions() {
     return this.particles.map((p) => {
-      const pos = p.trail.line.geometry.attributes.position.array;
+      const pos = p.trail.points;
       const vPos = new THREE.Vector3(pos[0], pos[1], pos[2]);
       this.trailsGroup.localToWorld(vPos);
       return vPos;

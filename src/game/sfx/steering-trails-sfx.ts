@@ -1,6 +1,5 @@
 import EventEmitter3 from 'eventemitter3';
-import * as THREE from 'three';
-import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
+import * as THREE from 'three/webgpu';
 import { EVENTS } from '@/game/const';
 import LineTrail from '@/game/line-trail';
 import SteeringParticle from '@/game/sfx/common/steering-particle';
@@ -37,11 +36,8 @@ export default class GameSteeringTrailsSfx {
     for (let i = 0; i < 5; i++) {
       const trail = new LineTrail({
         maxPositions: 15,
-        material: MaterialFactory.getMaterial('GenericTrail', {
-          name: 'ph_trail',
-          color: 0xffffff,
-          lineWidth: 0.2,
-        }, 'hud-trails'),
+        color: 0xffffff,
+        lineWidth: 0.2,
       });
       this.trails.push(trail);
       parent.add(trail.mesh);
@@ -71,7 +67,7 @@ export default class GameSteeringTrailsSfx {
       parent.worldToLocal(position);
       p.position.copy(position);
       trail.resetPositionTo(position);
-      trail.mesh.material.uniforms.color.value.setHex(color);
+      trail.mesh.color(color);
       this.tracers.push({
         trail,
         particle: p,
@@ -97,7 +93,7 @@ export default class GameSteeringTrailsSfx {
         trail.mesh.visible = false;
         tracers.splice(idx, 1);
         if (tracers.length === 0) {
-          const { color } = trail.mesh.material.uniforms;
+          const color = (trail.mesh.material as any).color;
           this.emitLandedEvent(color.value.clone());
           this.active = false;
         }

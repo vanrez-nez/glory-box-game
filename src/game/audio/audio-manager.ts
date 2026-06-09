@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import { AUDIO_ASSETS } from '@/game/assets';
 import GameAudioTrack from '@/game/audio/audio-track';
 import GameAudioMix from '@/game/audio/audio-mix';

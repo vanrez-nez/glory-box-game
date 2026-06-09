@@ -1,4 +1,8 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
+import { MeshPhongNodeMaterial } from 'three/webgpu';
+import {
+  positionWorld, vec3, length, pow, clamp,
+} from 'three/tsl';
 import { GetScreenSize } from '@/common/three-utils';
 import GameLogoRing from '@/components/game-logo/ring';
 
@@ -10,7 +14,7 @@ export default class GameLogo {
   opts!: Record<string, any>;
   rings!: any[];
   rafHandler!: number;
-  renderer!: THREE.WebGLRenderer;
+  renderer!: THREE.WebGPURenderer;
   camera!: THREE.PerspectiveCamera;
   scene!: THREE.Scene;
   clock!: THREE.Timer;
@@ -24,18 +28,16 @@ export default class GameLogo {
     this.init();
     this.initLights();
     this.initLightsBackground();
-    this.initShadowsBackground();
     this.initRings();
   }
 
   init() {
     const { opts } = this;
-    this.renderer = new THREE.WebGLRenderer({
+    this.renderer = new THREE.WebGPURenderer({
       canvas: opts.canvasElement,
       alpha: true,
       antialias: true,
     });
-    this.renderer.shadowMap.enabled = true;
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.camera = new THREE.PerspectiveCamera(45, 1, 1, 300);
     this.camera.position.z = 10;
@@ -44,7 +46,6 @@ export default class GameLogo {
     this.scene.fog = new THREE.FogExp2(0x000000, 0.015);
     this.scene.add(this.camera);
     this.clock = new THREE.Timer();
-    // global.renderer = this.renderer;
   }
 
   initLights() {
@@ -53,7 +54,6 @@ export default class GameLogo {
     spotLight.position.z = 10;
     const pointLight = new THREE.PointLight(0xffffff, 5, 25, 9);
     this.pointLight = pointLight;
-    pointLight.castShadow = true;
     pointLight.position.z = 0.5;
     this.scene.add(pointLight, spotLight, ambientLight);
   }
@@ -62,41 +62,18 @@ export default class GameLogo {
     const { scene, camera } = this;
     const [w, h] = GetScreenSize(camera, 10);
     const geo = new THREE.PlaneGeometry(w, h, 1, 1);
-    const mat = new THREE.MeshPhongMaterial({ color: 0x180E21, transparent: true });
-    mat.onBeforeCompile = (shader) => {
-      shader.fragmentShader = shader.fragmentShader.replace(
-        'gl_FragColor = vec4( outgoingLight, diffuseColor.a );',
-        `
-          // Subtract opacity with light distance decay
-          pointLight = pointLights[ 0 ];
-          vec3 viewPosition = - vViewPosition;
-          float lightDistance = length(pointLight.position - viewPosition);
-          float lightDecay = pow( saturate( -lightDistance / pointLight.distance + 1.0 ), pointLight.decay);
-          gl_FragColor = vec4(outgoingLight, lightDecay - 0.25);
-        `);
-    };
+    const mat = new MeshPhongNodeMaterial({ color: 0x180E21, transparent: true });
+    /*
+      TSL port of the old onBeforeCompile light-distance decay. The plane's
+      opacity falls off with distance from the point light (world-space distance
+      equals the original view-space length). pointLight distance = 25, decay = 9,
+      matching initLights().
+    */
+    const lightWorld = vec3(0, 0, 0.5);
+    const lightDistance = length(positionWorld.sub(lightWorld));
+    const lightDecay = pow(clamp(lightDistance.div(25).oneMinus(), 0, 1), 9);
+    mat.opacityNode = lightDecay.sub(0.25);
     const mesh = new THREE.Mesh(geo, mat);
-    scene.add(mesh);
-  }
-
-  initShadowsBackground() {
-    const { scene, camera } = this;
-    const [w, h] = GetScreenSize(camera, 10);
-    const geo = new THREE.PlaneGeometry(w, h, 1, 1);
-    const mat = new THREE.ShadowMaterial({ color: 0x0 });
-    mat.onBeforeCompile = (shader) => {
-      shader.fragmentShader = shader.fragmentShader.replace(
-        'gl_FragColor = vec4( color, opacity * ( 1.0 - getShadowMask() ) );',
-        `
-          // Make shadows softer with distance
-          vec3 lightToPosition = vPointShadowCoord[ 0 ].xyz;
-          float shadowDecay = length(lightToPosition) * 0.25;
-          gl_FragColor = vec4( color, opacity * ( 1.0 - getShadowMask()) - shadowDecay );
-        `);
-    };
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.receiveShadow = true;
-    mesh.castShadow = true;
     scene.add(mesh);
   }
 
@@ -143,11 +120,15 @@ export default class GameLogo {
     for (let i = 0; i < rings.length; i++) {
       rings[i].update(delta);
     }
-    renderer.render(scene, camera);
+    // WebGPURenderer renders asynchronously; the sync render() renders black
+    // after the first frame when driven from a plain rAF loop.
+    renderer.renderAsync(scene, camera);
   }
 
-  run() {
+  // WebGPURenderer needs async backend init before the first render.
+  async run() {
     this.stop();
+    await this.renderer.init();
     this.onFrame();
   }
 

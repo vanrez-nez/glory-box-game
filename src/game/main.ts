@@ -1,5 +1,5 @@
 import EventEmitter3 from 'eventemitter3';
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { AudioManagerInstance as AudioManager } from '@/game/audio/audio-manager';
 import { GameConfigInstance as GameConfig } from '@/game/config';
@@ -72,6 +72,10 @@ export default class Game {
     */
     GameConfig.set(this.opts.quality, true);
     this.initComponents();
+    // WebGPURenderer must finish async backend init before the first render;
+    // the loop is only started later (start()), but await here so resize and
+    // any pre-loop setup run against a ready renderer.
+    await this.components.engine.init();
     this.updateSize();
     this.attachEvents();
     await this.initLoad();

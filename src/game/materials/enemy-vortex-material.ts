@@ -6,15 +6,7 @@ export default class EnemyVortexMaterial extends GameMetaMaterial {
     super({
       nodeName: opts.name,
       low: {
-        type: 'ShaderMaterial',
-        args: {
-          fragmentShader: Shader.fragment,
-          vertexShader: Shader.vertex,
-          uniforms: Shader.uniforms,
-          transparent: true,
-          depthWrite: false,
-          wireframe: false,
-        },
+        create: () => Shader.create(),
       },
     });
   }

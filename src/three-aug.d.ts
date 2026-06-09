@@ -1,7 +1,7 @@
 // Module augmentation: the engine attaches these custom props to THREE objects.
 // This file must be a module (the `export {}`) for the augmentation to merge
 // with the real `three` types rather than replace them.
-import 'three';
+import 'three/webgpu';
 
 declare module 'three' {
   interface Object3D {

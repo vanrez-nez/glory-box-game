@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import GameMetaMaterial from '@/game/materials/meta-material';
 
 export default class EnemyVortexParticleMaterial extends GameMetaMaterial {

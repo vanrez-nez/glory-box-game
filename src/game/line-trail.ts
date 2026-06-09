@@ -1,67 +1,81 @@
-import * as THREE from 'three';
-import { MeshLineMaterial, MeshLine } from 'three.meshline';
+import * as THREE from 'three/webgpu';
+import { MeshLine } from 'makio-meshline';
 
+/*
+  Snake-like trail built on makio-meshline (TSL/WebGPU). Maintains a fixed-length
+  ring of points that follow a moving target; pushPosition() shifts the buffer and
+  appends the newest point, reproducing the old three.meshline advance() behaviour.
+  makio's MeshLine *is* a THREE.Mesh and owns its (node) material, so unlike the
+  previous version the material is configured from opts here rather than injected.
+  (mesh/line are typed `any`: makio's MeshLine.raycast signature isn't assignable
+  to three/webgpu's Object3D, which otherwise breaks scene.add() type-checking.)
+*/
 const DEFAULT = {
   maxPositions: 15,
-  sizeFn: (p: any) => p * 0.5,
-  material: new MeshLineMaterial({
-    color: new THREE.Color(0xffffff),
-    transparent: false,
-    opacity: 1,
-    depthTest: false,
-    side: THREE.FrontSide,
-    sizeAttenuation: true,
-    lineWidth: 1,
-    resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
-  }),
+  sizeFn: (p: number) => p * 0.5,
+  color: 0xffffff as number | string,
+  lineWidth: 1,
+  opacity: 1,
+  transparent: false,
 };
 
 export default class LineTrail {
   opts!: Record<string, any>;
-  geo!: any;
+  points!: Float32Array;
+  mesh!: any;
+  // Back-compat alias: callers used `trail.line` (the old MeshLine instance).
   line!: any;
-  mesh!: THREE.Mesh;
+
   constructor(opts: any) {
     this.opts = { ...DEFAULT, ...opts };
-    this.geo = this.getGeometry();
-    this.line = new MeshLine();
-    this.line.setGeometry(this.geo, this.opts.sizeFn);
-    this.line.geometry.computeBoundingSphere();
-    this.mesh = new THREE.Mesh(this.line.geometry, this.opts.material);
-  }
-
-  getGeometry() {
-    const { opts } = this;
-    const geo = new THREE.BufferGeometry();
-    const positions = new Float32Array(opts.maxPositions * 3);
-    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    return geo;
-  }
-
-  updateTrailPosition(idx: any, position: any) {
-    const { attributes } = this.line;
-    const arr = attributes.position.array;
-    const offset = arr.length - idx * 6;
-    arr[offset - 6] = position.x;
-    arr[offset - 5] = position.y;
-    arr[offset - 4] = position.z;
-    arr[offset - 3] = position.x;
-    arr[offset - 2] = position.y;
-    arr[offset - 1] = position.z;
-    attributes.position.needsUpdate = true;
+    this.points = new Float32Array(this.opts.maxPositions * 3);
+    const mesh = new MeshLine({
+      lines: this.points,
+      lineWidth: this.opts.lineWidth,
+      color: this.opts.color,
+      opacity: this.opts.opacity,
+      transparent: this.opts.transparent,
+      widthCallback: this.opts.sizeFn,
+      sizeAttenuation: true,
+      dynamic: true,
+      usage: THREE.DynamicDrawUsage,
+    });
+    (mesh.material as any).depthTest = false;
+    // Trails are short and move with their target; skip frustum culling rather
+    // than maintain a bounding sphere as the old implementation did.
+    mesh.frustumCulled = false;
+    this.mesh = mesh;
+    this.line = mesh;
   }
 
   resetPositionTo(position: any) {
-    const { opts, line } = this;
+    const { points, opts } = this;
     for (let i = 0; i < opts.maxPositions; i++) {
-      this.updateTrailPosition(i, position);
+      points[i * 3] = position.x;
+      points[i * 3 + 1] = position.y;
+      points[i * 3 + 2] = position.z;
     }
-    line.advance(position);
+    this.mesh.setPositions(points, false);
+  }
+
+  // Write a single point. No GPU flush — a following pushPosition() (or an
+  // explicit setPositions) uploads the buffer. Used by the dragon spine, which
+  // rewrites every point each frame and then pushes the head position.
+  updateTrailPosition(idx: number, position: any) {
+    const o = idx * 3;
+    this.points[o] = position.x;
+    this.points[o + 1] = position.y;
+    this.points[o + 2] = position.z;
   }
 
   pushPosition(position: any) {
-    const { line } = this;
-    line.advance(position);
-    line.geometry.boundingSphere.center.copy(position);
+    const { points, opts } = this;
+    // Drop the oldest point and append the newest at the end.
+    points.copyWithin(0, 3);
+    const last = (opts.maxPositions - 1) * 3;
+    points[last] = position.x;
+    points[last + 1] = position.y;
+    points[last + 2] = position.z;
+    this.mesh.setPositions(points, false);
   }
 }

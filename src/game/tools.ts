@@ -85,12 +85,12 @@ export default class GameTools {
     const f0 = rootFolder.addFolder({ title: 'Renderer' });
     f0.addBinding(renderer, 'toneMappingExposure', { min: 0.0, max: 10 });
     if (GameConfig.UsePostProcessing) {
-      // Bloom Pass
+      // Bloom Pass — BloomNode exposes its params as TSL uniform nodes, so the
+      // tweakpane bindings target the `.value` of each uniform.
       const f1 = rootFolder.addFolder({ title: 'BloomPass' });
-      f1.addBinding(bloomPass, 'strength', { min: 0.5, max: 4.5, label: 'Strength' });
-      f1.addBinding(bloomPass, 'radius', { min: 0, max: 5, label: 'Radius' });
-      f1.addBinding(bloomPass, 'threshold', { min: 0.1, max: 1.5, label: 'Threshold' });
-      this.addColorField(f1, bloomPass.highPassUniforms.defaultColor, 'value', 'HighPass Color');
+      f1.addBinding(bloomPass.strength, 'value', { min: 0.5, max: 4.5, label: 'Strength' });
+      f1.addBinding(bloomPass.radius, 'value', { min: 0, max: 5, label: 'Radius' });
+      f1.addBinding(bloomPass.threshold, 'value', { min: 0.1, max: 1.5, label: 'Threshold' });
     }
     // Scene
     const f2 = rootFolder.addFolder({ title: 'Scene' });

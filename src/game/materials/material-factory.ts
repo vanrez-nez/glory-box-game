@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import { groupBy } from 'lodash';
 import { GameConfigInstance as GameConfig } from '@/game/config';
 import WorldFloorMaterial from '@/game/materials/world-floor-material';
@@ -17,7 +17,6 @@ import EnemyHeadMaterial from '@/game/materials/enemy-head-material';
 import EnemyArmorMaterial from '@/game/materials/enemy-armor-material';
 import EnemyEyesMaterial from '@/game/materials/enemy-eyes-material';
 import GenericColorMaterial from '@/game/materials/generic-color-material';
-import GenericTrailMaterial from '@/game/materials/generic-trail-material';
 import EnemyRayMaterial from '@/game/materials/enemy-ray-material';
 import PlayerHitFxMaterial from '@/game/materials/player-hit-fx-material';
 import PlayerMaterial from '@/game/materials/player-material';
@@ -43,7 +42,6 @@ const MATERIALS = {
   EnemyHead: EnemyHeadMaterial,
   EnemyArmor: EnemyArmorMaterial,
   EnemyEyes: EnemyEyesMaterial,
-  GenericTrail: GenericTrailMaterial,
   GenericColor: GenericColorMaterial,
   PlayerMaterial,
   PlayerHitFx: PlayerHitFxMaterial,

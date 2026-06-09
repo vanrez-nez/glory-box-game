@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import { PHYSICS } from '@/game/const';
 import SolveRectangleCollision from '@/game/physics/collision';
 import GamePhysicsBody from '@/game/physics/physics-body';

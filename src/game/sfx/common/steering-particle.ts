@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 /*
   Simple Seek Steering Behaviour from Craig Reynolds as showed in
   http://www.red3d.com/cwr/steer/

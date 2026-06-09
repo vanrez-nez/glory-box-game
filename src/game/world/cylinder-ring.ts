@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { GAME } from '@/game/const';

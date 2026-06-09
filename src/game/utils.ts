@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import { GameConfigInstance as GameConfig } from '@/game/config';
 import { GAME } from '@/game/const';
 
