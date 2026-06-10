@@ -118,6 +118,17 @@ export default class Game {
     gameState.events.on(EVENTS.GameResume, this.resume.bind(this));
     gameState.events.on(EVENTS.PlayerDeath, this.onPlayerDeath.bind(this));
     window.addEventListener('resize', this.updateSize.bind(this));
+    window.addEventListener('keydown', this.onEditModeKey.bind(this));
+  }
+
+  // Cmd/Ctrl+E toggles edit mode (developer mode's free camera + frozen world).
+  onEditModeKey(e: KeyboardEvent) {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'e') {
+      e.preventDefault();
+      const on = !GameConfig.StaticDesign;
+      GameConfig.setStaticDesign(on);
+      this.components.engine.setEditMode(on);
+    }
   }
 
   getPhysicsBounds() {

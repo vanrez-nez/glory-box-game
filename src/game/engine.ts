@@ -123,19 +123,29 @@ export default class Engine {
 
   initHelpers() {
     const { scene, camera, renderer } = this;
-    // StaticDesign implies a free orbit camera for inspecting the layout.
-    if (GameConfig.EnableOrbitControls || GameConfig.StaticDesign) {
+    // Create the orbit camera in developer mode so edit mode (Cmd+E) can toggle it
+    // at runtime; it's only active while orbit/static design is on.
+    if (GameConfig.developerMode) {
       const c = new OrbitControls(camera, renderer.domElement) as any;
       c.enableDamping = true;
       c.dampingFactor = 0.25;
       c.minDistance = 1;
       c.maxDistance = 1000;
       c.enableKeys = false;
+      c.enabled = GameConfig.EnableOrbitControls || GameConfig.StaticDesign;
       this.orbitControls = c;
     }
     if (GameConfig.EnableAxes) {
       this.axesHelper = new THREE.AxesHelper(500);
       scene.add(this.axesHelper);
+    }
+  }
+
+  // Enable/disable the free orbit camera for edit mode. render() already switches
+  // between orbit and followTarget based on GameConfig.StaticDesign.
+  setEditMode(on: boolean) {
+    if (this.orbitControls) {
+      this.orbitControls.enabled = on;
     }
   }
 

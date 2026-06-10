@@ -70,6 +70,12 @@ export class GameConfig {
       this.qualityNode = quality;
     }
   }
+
+  // Runtime toggle for edit mode (free camera + frozen world). The StaticDesign
+  // getter reads DEV_CONFIG, so flipping it here flips the getter (dev-mode gated).
+  setStaticDesign(on: boolean) {
+    DEV_CONFIG.StaticDesign = on;
+  }
 }
 
 // dynamically assign all object keys from DEV_CONFIG and
