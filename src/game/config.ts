@@ -33,7 +33,10 @@ const RENDER = {
   UsePostProcessing: true,
   EnableShadows: true,
   ToneMapping: THREE.LinearToneMapping,
-  EnableSkyShader: true,
+  // The visible sky is the third-party skybox runtime (see skybox.ts). The old
+  // nebula sky-cylinder (w_skyc / WorldSkyCylinder) is gated by this flag and
+  // stays off so it doesn't double up with the skybox backdrop.
+  EnableSkyShader: false,
   PixelRatioMultiplier: 1,
 };
 

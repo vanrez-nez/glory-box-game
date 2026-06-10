@@ -13,7 +13,14 @@ export default class GameTools {
     this.pane.registerPlugin(StatsPanePluginBundle);
     // Widen the floating pane wrapper (default ~256px) to 30rem.
     const wrapper = this.pane.element.parentElement as HTMLElement | null;
-    if (wrapper) { wrapper.style.width = '30rem'; }
+    if (wrapper) {
+      wrapper.style.width = '30rem';
+      // Cap the floating wrapper to the viewport (it sits 8px from the top) and
+      // let it scroll internally. Otherwise a tall pane overflows the viewport
+      // and drags the whole page/game into scrolling instead of the pane.
+      wrapper.style.maxHeight = 'calc(100vh - 16px)';
+      wrapper.style.overflowY = 'auto';
+    }
     this.pane.element.style.width = '30rem';
   }
 
