@@ -169,10 +169,10 @@ export default class GamePlatform {
     }
   }
 
-  // Runs on the fixed physics step (before physics.update), so the platform
-  // advances exactly once per step and the player-carry measures one clean
-  // displacement — deterministic regardless of display refresh rate.
-  simUpdate(delta: any) {
+  // Runs per-draw with the (smooth) render delta so the platform moves smoothly
+  // at the display refresh. The physics step snapshots prevPosition so the
+  // player-carry measures the platform's displacement since the last step.
+  update(delta: any) {
     const { body, startPosition, opts } = this;
     if (this.isMovingPlatform()) {
       this.oscillator += delta;

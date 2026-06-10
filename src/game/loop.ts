@@ -5,6 +5,8 @@ const DEFAULT = {
   components: null,
 };
 
+// Seconds per fixed physics step (mainloop's default simulation timestep).
+const FIXED_DELTA = (1000 / 60) / 1000;
 // Clamp the per-frame render delta so a stall (tab blur, GC) doesn't teleport
 // visuals on the next frame.
 const MAX_FRAME_DELTA = 0.1;
@@ -12,11 +14,16 @@ const MAX_FRAME_DELTA = 0.1;
 export default class GameLoop {
   opts!: Record<string, any>;
   paused!: boolean;
-  lastDrawMs!: number;
+  // Physics steps run since the last draw, and the previous draw's interpolation
+  // phase — together they reconstruct the real frame delta from mainloop's own
+  // (rAF-timestamp) clock, the SAME clock the body interpolation uses.
+  stepCount!: number;
+  lastInterpolation!: number;
   constructor(opts: any) {
     this.opts = { ...DEFAULT, ...opts };
     this.bind();
-    this.lastDrawMs = 0;
+    this.stepCount = 0;
+    this.lastInterpolation = 0;
   }
 
   bind() {
@@ -40,27 +47,29 @@ export default class GameLoop {
 
   resume() {
     this.paused = false;
-    this.lastDrawMs = 0; // first frame after resume gets dt=0 (no jump)
+    this.stepCount = 0;
+    this.lastInterpolation = 0;
     MainLoop.start();
   }
 
-  // Fixed-step SIMULATION (always dt = 1/60). Input, forces and moving-platform
-  // motion run here — at the physics rate, independent of display refresh — then
-  // the physics step. Order matters: platforms move before the carry samples them.
+  // Fixed-step SIMULATION (always dt = 1/60). Input/forces run here — at the
+  // physics rate, independent of display refresh — then the physics step.
   onUpdate(stepMs: any) {
     if (GameConfig.StaticDesign) {
       return;
     }
     const dt = stepMs / 1000;
-    const { player, map, physics, gameInput } = this.opts.components;
+    const { player, physics, gameInput } = this.opts.components;
     player.simUpdate(dt, gameInput.state);
-    map.simUpdate(dt);
     physics.update(dt);
+    this.stepCount += 1;
   }
 
   // Per-frame RENDER. Bodies are interpolated between the last two physics steps;
-  // everything else animates on the REAL frame delta so motion is smooth at the
-  // native refresh rate instead of quantized to the 60Hz physics step.
+  // everything else animates on a frame delta reconstructed from mainloop's own
+  // timeline — (steps this frame + change in interpolation phase) * fixed step —
+  // so visuals stay locked to the same clock as the interpolation (no relative
+  // jitter, and no performance.now() callback noise).
   onDraw(interpolation: any) {
     const {
       engine, enemy, player, map,
@@ -71,10 +80,10 @@ export default class GameLoop {
     const { position: meshPosition } = player.mesh;
     const frozen = this.paused || GameConfig.StaticDesign;
 
-    const now = performance.now();
-    let delta = this.lastDrawMs ? (now - this.lastDrawMs) / 1000 : 0;
-    this.lastDrawMs = now;
-    delta = frozen ? 0 : Math.min(delta, MAX_FRAME_DELTA);
+    let delta = (this.stepCount + interpolation - this.lastInterpolation) * FIXED_DELTA;
+    this.stepCount = 0;
+    this.lastInterpolation = interpolation;
+    delta = frozen ? 0 : Math.min(Math.max(delta, 0), MAX_FRAME_DELTA);
 
     fpsGraph && fpsGraph.begin();
     physics.interpolate(frozen ? 1 : interpolation);

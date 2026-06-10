@@ -356,22 +356,9 @@ export default class GameMap {
     this.events.emit(EVENTS.CollectibleCollect, collectible);
   }
 
-  // Fixed-step: advance moving platforms (before the physics carry samples them).
-  simUpdate(delta: number) {
-    const { mapChunks, initialized } = this;
-    if (!initialized) { return; }
-    for (let i = 0; i < mapChunks.length; i++) {
-      const chunk = mapChunks[i];
-      if (chunk.loaded) {
-        const { platforms } = chunk.opts;
-        for (let j = 0; j < platforms.length; j++) {
-          platforms[j].simUpdate(delta);
-        }
-      }
-    }
-  }
-
-  // Per-frame render: chunk load/unload bookkeeping + visual prop animation.
+  // Per-frame render: chunk load/unload bookkeeping + visual prop / moving-
+  // platform animation (moving platforms run here, per-draw, so they stay smooth
+  // at the display refresh; the physics carry snapshots their displacement).
   update(delta: number, playerPosition: THREE.Vector3) {
     const { mapChunks, initialized } = this;
     if (!initialized) { return; }
@@ -379,9 +366,12 @@ export default class GameMap {
     for (let i = 0; i < mapChunks.length; i++) {
       const chunk = mapChunks[i];
       if (chunk.loaded) {
-        const { props } = chunk.opts;
+        const { props, platforms } = chunk.opts;
         for (let j = 0; j < props.length; j++) {
           props[j].update(delta);
+        }
+        for (let j = 0; j < platforms.length; j++) {
+          platforms[j].update(delta);
         }
       }
     }
