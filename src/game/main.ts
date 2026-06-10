@@ -25,7 +25,6 @@ export interface GameOptions {
   canvasElement: HTMLCanvasElement | null;
   mapElement: HTMLImageElement | null;
   store: any;
-  quality: string | null;
 }
 
 export interface GameComponents {
@@ -47,7 +46,6 @@ const DEFAULT: GameOptions = {
   canvasElement: null,
   mapElement: null,
   store: null,
-  quality: null,
 };
 
 export default class Game {
@@ -68,10 +66,10 @@ export default class Game {
 
   async init() {
     /*
-      Initializes config based on selected quality,
-      GameConfig is shared as a singleton through all the modules
+      GameConfig is shared as a singleton through all the modules. Developer
+      mode is enabled here (it gates the dev tools / edit-mode features).
     */
-    GameConfig.set(this.opts.quality, true);
+    GameConfig.set(true);
     // Load all assets (manifest images/model + audio buffers) BEFORE building
     // components — materials read their textures synchronously from the loader.
     this.gameLoader = new GameLoader();
@@ -246,7 +244,7 @@ export default class Game {
       this.tools.addScreen('player', player);
       this.tools.addScreen('world', world);
       this.tools.addScreen('materials');
-      this.tools.persist(GameConfig.qualityNode);
+      this.tools.persist();
     }
   }
 

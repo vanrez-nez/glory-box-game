@@ -1,10 +1,8 @@
 import * as THREE from 'three/webgpu';
 import gsap from 'gsap';
-import { QUALITY } from '@/game/const';
 import DefaultMood from '@/game/mood-presets/default';
 // import NeutralMood from '@/game/mood-presets/neutral';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
-import { GameConfigInstance as GameConfig } from '@/game/config';
 
 
 const DEFAULT = {
@@ -170,17 +168,10 @@ export default class GameMoodManager {
     });
   }
 
-  getQualityNode(presetNode: any) {
-    const qualities = Object.keys(QUALITY);
-    return presetNode[qualities[GameConfig.SceneQuality]];
-  }
-
   async transitionTo(moodPreset: any, time: any) {
-    const engineNode = this.getQualityNode(moodPreset.Engine);
-    const materialsNode = this.getQualityNode(moodPreset.Materials);
-    this.transitionEngine(engineNode, time);
+    this.transitionEngine(moodPreset.Engine, time);
     // this.transitionWorld(moodPreset.World, time);
-    this.transitionMaterials(materialsNode, time);
+    this.transitionMaterials(moodPreset.Materials, time);
     return new Promise((resolve) => {
       setTimeout(resolve, 1000);
     });

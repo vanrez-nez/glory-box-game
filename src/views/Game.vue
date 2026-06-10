@@ -21,9 +21,8 @@ export default defineComponent({
     PauseMenu,
   },
   activated() {
-    const { quality } = this.$route.params;
     const gameStage = this.$refs.gameStage as any;
-    gameStage.recreate(quality);
+    gameStage.recreate();
   },
   methods: {
     onReady() {

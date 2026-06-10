@@ -1,25 +1,20 @@
 import * as THREE from 'three/webgpu';
 import { GetTextureRepeat } from '@/game/utils';
-import { QUALITY } from '@/game/const';
 
 
 const DEFAULTS = {
   nodeName: '',
-  low: {
+  profile: {
     type: 'MeshBasicMaterial',
     args: {},
   },
-  medium: {},
-  high: {},
 };
 
 const CACHED_TEXTURES: Record<string, any> = {};
 
 export default class GameMetaMaterial {
   opts: Record<string, any>;
-  high: THREE.Material | null = null;
-  medium: THREE.Material | null = null;
-  low: THREE.Material | null = null;
+  material: THREE.Material | null = null;
   // Registry key this material was built from (e.g. 'WorldCylinder', 'EnemyRay').
   // Set by the factory; used by the dev tools and mood manager to group/branch
   // instances by kind now that they share one class.
@@ -27,9 +22,7 @@ export default class GameMetaMaterial {
 
   constructor(opts: any) {
     this.opts = { ...DEFAULTS, ...opts };
-    this.high = null;
-    this.medium = null;
-    this.low = null;
+    this.material = null;
   }
 
   static GetTexture(...args: any[]) {
@@ -42,41 +35,11 @@ export default class GameMetaMaterial {
     };
   }
 
-  getMaterial(quality: any): THREE.Material | null {
-    let mat: THREE.Material | null = null;
-    switch (quality) {
-      case QUALITY.Low:
-        this.createLowQualityMaterial();
-        mat = this.low;
-        break;
-      case QUALITY.Medium:
-        this.createMediumQualityMaterial();
-        mat = this.medium || this.getMaterial(QUALITY.Low);
-        break;
-      case QUALITY.High:
-        this.createHighQualityMaterial();
-        mat = this.high || this.getMaterial(QUALITY.Medium);
-        break;
+  getMaterial(): THREE.Material | null {
+    if (this.material === null) {
+      this.material = this.createMaterial(this.opts.profile);
     }
-    return mat;
-  }
-
-  createLowQualityMaterial() {
-    if (this.low === null) {
-      this.low = this.createMaterial(this.opts.low);
-    }
-  }
-
-  createMediumQualityMaterial() {
-    if (this.medium === null) {
-      this.medium = this.createMaterial(this.opts.medium);
-    }
-  }
-
-  createHighQualityMaterial() {
-    if (this.high === null) {
-      this.high = this.createMaterial(this.opts.high);
-    }
+    return this.material;
   }
 
   solvePropDefers(args: any) {
@@ -89,12 +52,8 @@ export default class GameMetaMaterial {
   }
 
   dispose() {
-    this.high && this.high.dispose();
-    this.medium && this.medium.dispose();
-    this.low && this.low.dispose();
-    this.high = null;
-    this.medium = null;
-    this.low = null;
+    this.material && this.material.dispose();
+    this.material = null;
   }
 
   createMaterial(profile: any): THREE.Material | null {
@@ -135,6 +94,6 @@ export default class GameMetaMaterial {
   }
 
   get activeMaterial() {
-    return this.low || this.medium || this.high;
+    return this.getMaterial();
   }
 }

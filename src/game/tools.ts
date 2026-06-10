@@ -62,11 +62,10 @@ export default class GameTools {
   /*
     Persists the whole pane state to localStorage so dev tweaks survive reloads
     (a lightweight replacement for dat.gui's named-preset "remember" system).
-    Keyed per quality level since each level exposes a different set of
-    materials/passes. Also adds a Reset button to clear the saved state.
+    Also adds a Reset button to clear the saved state.
   */
-  persist(quality: string) {
-    const key = `glory-box:tools-state:${quality}`;
+  persist() {
+    const key = 'glory-box:tools-state';
     const saved = localStorage.getItem(key);
     if (saved) {
       try {

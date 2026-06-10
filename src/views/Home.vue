@@ -2,21 +2,11 @@
   <div class="Home">
     <game-logo ref="gameLogo" class="Home-gameLogo"></game-logo>
     <div class="Home-menuContainer">
-      <template v-if="activeMenu === 'main-menu'">
-        <generic-menu
-          class='Home-mainMenu'
-          :items='mainMenu'
-        >
-        </generic-menu>
-      </template>
-      <template v-if="activeMenu === 'quality-menu'">
-        <p class="Home-menuTitle">Graphics Quality</p>
-        <generic-menu
-          :items='qualityMenu'
-          @exit='reset'
-        >
-        </generic-menu>
-      </template>
+      <generic-menu
+        class='Home-mainMenu'
+        :items='mainMenu'
+      >
+      </generic-menu>
     </div>
     <action-bar></action-bar>
   </div>
@@ -28,35 +18,14 @@ import ActionBar from '@/components/action-bar.vue';
 import GenericMenu from '@/components/generic-menu.vue';
 import GameLogo from '@/components/game-logo.vue';
 
-const MAIN_MENU = 'main-menu';
-const QUALITY_MENU = 'quality-menu';
-
 export default defineComponent({
   name: 'Home',
   data() {
     return {
-      activeMenu: MAIN_MENU,
       mainMenu: [
-        { text: 'START', onClick: this.onStartActivate },
+        { text: 'START', to: { name: 'game' }, onClick: this.onStart },
         { text: 'CONTROLS', onClick: this.onControls },
         { text: 'ABOUT', to: { name: 'about' } },
-      ],
-      qualityMenu: [
-        {
-          text: 'LOW',
-          to: { name: 'game', params: { quality: 'low' } },
-          onClick: this.onQualitySelect,
-        },
-        {
-          text: 'MEDIUM',
-          to: { name: 'game', params: { quality: 'medium' } },
-          onClick: this.onQualitySelect,
-        },
-        {
-          text: 'HIGH',
-          to: { name: 'game', params: { quality: 'high' } },
-          onClick: this.onQualitySelect,
-        },
       ],
     };
   },
@@ -67,7 +36,6 @@ export default defineComponent({
   },
   activated() {
     const gameLogo = this.$refs.gameLogo as any;
-    this.reset();
     gameLogo.run();
   },
   deactivated() {
@@ -78,21 +46,14 @@ export default defineComponent({
     gameLogo?.stop();
   },
   methods: {
-    bindToQuality(quality: any) {
-      return this.onQualitySelect.bind(this, quality);
-    },
-    onStartActivate() {
-      this.activeMenu = QUALITY_MENU;
-    },
-    onControls() {
-      // console.log('controls');
-    },
-    onQualitySelect(_quality?: any) {
+    onStart() {
+      // Stop the logo's render loop before navigating to the game so it doesn't
+      // keep rendering into a hidden canvas.
       const gameLogo = this.$refs.gameLogo as any;
       gameLogo.stop();
     },
-    reset() {
-      this.activeMenu = MAIN_MENU;
+    onControls() {
+      // console.log('controls');
     },
   },
 });

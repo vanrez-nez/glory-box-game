@@ -12,13 +12,16 @@ import NebulaShader from '@/shaders/nebula';
 /*
   Material definitions registry.
 
-  Every game material is a `GameMetaMaterial` configured with a per-quality
-  profile (`low` / `medium` / `high`). These materials used to be ~19 one-method
-  subclasses that did nothing but call `super({ ... })`; they are now plain
-  builder functions keyed by name. The factory (`material-factory.ts`) looks up
-  the builder, calls it with the call-site `opts`, and wraps the returned profile
-  in a single `GameMetaMaterial` instance (tagging it with `materialType = key`
-  for the dev tools / mood grouping).
+  Every game material is a `GameMetaMaterial` configured with a single render
+  `profile`. (The game used to ship low/medium/high tiers; that LOD system was
+  removed and each material now keeps the one profile it rendered with at the
+  full-quality baseline.) These were ~19 one-method subclasses that did nothing
+  but call `super({ ... })`; they are now plain builder functions keyed by name.
+
+  The factory (`material-factory.ts`) looks up the builder, calls it with the
+  call-site `opts`, and wraps the returned profile in a single
+  `GameMetaMaterial` instance (tagging it with `materialType = key` for the dev
+  tools / mood grouping).
 
   `GetTexture(...)` returns a deferred (lazy) texture loader — see
   `meta-material.ts`. Textures must only resolve after assets have loaded.
@@ -30,23 +33,19 @@ const { GetTexture } = GameMetaMaterial;
 // (with its `uniforms` dict) — see GameMetaMaterial.createMaterial.
 const shader = (mod: { create: () => any }) => (opts: any) => ({
   nodeName: opts.name,
-  low: { create: () => mod.create() },
+  profile: { create: () => mod.create() },
 });
 
-// Plain flat-colour MeshBasicMaterial (the most common low-quality profile).
+// Plain flat-colour MeshBasicMaterial (the most common profile).
 const basicColor = (opts: any) => ({
   nodeName: opts.name,
-  low: { type: 'MeshBasicMaterial', args: { color: opts.color } },
+  profile: { type: 'MeshBasicMaterial', args: { color: opts.color } },
 });
 
-// Shared low(basic)+medium(standard) metal look used by the dragon head & armor.
+// Shared metal look used by the dragon head & armor.
 const metalArmor = (opts: any) => ({
   nodeName: opts.name,
-  low: {
-    type: 'MeshBasicMaterial',
-    args: { color: opts.color, vertexColors: true },
-  },
-  medium: {
+  profile: {
     type: 'MeshStandardMaterial',
     args: {
       color: 0xffffff,
@@ -64,30 +63,7 @@ export type MaterialDef = (opts: any) => Record<string, any>;
 export const MATERIAL_DEFS: Record<string, MaterialDef> = {
   WorldCylinder: opts => ({
     nodeName: opts.name,
-    low: {
-      type: 'MeshBasicMaterial',
-      args: {
-        map: GetTexture(IMAGE_ASSETS.HullBase, opts.xScale, opts.yScale),
-        color: 0x1c284d,
-        reflectivity: 0.5,
-        wireframe: false,
-      },
-    },
-    medium: {
-      type: 'MeshPhongMaterial',
-      args: {
-        envMap: Skybox.textureCube,
-        map: GetTexture(IMAGE_ASSETS.HullBase, opts.xScale, opts.yScale),
-        emissiveMap: GetTexture(IMAGE_ASSETS.HullEmissive, opts.xScale, opts.yScale),
-        emissiveIntensity: 1.4,
-        emissive: 0x00ffff,
-        color: 0x1c284d,
-        reflectivity: 0.5,
-        shininess: 5,
-        specular: 0xf174d,
-      },
-    },
-    high: {
+    profile: {
       type: 'MeshStandardMaterial',
       args: {
         envMap: Skybox.textureCube,
@@ -108,26 +84,7 @@ export const MATERIAL_DEFS: Record<string, MaterialDef> = {
     const { scale } = opts;
     return {
       nodeName: opts.name,
-      low: {
-        type: 'MeshBasicMaterial',
-        args: {
-          color: 0x484b57,
-          map: GetTexture(IMAGE_ASSETS.GroundBase, scale, scale),
-          wireframe: false,
-        },
-      },
-      medium: {
-        type: 'MeshPhongMaterial',
-        args: {
-          envMap: Skybox.textureCube,
-          map: GetTexture(IMAGE_ASSETS.GroundBase, scale, scale),
-          color: 0x1c284d,
-          reflectivity: 0.5,
-          shininess: 5,
-          specular: 0xf174d,
-        },
-      },
-      high: {
+      profile: {
         type: 'MeshStandardMaterial',
         args: {
           color: 0x6082b6,
@@ -153,19 +110,7 @@ export const MATERIAL_DEFS: Record<string, MaterialDef> = {
     const width = opts.width * 0.15;
     return {
       nodeName: opts.name,
-      low: {
-        type: 'MeshBasicMaterial',
-        args: { color: opts.color },
-      },
-      medium: {
-        type: 'MeshLambertMaterial',
-        args: {
-          envMap: Skybox.textureCube,
-          reflectivity: 0.35,
-          color: opts.color,
-        },
-      },
-      high: {
+      profile: {
         type: 'MeshStandardMaterial',
         args: {
           map: GetTexture(IMAGE_ASSETS.GroundBase, width, 0.5),
@@ -184,11 +129,7 @@ export const MATERIAL_DEFS: Record<string, MaterialDef> = {
 
   PlatformSocket: opts => ({
     nodeName: opts.name,
-    low: {
-      type: 'MeshBasicMaterial',
-      args: { vertexColors: true },
-    },
-    medium: {
+    profile: {
       type: 'MeshLambertMaterial',
       args: {
         wireframe: false,
@@ -199,11 +140,7 @@ export const MATERIAL_DEFS: Record<string, MaterialDef> = {
 
   CollectibleSocket: opts => ({
     nodeName: opts.name,
-    low: {
-      type: 'MeshBasicMaterial',
-      args: { color: opts.color },
-    },
-    medium: {
+    profile: {
       type: 'MeshLambertMaterial',
       args: {
         map: GetTexture(IMAGE_ASSETS.GroundBase, 1, 1),
@@ -220,7 +157,7 @@ export const MATERIAL_DEFS: Record<string, MaterialDef> = {
     const YRepeat = 1 / 9;
     return {
       nodeName: opts.name,
-      low: {
+      profile: {
         type: 'MeshLambertMaterial',
         args: {
           envMap: Skybox.textureCube,
@@ -243,7 +180,7 @@ export const MATERIAL_DEFS: Record<string, MaterialDef> = {
 
   EnemyEyes: opts => ({
     nodeName: opts.name,
-    low: {
+    profile: {
       type: 'MeshBasicMaterial',
       args: { color: opts.color, vertexColors: true },
     },
@@ -251,7 +188,7 @@ export const MATERIAL_DEFS: Record<string, MaterialDef> = {
 
   GenericColor: opts => ({
     nodeName: opts.name,
-    low: {
+    profile: {
       type: 'MeshBasicMaterial',
       args: {
         transparent: opts.transparent || false,

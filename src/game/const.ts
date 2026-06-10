@@ -3,12 +3,6 @@ import {
   GAMEPAD_BUTTONS,
 } from '@/common/input-manager';
 
-export const QUALITY = {
-  Low: 0,
-  Medium: 1,
-  High: 2,
-};
-
 export const GAME = {
   CylinderRadius: 35,
   HudDistanceFromCamera: 10,

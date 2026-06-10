@@ -16,21 +16,12 @@ export default createRouter({
       component: About,
     },
     {
-      path: '/game/:quality',
+      path: '/game',
       name: 'game',
       // route level code-splitting
       // this generates a separate chunk for this route
       // which is lazy-loaded when the route is visited.
       component: () => import('./views/Game.vue'),
-      beforeEnter: (to, from, next) => {
-        const { quality } = to.params;
-        // validate only valid qualities
-        if (['low', 'medium', 'high'].indexOf(quality as string) > -1) {
-          next();
-        } else {
-          next('/');
-        }
-      },
     },
   ],
 });

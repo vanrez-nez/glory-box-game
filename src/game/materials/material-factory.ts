@@ -1,6 +1,5 @@
 import * as THREE from 'three/webgpu';
 import { groupBy } from 'lodash';
-import { GameConfigInstance as GameConfig } from '@/game/config';
 import GameMetaMaterial from '@/game/materials/meta-material';
 import { MATERIAL_DEFS } from '@/game/materials/material-definitions';
 
@@ -41,7 +40,7 @@ export default class GameMaterialFactory {
           materialsCache[cacheHash] = material;
         }
       }
-      return material.getMaterial(GameConfig.MaterialQuality);
+      return material.getMaterial();
     } else {
       return new THREE.MeshBasicMaterial();
     }

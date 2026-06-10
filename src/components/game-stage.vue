@@ -20,25 +20,19 @@ export default defineComponent({
   name: 'GameStage',
   data() {
     return {
-      prevQuality: '',
       mapBugUrl,
       game: null as Game | null,
     };
   },
   methods: {
-    recreate(quality: any) {
+    recreate() {
       const canvas = this.$refs.canvas as HTMLCanvasElement;
       const map = this.$refs.map as HTMLImageElement;
-      if (this.prevQuality !== quality) {
-        this.prevQuality = quality;
-        this.destroy();
-      }
       if (isEmpty(this.game)) {
         const game = new Game({
           canvasElement: canvas,
           mapElement: map,
           store: this.$store,
-          quality,
         });
         this.game = game;
         game.events.on(EVENTS.GameReady, () => {
