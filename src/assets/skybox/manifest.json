@@ -1,0 +1,103 @@
+{
+  "composition": {
+    "mode": "alpha-over",
+    "order": "bottom-to-top"
+  },
+  "geometry": {
+    "type": "box"
+  },
+  "nodes": [
+    {
+      "blendMode": "screen",
+      "enabled": true,
+      "id": "layer-starfield-1780989212420-1",
+      "name": "Starfield",
+      "opacity": 100,
+      "params": {
+        "clip": {
+          "altitudeCenterDeg": 0,
+          "altitudeSpanDeg": 180,
+          "azimuthCenterDeg": 0,
+          "azimuthSpanDeg": 360
+        },
+        "nebula": {
+          "uBaseScale": 10,
+          "uCloudCore": [
+            0.025,
+            0.03,
+            0.07
+          ],
+          "uCloudHighlight": [
+            0.3,
+            0.36,
+            0.72
+          ],
+          "uCloudShadow": [
+            0.004,
+            0.006,
+            0.018
+          ],
+          "uColorWarpAmp": 0.045,
+          "uColorWarpFreq": 2.2,
+          "uContrast": 3,
+          "uCoverage": 0.15,
+          "uDensity": 2,
+          "uLightFocus": 1.55,
+          "uLightIntensity": 0.25,
+          "uLightLining": 1,
+          "uNebulaExposure": 0.1,
+          "uNebulaStrength": 7.4,
+          "uOctaves": 8,
+          "uOpacity": 0.21,
+          "uSeed": 2.4,
+          "uSoftness": 0.596
+        },
+        "nebulaField": {
+          "amplitude": 0.045,
+          "anchors": [
+            {
+              "color": "#243075",
+              "x": 0.5425170527058052,
+              "y": 0.4424628944937785
+            },
+            {
+              "color": "#2e1438",
+              "x": 0.3605710308118477,
+              "y": 0.38922604819214623
+            },
+            {
+              "color": "#0d1f47",
+              "x": 0.877526056803331,
+              "y": 0.6516909643982685
+            },
+            {
+              "color": "#212633",
+              "x": 0.05120819117478348,
+              "y": 0.8068512374606498
+            }
+          ],
+          "frequency": 2.2,
+          "mode": "inverse-distance",
+          "power": 2
+        },
+        "quality": "high",
+        "stars": {
+          "uBright": 2,
+          "uBrightVar": 0.85,
+          "uColorVar": 1,
+          "uDensity": 325,
+          "uGlareSize": 4.6,
+          "uGlareStr": 0.8,
+          "uGlareVar": 0.7,
+          "uLargeStarRarity": 0.97,
+          "uSeed": 1,
+          "uSizeVar": 0.7,
+          "uStarSize": 1.55
+        }
+      },
+      "type": "starfield"
+    }
+  ],
+  "version": 2,
+  "assets": {}
+}

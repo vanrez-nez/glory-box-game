@@ -27,6 +27,7 @@ export default class Engine {
   ambientLight!: THREE.AmbientLight;
   orbitControls!: OrbitControls;
   axesHelper!: THREE.AxesHelper;
+  skybox?: THREE.Object3D;
   cameraOffset!: THREE.Vector3;
   cameraTarget!: THREE.Vector3;
   cameraTargetTo!: THREE.Vector3;
@@ -190,6 +191,12 @@ export default class Engine {
       this.orbitControls.target = this.cameraTarget;
     } else {
       this.followTarget();
+    }
+    // Keep the skybox centered on the camera so its unit box always encloses the
+    // view (it renders behind everything via renderOrder/-depth). Only the
+    // position follows — rotation stays world-fixed so the stars don't spin.
+    if (this.skybox) {
+      this.skybox.position.copy(camera.position);
     }
     // Synchronous render is the supported path now that init() is awaited before
     // the loop starts (renderAsync() is deprecated).

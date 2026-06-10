@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
+import { AudioManagerInstance as AudioManager } from '@/game/audio/audio-manager';
 import GameEnemyDragon from '@/game/enemy/enemy-dragon';
 import GameEnemyRays from '@/game/enemy/enemy-rays';
-import GameEnemyVortex from '@/game/enemy/enemy-vortex';
 
 const DEFAULT = {};
 
@@ -10,7 +10,6 @@ export default class GameEnemy {
   group!: THREE.Group;
   dragon!: any;
   rays!: any;
-  vortex!: any;
   bodies!: any;
   constructor(opts: any) {
     this.opts = { ...DEFAULT, ...opts };
@@ -18,14 +17,16 @@ export default class GameEnemy {
     this.group.name = 'GameEnemy';
     this.dragon = new GameEnemyDragon({ parent: this.group });
     this.rays = new GameEnemyRays({ parent: this.group });
-    this.vortex = new GameEnemyVortex({ parent: this.group });
     this.bodies = this.rays.bodies.concat(this.dragon.body);
+    // These ambient loops were anchored to the (removed) vortex; keep them
+    // spatialized on the dragon so the soundscape is preserved.
+    AudioManager.setPositionalTrackParent('wind_loop', this.dragon.head);
+    AudioManager.setPositionalTrackParent('dragon_near_loop', this.dragon.head);
   }
 
   update(delta: any, camera: any, playerPosition: any) {
     this.dragon.update(delta, playerPosition);
     this.rays.update(delta, camera, playerPosition);
-    this.vortex.update(delta, this.dragon.positionY);
   }
 
   restart() {

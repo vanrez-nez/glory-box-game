@@ -20,6 +20,10 @@ const DEV_CONFIG = {
 const WORLD = {
   MapWidth: 128,
   CylinderWrapAngle: Math.PI * 2,
+  // Extra invisible collision width (world units, total — split across both edges)
+  // added to a platform's contact footprint beyond its visible pad, so the player
+  // doesn't drop off exactly at the visual edge (forgiveness margin).
+  PlatformContactThreshold: 1,
 };
 
 const QUALITY_LEVELS = {

@@ -11,8 +11,6 @@ import PlatformStepsMaterial from '@/game/materials/platform-steps-material';
 import CollectibleSocketMaterial from '@/game/materials/collectible-socket-material';
 import CollectibleGlyphMaterial from '@/game/materials/collectible-glyph-material';
 import CollectibleItemMaterial from '@/game/materials/collectible-item-material';
-import EnemyVortexMaterial from '@/game/materials/enemy-vortex-material';
-import EnemyVortexParticleMaterial from '@/game/materials/enemy-vortex-particle-material';
 import EnemyHeadMaterial from '@/game/materials/enemy-head-material';
 import EnemyArmorMaterial from '@/game/materials/enemy-armor-material';
 import EnemyEyesMaterial from '@/game/materials/enemy-eyes-material';
@@ -36,8 +34,6 @@ const MATERIALS = {
   CollectibleSocket: CollectibleSocketMaterial,
   CollectibleGlyph: CollectibleGlyphMaterial,
   CollectibleItem: CollectibleItemMaterial,
-  EnemyVortex: EnemyVortexMaterial,
-  EnemyVortexParticle: EnemyVortexParticleMaterial,
   EnemyRay: EnemyRayMaterial,
   EnemyHead: EnemyHeadMaterial,
   EnemyArmor: EnemyArmorMaterial,

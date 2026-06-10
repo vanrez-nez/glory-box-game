@@ -148,7 +148,10 @@ export default class GamePlatform {
       friction: 0.05,
       isStatic: true,
       onUpdate: SyncBodyPhysicsMesh.bind(this, mesh),
-      scale: new THREE.Vector2(opts.width, 1),
+      // Collision footprint = visible pad width + a forgiveness threshold so the
+      // player gets a little invisible ground past each edge (the mesh stays
+      // opts.width; only the body is widened).
+      scale: new THREE.Vector2(opts.width + GameConfig.PlatformContactThreshold, 1),
       distance: GAME.PlatformOffset,
       collisionTargets: [PHYSICS.Player],
       // rotate the pad tangent to the cylinder (matches the socket arc); without

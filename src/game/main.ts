@@ -17,6 +17,7 @@ import GameMap from '@/game/map';
 import GameSfxManager from '@/game/sfx-manager';
 import GameMoodManager from '@/game/mood-manager';
 import GameEnemy from '@/game/enemy/enemy';
+import { StaticInstance as Skybox } from '@/game/skybox';
 import GamePlayerHud from '@/game/player/player-hud';
 import GameEnemyHud from '@/game/enemy/enemy-hud';
 
@@ -76,6 +77,19 @@ export default class Game {
     // the loop is only started later (start()), but await here so resize and
     // any pre-loop setup run against a ready renderer.
     await this.components.engine.init();
+    // The live skybox backdrop needs the initialized WebGPU renderer. Add it and
+    // let the engine recentre it on the camera each frame. (Material reflections
+    // use the cube-image env captured at build time — see skybox.ts.)
+    const { engine } = this.components;
+    const skyboxMesh = Skybox.createMesh(engine.renderer) as unknown as THREE.Object3D;
+    engine.scene.add(skyboxMesh);
+    // The renderer runs with sortObjects=false, so renderOrder is ignored and draw
+    // order follows scene-children order. The skybox (depthTest off) must draw
+    // first or it paints over the world — move it to the front of the children.
+    const children = engine.scene.children;
+    children.splice(children.indexOf(skyboxMesh), 1);
+    children.unshift(skyboxMesh);
+    engine.skybox = skyboxMesh;
     this.updateSize();
     this.attachEvents();
     await this.initLoad();

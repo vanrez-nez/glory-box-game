@@ -27,7 +27,6 @@ export default class WorldCylinderMaterial extends GameMetaMaterial {
           color: 0x1c284d,
           reflectivity: 0.5,
           shininess: 5,
-          refraction: 0.8,
           specular: 0xf174d,
         },
       },

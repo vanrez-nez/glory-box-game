@@ -5,10 +5,36 @@ import { StatsPanePluginBundle, type StatsPaneApi } from '@/game/stats-blade';
 
 export default class GameTools {
   pane!: any;
+  tab?: any;
+  pages: Record<string, any> = {};
   fpsGraph?: StatsPaneApi;
   constructor() {
     this.pane = new Pane({ title: 'Dev Tools' });
     this.pane.registerPlugin(StatsPanePluginBundle);
+    // Widen the floating pane wrapper (default ~256px) to 30rem.
+    const wrapper = this.pane.element.parentElement as HTMLElement | null;
+    if (wrapper) { wrapper.style.width = '30rem'; }
+    this.pane.element.style.width = '30rem';
+  }
+
+  // Lazily create the tabbed layout the screens build into (Physics / Engine /
+  // Player / Materials). Created on first use so it sits below the FPS blade.
+  ensureTabs() {
+    if (this.tab) { return; }
+    this.tab = this.pane.addTab({
+      pages: [
+        { title: 'Physics' },
+        { title: 'Engine' },
+        { title: 'Player' },
+        { title: 'Materials' },
+      ],
+    });
+    this.pages = {
+      physics: this.tab.pages[0],
+      engine: this.tab.pages[1],
+      player: this.tab.pages[2],
+      materials: this.tab.pages[3],
+    };
   }
 
   addFpsGraph() {
@@ -59,13 +85,15 @@ export default class GameTools {
   }
 
   buildPhysicsScreen(obj: any) {
-    const f1 = this.pane.addFolder({ title: 'Generic Physics', expanded: false });
+    this.ensureTabs();
+    const f1 = this.pages.physics;
     f1.addBinding(obj.opts.gravity, 'x', { min: -0.5, max: 0.5, label: 'Gravity X' });
     f1.addBinding(obj.opts.gravity, 'y', { min: -0.5, max: 0.5, label: 'Gravity Y' });
   }
 
   buildPlayerScreen(obj: any) {
-    const f1 = this.pane.addFolder({ title: 'Player', expanded: false });
+    this.ensureTabs();
+    const f1 = this.pages.player;
 
     f1.addBinding(obj.playerBody.opts, 'mass', { min: 0.01, max: 0.3, label: 'Mass' });
     f1.addBinding(obj.playerBody.opts, 'friction', { min: 0.01, max: 0.3, label: 'Friction' });
@@ -80,7 +108,8 @@ export default class GameTools {
   }
 
   buildEngineScreen(obj: any) {
-    const rootFolder = this.pane.addFolder({ title: 'Engine', expanded: false });
+    this.ensureTabs();
+    const rootFolder = this.pages.engine;
     const { renderer, bloomPass, scene, ambientLight } = obj;
     const f0 = rootFolder.addFolder({ title: 'Renderer' });
     f0.addBinding(renderer, 'toneMappingExposure', { min: 0.0, max: 10 });
@@ -167,16 +196,6 @@ export default class GameTools {
     d2Folder.addBinding(u.u_fatDebrisLevels.value, 'y', { min: 0.0, max: 1.0, label: 'Density' });
     d2Folder.addBinding(u.u_fatDebrisLevels.value, 'z', { min: 0.0, max: 1.0, label: 'Width' });
     d2Folder.addBinding(u.u_fatDebrisLevels.value, 'w', { min: 0.0, max: 1.0, label: 'Intensity' });
-  }
-
-  addEnemyVortexMaterial(folder: any, mat: any) {
-    const u = mat.uniforms;
-    this.addColorField(folder, u.u_colorFrom, 'value', 'Color From');
-    this.addColorField(folder, u.u_colorTo, 'value', 'Color To');
-    folder.addBinding(u.u_twist, 'value', { min: 0, max: 4000, label: 'Twist' });
-    folder.addBinding(u.u_displacementScale, 'value', { min: 0.0, max: 100.0, label: 'Disp Scale' });
-    folder.addBinding(u.u_displacementBias, 'value', { min: 0.0, max: 100.0, label: 'Disp Bias' });
-    folder.addBinding(u.u_fogDistance, 'value', { min: 0, max: 500, label: 'Fog Dist' });
   }
 
   addSkyShaderMaterial(folder: any, mat: any) {
@@ -287,7 +306,8 @@ export default class GameTools {
   }
 
   buildMaterialsScreen() {
-    const rootFolder = this.pane.addFolder({ title: 'Materials', expanded: false });
+    this.ensureTabs();
+    const rootFolder = this.pages.materials;
     const matDict = MaterialFactory.getMaterialsByMaterialType();
     Object.keys(matDict).forEach((k) => {
       this.buildMaterialGroup(rootFolder, k, matDict[k]);
@@ -322,9 +342,6 @@ export default class GameTools {
           break;
         case 'GenericTrailMaterial':
           this.addMeshLineMaterial(f, mat);
-          break;
-        case 'EnemyVortexMaterial':
-          this.addEnemyVortexMaterial(f, mat);
           break;
         case 'EnemyRayMaterial':
           this.addEnemyRayMaterial(f, mat);
