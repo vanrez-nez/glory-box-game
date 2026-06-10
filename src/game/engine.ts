@@ -69,6 +69,14 @@ export default class Engine {
     }
   }
 
+  // Which backend the renderer actually resolved to — 'WebGPU', or 'WebGL' if
+  // three fell back (a common cause of a sudden framerate drop). Valid after
+  // init() has run (the backend is created there).
+  getBackendName(): string {
+    const backend = (this.renderer as any).backend;
+    return backend && backend.isWebGPUBackend === true ? 'WebGPU' : 'WebGL';
+  }
+
   initWorld() {
     const { opts } = this;
     this.renderer = new THREE.WebGPURenderer({

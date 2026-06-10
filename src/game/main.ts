@@ -237,6 +237,7 @@ export default class Game {
     this.tools = new GameTools();
     if (GameConfig.EnableStats) {
       this.tools.addFpsGraph();
+      this.tools.fpsGraph?.setRenderer(engine.getBackendName());
     }
     if (GameConfig.EnableTools) {
       this.tools.addScreen('physics', physics);

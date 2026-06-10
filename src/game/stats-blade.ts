@@ -45,6 +45,7 @@ export type StatsPaneApi = {
   end: () => number
   showPanel: (index: number) => void
   update: () => number
+  setRenderer: (name: string) => void
 }
 
 const STATS_PLUGIN_ID = 'candilero-stats'
@@ -81,6 +82,8 @@ const cn = ClassName('stats')
 class StatsPaneView implements View {
   readonly element: HTMLElement
   private readonly labelElement: HTMLDivElement
+  private readonly labelTextElement: HTMLSpanElement
+  private readonly rendererElement: HTMLSpanElement
   private readonly canvas: HTMLCanvasElement
   private readonly context: CanvasRenderingContext2D
   private readonly resizeObserver: ResizeObserver
@@ -98,7 +101,14 @@ class StatsPaneView implements View {
 
     this.labelElement = document.createElement('div')
     this.labelElement.classList.add(cn('label'))
-    this.labelElement.textContent = 'FPS'
+    // FPS/MS/MB text on the left, renderer backend pinned to the right.
+    this.labelTextElement = document.createElement('span')
+    this.labelTextElement.classList.add(cn('labelText'))
+    this.labelTextElement.textContent = 'FPS'
+    this.labelElement.appendChild(this.labelTextElement)
+    this.rendererElement = document.createElement('span')
+    this.rendererElement.classList.add(cn('renderer'))
+    this.labelElement.appendChild(this.rendererElement)
     this.element.appendChild(this.labelElement)
 
     this.canvas = document.createElement('canvas')
@@ -194,9 +204,13 @@ class StatsPaneView implements View {
     const panel = this.panels[this.activePanelIndex]
 
     if (panel) {
-      this.labelElement.textContent = panel.getLabel()
+      this.labelTextElement.textContent = panel.getLabel()
       panel.drawTo(this.context)
     }
+  }
+
+  setRenderer(name: string): void {
+    this.rendererElement.textContent = name
   }
 
   private resizeToElement(): void {
@@ -353,6 +367,10 @@ export class StatsBladeApi extends BladeApi<StatsPaneController> implements Stat
   update(): number {
     return this.controller.view.update()
   }
+
+  setRenderer(name: string): void {
+    this.controller.view.setRenderer(name)
+  }
 }
 
 const StatsBladePlugin: BladePlugin<StatsBladeParams> = createPlugin({
@@ -398,15 +416,27 @@ export const StatsPanePluginBundle: TpPluginBundle = {
     .${cn('label')} {
       box-sizing: border-box;
       color: var(--mo-fg);
+      display: flex;
       font-size: 11px;
+      gap: 8px;
       height: var(--cnt-usz);
+      justify-content: space-between;
       line-height: var(--cnt-usz);
       margin-bottom: var(--cnt-usp);
       overflow: hidden;
       padding-left: var(--bld-hp);
       padding-right: var(--bld-hp);
-      text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    .${cn('labelText')} {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .${cn('renderer')} {
+      flex: none;
+      opacity: 0.7;
     }
 
     .${cn('canvas')} {
