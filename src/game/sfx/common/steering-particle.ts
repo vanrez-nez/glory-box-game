@@ -6,8 +6,10 @@ import * as THREE from 'three/webgpu';
 */
 
 const DEFAULT = {
-  maxSpeed: 6,
-  maxForce: 0.6,
+  // 0.75x of the original 6 / 0.6 — slows the steering trails while keeping the
+  // curve shape (scaling maxForce with maxSpeed preserves the turn rate).
+  maxSpeed: 4,
+  maxForce: 2,
 };
 
 const cacheVecA = new THREE.Vector3();
