@@ -20,6 +20,10 @@ export default class GameMetaMaterial {
   high: THREE.Material | null = null;
   medium: THREE.Material | null = null;
   low: THREE.Material | null = null;
+  // Registry key this material was built from (e.g. 'WorldCylinder', 'EnemyRay').
+  // Set by the factory; used by the dev tools and mood manager to group/branch
+  // instances by kind now that they share one class.
+  materialType = '';
 
   constructor(opts: any) {
     this.opts = { ...DEFAULTS, ...opts };

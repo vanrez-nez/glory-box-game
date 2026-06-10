@@ -141,14 +141,13 @@ export default class GameMoodManager {
   transitionMaterialsGroup(tl: any, instances: any, config: any, time: any) {
     instances.forEach((instance: any) => {
       const mat = instance.activeMaterial;
-      const type = instance.constructor.name;
+      const type = instance.materialType;
 
       const tntParams = { tl, mat, time, config };
       switch (type) {
-        case 'EnemyRayMaterial':
-        case 'PlayerHudFireballMaterial':
-        case 'GenericTrailMaterial':
-        case 'WorldSkyCylinderMaterial':
+        case 'EnemyRay':
+        case 'PlayerHudFireball':
+        case 'WorldSkyCylinder':
           this.transitionShaderMaterial(tntParams);
           break;
         default:

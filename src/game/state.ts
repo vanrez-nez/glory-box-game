@@ -14,6 +14,10 @@ export default class GameState {
   deaths!: number;
   attackPower!: number;
   collectHistory!: any[];
+  // Handles returned by store.subscribe so we can detach on dispose — the Vuex
+  // store is a long-lived singleton that outlives the game, so leaving these
+  // attached leaks a listener (and a reference to this GameState) per game.
+  storeSubscriptions: Array<() => void> = [];
   constructor(opts: any) {
     this.opts = { ...DEFAULT, ...opts };
     this.events = new EventEmitter3();
@@ -23,11 +27,18 @@ export default class GameState {
 
   onStoreMutation(mutationType: any, callback: any) {
     const { store } = this.opts;
-    store.subscribe((mutation: any, state: any) => {
+    const unsubscribe = store.subscribe((mutation: any, state: any) => {
       if (mutation.type === mutationType) {
         callback(mutation.payload, state);
       }
     });
+    this.storeSubscriptions.push(unsubscribe);
+  }
+
+  dispose() {
+    this.storeSubscriptions.forEach(unsubscribe => unsubscribe());
+    this.storeSubscriptions = [];
+    this.events.removeAllListeners();
   }
 
   attachEvents() {

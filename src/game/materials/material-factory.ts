@@ -1,48 +1,10 @@
 import * as THREE from 'three/webgpu';
 import { groupBy } from 'lodash';
 import { GameConfigInstance as GameConfig } from '@/game/config';
-import WorldFloorMaterial from '@/game/materials/world-floor-material';
-import WorldCylinderMaterial from '@/game/materials/world-cylinder-material';
-import WorldSkyCylinderMaterial from '@/game/materials/world-sky-cylinder-material';
-import WorldFxCylinderMaterial from '@/game/materials/world-fx-cylinder-material';
-import PlatformSocketMaterial from '@/game/materials/platform-socket-material';
-import PlatformLightMaterial from '@/game/materials/platform-light-material';
-import PlatformStepsMaterial from '@/game/materials/platform-steps-material';
-import CollectibleSocketMaterial from '@/game/materials/collectible-socket-material';
-import CollectibleGlyphMaterial from '@/game/materials/collectible-glyph-material';
-import CollectibleItemMaterial from '@/game/materials/collectible-item-material';
-import EnemyHeadMaterial from '@/game/materials/enemy-head-material';
-import EnemyArmorMaterial from '@/game/materials/enemy-armor-material';
-import EnemyEyesMaterial from '@/game/materials/enemy-eyes-material';
-import GenericColorMaterial from '@/game/materials/generic-color-material';
-import EnemyRayMaterial from '@/game/materials/enemy-ray-material';
-import PlayerHitFxMaterial from '@/game/materials/player-hit-fx-material';
-import PlayerMaterial from '@/game/materials/player-material';
-import PlayerHudFireballMaterial from '@/game/materials/player-hud-fireball-material';
-import WorldCheckpointRingMaterial from '@/game/materials/world-checkpoint-ring-material';
+import GameMetaMaterial from '@/game/materials/meta-material';
+import { MATERIAL_DEFS } from '@/game/materials/material-definitions';
 
 const DEFAULT = {};
-const MATERIALS = {
-  WorldCylinder: WorldCylinderMaterial,
-  WorldFloor: WorldFloorMaterial,
-  WorldSkyCylinder: WorldSkyCylinderMaterial,
-  WorldFxCylinder: WorldFxCylinderMaterial,
-  WorldCheckpointRing: WorldCheckpointRingMaterial,
-  PlatformLight: PlatformLightMaterial,
-  PlatformSteps: PlatformStepsMaterial,
-  PlatformSocket: PlatformSocketMaterial,
-  CollectibleSocket: CollectibleSocketMaterial,
-  CollectibleGlyph: CollectibleGlyphMaterial,
-  CollectibleItem: CollectibleItemMaterial,
-  EnemyRay: EnemyRayMaterial,
-  EnemyHead: EnemyHeadMaterial,
-  EnemyArmor: EnemyArmorMaterial,
-  EnemyEyes: EnemyEyesMaterial,
-  GenericColor: GenericColorMaterial,
-  PlayerMaterial,
-  PlayerHitFx: PlayerHitFxMaterial,
-  PlayerHudFireball: PlayerHudFireballMaterial,
-};
 
 export default class GameMaterialFactory {
   opts!: Record<string, any>;
@@ -63,7 +25,8 @@ export default class GameMaterialFactory {
   getMaterial(materialName: any, params?: any, cacheId: any = null) {
     const { materialsCache } = this;
     let material;
-    if ((MATERIALS as any)[materialName]) {
+    const def = MATERIAL_DEFS[materialName];
+    if (def) {
       const useCache = cacheId !== null;
       let cacheHash = '';
       if (useCache) {
@@ -71,7 +34,8 @@ export default class GameMaterialFactory {
         material = materialsCache[cacheHash];
       }
       if (!material) {
-        material = new (MATERIALS as any)[materialName](params);
+        material = new GameMetaMaterial(def(params));
+        material.materialType = materialName;
         this.instances.push(material);
         if (useCache) {
           materialsCache[cacheHash] = material;
@@ -88,7 +52,7 @@ export default class GameMaterialFactory {
   }
 
   getMaterialsByMaterialType() {
-    return groupBy(this.instances, obj => obj.constructor.name);
+    return groupBy(this.instances, obj => obj.materialType);
   }
 }
 

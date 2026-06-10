@@ -278,19 +278,16 @@ export default class GameTools {
     instances.forEach((m) => {
       const mat = m.activeMaterial;
       const id = mat.userData.nodeId;
-      const materialType = m.constructor.name;
+      const materialType = m.materialType;
       if (id && id !== '') {
         switch (materialType) {
-          case 'WorldSkyCylinderMaterial':
+          case 'WorldSkyCylinder':
             result[id] = this.getSkyShaderProps(mat);
             break;
-          case 'PlayerHudFireballMaterial':
+          case 'PlayerHudFireball':
             result[id] = this.getFireballShaderProps(mat);
             break;
-          case 'GenericTrailMaterial':
-            result[id] = this.getMeshLineProps(mat);
-            break;
-          case 'EnemyRayMaterial':
+          case 'EnemyRay':
             result[id] = this.getMeshEnemyRayProps(mat);
             break;
           default:
@@ -334,16 +331,13 @@ export default class GameTools {
       // and emits `change` continuously (≈20 of them ≈ a timer every ~10ms).
       f.addBinding({ t: mat.type }, 't', { label: 'Type', readonly: true, interval: 0 });
       switch (materialType) {
-        case 'WorldSkyCylinderMaterial':
+        case 'WorldSkyCylinder':
           this.addSkyShaderMaterial(f, mat);
           break;
-        case 'PlayerHudFireballMaterial':
+        case 'PlayerHudFireball':
           this.addFireballShaderMaterial(f, mat);
           break;
-        case 'GenericTrailMaterial':
-          this.addMeshLineMaterial(f, mat);
-          break;
-        case 'EnemyRayMaterial':
+        case 'EnemyRay':
           this.addEnemyRayMaterial(f, mat);
           break;
         default:

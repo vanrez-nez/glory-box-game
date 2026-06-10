@@ -216,6 +216,7 @@ export default class Game {
   dispose() {
     const { components } = this;
     this.loop.unbind();
+    components.gameState.dispose();
     MaterialFactory.clear();
     components.engine.dispose();
   }

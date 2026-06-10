@@ -38,7 +38,6 @@ export default class GamePlayer {
   opts: PlayerOptions;
   jumpLocked = false;
   jumpDefer = 0;
-  stateBuff: unknown[] = [];
   bodies: GamePhysicsBody[] = [];
   groundedTime = 0;
   locked = false;
@@ -53,7 +52,6 @@ export default class GamePlayer {
     this.opts = { ...DEFAULT, ...opts };
     this.jumpLocked = false;
     this.jumpDefer = 0;
-    this.stateBuff = [];
     this.bodies = [];
     this.groundedTime = 0;
     this.locked = false;
