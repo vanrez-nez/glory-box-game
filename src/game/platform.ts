@@ -169,14 +169,13 @@ export default class GamePlatform {
     }
   }
 
-  update(delta: any) {
+  // Runs on the fixed physics step (before physics.update), so the platform
+  // advances exactly once per step and the player-carry measures one clean
+  // displacement — deterministic regardless of display refresh rate.
+  simUpdate(delta: any) {
     const { body, startPosition, opts } = this;
     if (this.isMovingPlatform()) {
       this.oscillator += delta;
-      // Only move the visual/body position here (runs per-draw). prevPosition is
-      // snapshotted in the physics step so the player-carry measures displacement
-      // since the last carry (rate-independent — the loop draws faster than it
-      // steps physics, so tracking prev here under-carried the player).
       body.position.x = startPosition.x + Math.sin(this.oscillator) * opts.width;
     }
   }

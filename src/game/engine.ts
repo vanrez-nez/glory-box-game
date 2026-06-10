@@ -13,6 +13,11 @@ interface EngineOptions {
 
 const DEFAULT: EngineOptions = {};
 
+// Camera follow smoothing rates (per second). Tuned so 1 - e^(-rate/60) matches
+// the old fixed per-frame lerp factors (0.1 look / 0.05 position) at 60Hz.
+const CAMERA_TARGET_RATE = 6.3;
+const CAMERA_POS_RATE = 3.1;
+
 export default class Engine {
   opts: EngineOptions;
   width = 0;
@@ -181,7 +186,7 @@ export default class Engine {
     this.camera.position.set(0, 30, GAME.ZoomCameraDistance);
   }
 
-  followTarget() {
+  followTarget(delta = 0) {
     const { cameraVector, cameraTargetTo, cameraTarget,
       camera, cameraOffset } = this;
     // Sit radially behind the player at its actual cylinder angle. Deriving the
@@ -191,13 +196,18 @@ export default class Engine {
     CylinderToCartesian(cameraVector, GAME.CylinderRadius + GAME.CameraDistance, theta);
     cameraVector.y = cameraTarget.y + 12;
     cameraVector.add(cameraOffset);
-    cameraTargetTo.lerp(cameraTarget, 0.1);
+    // Frame-rate-independent smoothing: 1 - e^(-rate*dt) reproduces the old fixed
+    // per-frame factors (0.1 / 0.05) at 60Hz but stays consistent at any refresh.
+    // dt=0 (paused / first frame) → no movement.
+    const targetF = 1 - Math.exp(-CAMERA_TARGET_RATE * delta);
+    const posF = 1 - Math.exp(-CAMERA_POS_RATE * delta);
+    cameraTargetTo.lerp(cameraTarget, targetF);
     camera.lookAt(cameraTargetTo);
-    camera.position.lerp(cameraVector, 0.05);
+    camera.position.lerp(cameraVector, posF);
     cameraOffset.set(0, 0, 0);
   }
 
-  render() {
+  render(delta = 0) {
     const { renderer, scene, camera, postProcessing } = this;
     if (GameConfig.StaticDesign) {
       // Free camera detached from the player: keep the orbit pivot at a fixed
@@ -208,7 +218,7 @@ export default class Engine {
       this.orbitControls.update();
       this.orbitControls.target = this.cameraTarget;
     } else {
-      this.followTarget();
+      this.followTarget(delta);
     }
     // Keep the skybox centered on the camera so its unit box always encloses the
     // view (it renders behind everything via renderOrder/-depth). Only the

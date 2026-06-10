@@ -243,13 +243,16 @@ export default class GamePlayer {
     }
   }
 
-  updateTransforms() {
-    const { opts, mesh, playerBody, grounded, descending } = this;
-    if (descending) {
-      playerBody.opts.gravity!.set(0, opts.descentGravity);
-    } else {
-      playerBody.opts.gravity!.set(0, opts.gravity);
-    }
+  // Select gravity from collision state — physics, so it must run on the fixed
+  // step before physics.update consumes it.
+  applyGravity() {
+    const { opts, playerBody, descending } = this;
+    playerBody.opts.gravity!.set(0, descending ? opts.descentGravity : opts.gravity);
+  }
+
+  // Squash/stretch from vertical velocity — purely visual (render pass).
+  updateScaleOffset() {
+    const { mesh, playerBody, grounded } = this;
     if (!grounded) {
       // Modify height mass with velocity
       mesh.scaleOffset.y = THREE.MathUtils.clamp(playerBody.velocity.y * 0.5, -0.1, 0.9);
@@ -265,9 +268,16 @@ export default class GamePlayer {
       GAME.PlayerOffset);
   }
 
-  update(delta: number, inputState: Record<string, boolean>) {
+  // Fixed-step simulation: sample input → forces, and pick gravity, so they feed
+  // the physics step at a refresh-independent rate.
+  simUpdate(_delta: number, inputState: Record<string, boolean>) {
     this.processInputs(inputState);
-    this.updateTransforms();
+    this.applyGravity();
+  }
+
+  // Per-frame render: visual squash/stretch + light follow.
+  update(_delta: number) {
+    this.updateScaleOffset();
     this.updateLights();
   }
 }

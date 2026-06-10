@@ -111,6 +111,10 @@ export default class GameMapParser {
     }).on('message', (output: any) => {
       this.tiles = output.tiles;
       this.opts.onParse();
+      // One-shot parse — terminate the worker so it doesn't linger idle (the
+      // browser otherwise keeps waking it, showing up as thread-pool noise).
+      // `kill()` exists at runtime (Worker.prototype.kill) but isn't in the types.
+      (t as any).kill();
     });
   }
 }
