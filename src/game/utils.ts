@@ -2,8 +2,6 @@ import * as THREE from 'three/webgpu';
 import { GameConfigInstance as GameConfig } from '@/game/config';
 import { GAME } from '@/game/const';
 
-const PI_WIDTH = 128 / Math.PI;
-
 export function GetTextureRepeat(url: any, repeatX: any, repeatY: any, offsetX = 0, offsetY = 0) {
   const tex = new THREE.TextureLoader().load(url);
   tex.wrapS = THREE.RepeatWrapping;
@@ -17,7 +15,8 @@ export function GetTextureRepeat(url: any, repeatX: any, repeatY: any, offsetX =
   Map 2D cartesian coords to cylindrical coords
 */
 export function CartesianToCylinder(vec3: any, x: any, y: any, project = 0) {
-  const theta = x / PI_WIDTH;
+  // x is map-space; ThetaPerUnit (config-derived) wraps it onto the cylinder.
+  const theta = x * GameConfig.ThetaPerUnit;
   const radius = GAME.CylinderRadius + project;
   vec3.x = radius * Math.sin(theta);
   vec3.y = y;

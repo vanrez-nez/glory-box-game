@@ -1,6 +1,7 @@
 import EventEmitter3 from 'eventemitter3';
 import * as THREE from 'three/webgpu';
-import { EVENTS, PHYSICS } from '@/game/const';
+import { EVENTS, PHYSICS, GAME } from '@/game/const';
+import { GameConfigInstance as GameConfig } from '@/game/config';
 import CollisionEdges from '@/game/physics/collision-edges';
 
 export interface PhysicsBodyOptions {
@@ -125,10 +126,18 @@ export default class GamePhysicsBody {
     return (this.mask & (1 << bodyType | 0)) !== 0;
   }
 
+  // Bodies author scale.x as a WORLD width (player cube 1.5, platform width, ray
+  // diameter), but x positions/collisions live in map-x. One map-x unit spans
+  // `CylinderRadius * ThetaPerUnit` world units of arc, so divide the x half-width
+  // by that to keep the collision footprint matching the visual at any wrap angle.
+  // (y maps 1:1 to world, so it's left alone.)
+  get worldPerUnit() { return GAME.CylinderRadius * GameConfig.ThetaPerUnit; }
+
   updateScale() {
     const { box, scale } = this;
-    box.min.set(-scale.x * 0.5, -scale.y * 0.5);
-    box.max.set(scale.x * 0.5, scale.y * 0.5);
+    const halfX = (scale.x * 0.5) / this.worldPerUnit;
+    box.min.set(-halfX, -scale.y * 0.5);
+    box.max.set(halfX, scale.y * 0.5);
   }
 
   /* Get absolute position for box edges */
@@ -136,6 +145,6 @@ export default class GamePhysicsBody {
   get rightEdge() { return this.position.x + this.box.max.x; }
   get topEdge() { return this.position.y - this.box.min.y; }
   get bottomEdge() { return this.position.y - this.box.max.y; }
-  get halfScaleX() { return this.scale.x / 2; }
+  get halfScaleX() { return (this.scale.x / 2) / this.worldPerUnit; }
   get halfScaleY() { return this.scale.y / 2; }
 }

@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { PHYSICS } from '@/game/const';
+import { GameConfigInstance as GameConfig } from '@/game/config';
 import SolveRectangleCollision from '@/game/physics/collision';
 import GamePhysicsBody from '@/game/physics/physics-body';
 
@@ -16,6 +17,7 @@ export default class GamePhysics {
   boundsBody!: any;
   testBoxA!: THREE.Box2;
   testBoxB!: THREE.Box2;
+  wrapVec!: THREE.Vector2;
   constructor(opts: any) {
     this.opts = { ...DEFAULT, ...opts };
     this.bodies = [];
@@ -26,6 +28,20 @@ export default class GamePhysics {
     this.boundsBody = new GamePhysicsBody({ type: PHYSICS.WorldBounds });
     this.testBoxA = new THREE.Box2();
     this.testBoxB = new THREE.Box2();
+    this.wrapVec = new THREE.Vector2();
+  }
+
+  // In full-circle mode the playable x is a loop of width MapWidth. Returns the
+  // offset to add to bx so it lands in the nearest copy relative to ax (0 if the
+  // pair doesn't straddle the seam, or when wrapping is disabled).
+  wrapOffset(ax: number, bx: number) {
+    if (!GameConfig.WrapAround) { return 0; }
+    const w = GameConfig.MapWidth;
+    const half = w / 2;
+    const dx = bx - ax;
+    if (dx > half) { return -w; }
+    if (dx < -half) { return w; }
+    return 0;
   }
 
   add(body: any) {
@@ -69,7 +85,16 @@ export default class GamePhysics {
         collided = true;
       }
 
-      if (body.leftEdge < bounds.min.x) {
+      if (GameConfig.WrapAround) {
+        // Full circle: loop x continuously instead of hitting left/right walls.
+        const w = GameConfig.MapWidth;
+        const half = w / 2;
+        if (pos.x >= half) {
+          pos.x -= w;
+        } else if (pos.x < -half) {
+          pos.x += w;
+        }
+      } else if (body.leftEdge < bounds.min.x) {
         cE.left = boundsBody;
         pos.x = bounds.min.x - box.min.x;
         vel.x = 0;
@@ -99,14 +124,20 @@ export default class GamePhysics {
         if (disabled || canCollide === false) {
           continue;
         }
+        // Wrap-aware test: bring b2 into the nearest seam-copy of b1 so pads at
+        // opposite map edges (same spot on the circle) still collide.
+        const off2 = this.wrapOffset(b1.position.x, b2.position.x);
         boxA.copy(b1.box).translate(b1.position);
-        boxB.copy(b2.box).translate(b2.position);
+        boxB.copy(b2.box).translate(this.wrapVec.set(b2.position.x + off2, b2.position.y));
         const isColliding = boxA.intersectsBox(boxB);
 
         let shouldCollide = isColliding;
 
         // swap so b1 is always the dynamic object
-        const pair = b1.opts.isStatic ? [b2, b1] : [b1, b2];
+        const swapped = b1.opts.isStatic;
+        const pair = swapped ? [b2, b1] : [b1, b2];
+        // offset that brings pair[1] into pair[0]'s frame for the solve
+        const pairOff = swapped ? -off2 : off2;
 
         const b2isPlatform = pair[1].opts.type === PHYSICS.StaticPlatform ||
               pair[1].opts.type === PHYSICS.MovingPlatform;
@@ -117,7 +148,7 @@ export default class GamePhysics {
         }
 
         if (shouldCollide) {
-          collisionPairs.push(pair);
+          collisionPairs.push([pair[0], pair[1], pairOff]);
         }
       }
     }
@@ -127,12 +158,16 @@ export default class GamePhysics {
   solveCollisions(collisions: any) {
     if (collisions.length > 0) {
       for (let i = 0; i < collisions.length; i++) {
-        const [b1, b2] = collisions[i];
+        const [b1, b2, off] = collisions[i];
 
         // Solve collision only when any of the two bodies are not sensors
         const solve = b1.opts.isSensor === false &&
           b2.opts.isSensor === false;
+        // Resolve in b1's frame across the seam: shift b2 next to b1, solve, then
+        // restore so the moving-platform follow below uses real positions.
+        if (off) { b2.position.x += off; }
         SolveRectangleCollision(b1, b2, solve);
+        if (off) { b2.position.x -= off; }
 
         // if object is colliding with moving platform move b1 along with it
         if (b2.opts.type === PHYSICS.MovingPlatform) {

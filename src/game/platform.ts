@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 import gsap from 'gsap';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
+import { GameConfigInstance as GameConfig } from '@/game/config';
 import { PHYSICS, MAP, EVENTS, GAME } from '@/game/const';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { CartesianToCylinder, SyncBodyPhysicsMesh } from '@/game/utils';
@@ -81,7 +82,7 @@ export default class GamePlatform {
   getSocketGeometry() {
     const { opts } = this;
     const width = this.isMovingPlatform() ? opts.width * 3 : opts.width;
-    const length = (Math.PI / 128) * width;
+    const length = GameConfig.ThetaPerUnit * width;
     const outerGeo = this.getSocketArcGeometry(opts.x, opts.y, length, 0.2, 1.2);
     return outerGeo;
   }
@@ -89,7 +90,7 @@ export default class GamePlatform {
   getSocketLightsGeometry() {
     const { opts } = this;
     const width = this.isMovingPlatform() ? opts.width * 3 : opts.width;
-    const length = (Math.PI / 128) * width;
+    const length = GameConfig.ThetaPerUnit * width;
     const innerGeo = this.getSocketArcGeometry(opts.x, opts.y, length - 0.02, 0.35, 0.1);
     return innerGeo;
   }
@@ -148,7 +149,9 @@ export default class GamePlatform {
       scale: new THREE.Vector2(opts.width, 1),
       distance: GAME.PlatformOffset,
       collisionTargets: [PHYSICS.Player],
-      syncLookAt: false,
+      // rotate the pad tangent to the cylinder (matches the socket arc); without
+      // this the box pads keep a fixed world orientation and only line up at theta=0.
+      syncLookAt: true,
     });
   }
 

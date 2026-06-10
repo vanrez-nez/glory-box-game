@@ -5,7 +5,7 @@ import { fxaa } from 'three/addons/tsl/display/FXAANode.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GameConfigInstance as GameConfig } from '@/game/config';
 import { GAME } from '@/game/const';
-import { CartesianToCylinder } from '@/game/utils';
+import { CylinderFromCartesian, CylinderToCartesian } from '@/game/utils';
 
 interface EngineOptions {
   canvas?: HTMLCanvasElement | null;
@@ -122,7 +122,8 @@ export default class Engine {
 
   initHelpers() {
     const { scene, camera, renderer } = this;
-    if (GameConfig.EnableOrbitControls) {
+    // StaticDesign implies a free orbit camera for inspecting the layout.
+    if (GameConfig.EnableOrbitControls || GameConfig.StaticDesign) {
       const c = new OrbitControls(camera, renderer.domElement) as any;
       c.enableDamping = true;
       c.dampingFactor = 0.25;
@@ -164,12 +165,12 @@ export default class Engine {
   followTarget() {
     const { cameraVector, cameraTargetTo, cameraTarget,
       camera, cameraOffset } = this;
-    CartesianToCylinder(
-      cameraVector.copy(cameraTarget),
-      cameraTarget.x * (Math.PI / 2),
-      cameraTarget.y + 12,
-      GAME.CameraDistance,
-    );
+    // Sit radially behind the player at its actual cylinder angle. Deriving the
+    // angle from the player's world position (atan2) keeps the follow seamless
+    // across the wrap seam — theta is continuous in 3D as x loops around.
+    const [, theta] = CylinderFromCartesian(cameraTarget);
+    CylinderToCartesian(cameraVector, GAME.CylinderRadius + GAME.CameraDistance, theta);
+    cameraVector.y = cameraTarget.y + 12;
     cameraVector.add(cameraOffset);
     cameraTargetTo.lerp(cameraTarget, 0.1);
     camera.lookAt(cameraTargetTo);
@@ -179,7 +180,12 @@ export default class Engine {
 
   render() {
     const { renderer, scene, camera, postProcessing } = this;
-    if (GameConfig.EnableOrbitControls) {
+    if (GameConfig.StaticDesign) {
+      // Free camera detached from the player: keep the orbit pivot at a fixed
+      // point on the cylinder axis so the whole static layout can be inspected.
+      this.orbitControls.target.set(0, this.cameraTarget.y, 0);
+      this.orbitControls.update();
+    } else if (GameConfig.EnableOrbitControls) {
       this.orbitControls.update();
       this.orbitControls.target = this.cameraTarget;
     } else {

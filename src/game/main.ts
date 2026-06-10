@@ -107,9 +107,14 @@ export default class Game {
   }
 
   getPhysicsBounds() {
+    // Full-circle: x spans one map width and wraps (no left/right walls). Legacy
+    // 180-degree mode keeps the fixed BoundsLeft/Right walls.
+    const halfW = GameConfig.MapWidth / 2;
+    const left = GameConfig.WrapAround ? -halfW : GAME.BoundsLeft;
+    const right = GameConfig.WrapAround ? halfW : GAME.BoundsRight;
     return new THREE.Box2(
-      new THREE.Vector2(GAME.BoundsLeft, GAME.BoundsTop),
-      new THREE.Vector2(GAME.BoundsRight, GAME.BoundsBottom),
+      new THREE.Vector2(left, GAME.BoundsTop),
+      new THREE.Vector2(right, GAME.BoundsBottom),
     );
   }
 

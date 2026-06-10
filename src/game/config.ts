@@ -7,6 +7,19 @@ const DEV_CONFIG = {
   EnableOrbitControls: false,
   EnableAxes: false,
   DebugCollisions: false,
+  // Static design mode: detach the camera from the player (free orbit) and
+  // freeze the world so the cylinder layout can be inspected. Implies orbit
+  // controls. Dev-mode only.
+  StaticDesign: false,
+};
+
+// Ungated numeric world tuning (not dev/quality gated). The cylinder wrap is
+// derived from these: a MapWidth-wide map is wrapped around CylinderWrapAngle
+// radians. CylinderWrapAngle = 2*PI wraps the full circle; PI reproduces the
+// legacy 180-degree (front-half) layout.
+const WORLD = {
+  MapWidth: 128,
+  CylinderWrapAngle: Math.PI * 2,
 };
 
 const QUALITY_LEVELS = {
@@ -68,6 +81,21 @@ function setupGetters(o: any) {
     Object.defineProperty(o, key, {
       get() { return (QUALITY_LEVELS as any)[this.qualityNode][key]; },
     });
+  });
+  // ungated numeric world values
+  Object.keys(WORLD).forEach((key) => {
+    Object.defineProperty(o, key, {
+      get() { return (WORLD as any)[key]; },
+    });
+  });
+  // derived: radians of cylinder arc per 1 unit of map-x
+  Object.defineProperty(o, 'ThetaPerUnit', {
+    get() { return WORLD.CylinderWrapAngle / WORLD.MapWidth; },
+  });
+  // derived: the map covers the full circle, so player x loops continuously
+  // (physics wraps modulo MapWidth instead of clamping at left/right walls).
+  Object.defineProperty(o, 'WrapAround', {
+    get() { return WORLD.CylinderWrapAngle >= Math.PI * 2 - 0.0001; },
   });
   return o;
 }

@@ -1,4 +1,5 @@
 import MainLoop from 'mainloop.js';
+import { GameConfigInstance as GameConfig } from '@/game/config';
 
 const DEFAULT = {
   components: null,
@@ -41,7 +42,11 @@ export default class GameLoop {
   onUpdate(delta: any) {
     delta /= 1000;
     this.deltaLeft += delta;
-    this.opts.components.physics.update(delta);
+    // StaticDesign freezes the world (no physics) but the loop keeps running so
+    // render() + orbit controls stay live for inspection.
+    if (!GameConfig.StaticDesign) {
+      this.opts.components.physics.update(delta);
+    }
   }
 
   onDraw() {
@@ -55,7 +60,7 @@ export default class GameLoop {
     let delta = this.deltaLeft;
     this.deltaLeft = 0;
     fpsGraph && fpsGraph.begin();
-    if (this.paused) {
+    if (this.paused || GameConfig.StaticDesign) {
       delta = 0;
     }
     enemy.update(delta, engine.camera, bodyPosition);
