@@ -43,6 +43,12 @@ export default class GamePhysicsBody {
   scale: THREE.Vector2;
   position: THREE.Vector2;
   prevPosition: THREE.Vector2;
+  // Render interpolation: prevRenderPosition is the position at the start of the
+  // last physics step; renderPosition is the interpolated value the mesh is
+  // drawn at (see GamePhysics.interpolate). Kept separate from prevPosition,
+  // which the moving-platform carry uses.
+  prevRenderPosition: THREE.Vector2;
+  renderPosition: THREE.Vector2;
   acceleration: THREE.Vector2;
   velocity: THREE.Vector2;
   prevCollisions: CollisionEdges;
@@ -62,6 +68,8 @@ export default class GamePhysicsBody {
     this.scale = this.opts.scale || new THREE.Vector2();
     this.position = new THREE.Vector2();
     this.prevPosition = new THREE.Vector2();
+    this.prevRenderPosition = new THREE.Vector2();
+    this.renderPosition = new THREE.Vector2();
     this.acceleration = new THREE.Vector2();
     this.velocity = new THREE.Vector2();
     this.prevCollisions = new CollisionEdges();
@@ -107,7 +115,7 @@ export default class GamePhysicsBody {
 
   update(delta: number, timeScale: number) {
     const { velocity, acceleration, position } = this;
-    const { friction, maxVelocity, onUpdate } = this.opts;
+    const { friction, maxVelocity } = this.opts;
     velocity.add(acceleration);
     velocity.x = THREE.MathUtils.clamp(velocity.x, -maxVelocity.x, maxVelocity.x);
     velocity.y = THREE.MathUtils.clamp(velocity.y, -maxVelocity.y, maxVelocity.y);
@@ -119,7 +127,8 @@ export default class GamePhysicsBody {
       position.y += velocity.y * dt;
     }
     this.updateScale();
-    onUpdate(this);
+    // Mesh sync no longer happens here — it runs once per drawn frame in
+    // GamePhysics.interpolate so the render can interpolate between fixed steps.
   }
 
   canCollideWith(bodyType: number) {

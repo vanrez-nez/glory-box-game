@@ -49,10 +49,10 @@ export default class GameLoop {
     }
   }
 
-  onDraw() {
+  onDraw(interpolation: any) {
     const {
       engine, gameInput, enemy, player, map,
-      world, playerHud, enemyHud,
+      world, playerHud, enemyHud, physics,
     } = this.opts.components;
     const { fpsGraph } = this.opts;
     const { position: bodyPosition } = player.playerBody;
@@ -63,6 +63,9 @@ export default class GameLoop {
     if (this.paused || GameConfig.StaticDesign) {
       delta = 0;
     }
+    // Position every body's mesh at the interpolated point between the last two
+    // fixed physics steps, so the render is smooth at any display refresh rate.
+    physics.interpolate(this.paused || GameConfig.StaticDesign ? 1 : interpolation);
     enemy.update(delta, engine.camera, bodyPosition);
     player.update(delta, gameInput.state);
     world.update(delta, meshPosition);

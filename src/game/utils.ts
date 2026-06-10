@@ -79,14 +79,17 @@ export function SyncBodyPhysicsMesh(mesh: any, body: any) {
     const positionOffset = mesh.positionOffset || vPositionZero;
     const scaleOffset = mesh.scaleOffset || vScaleZero;
 
+    // Draw at the interpolated render position (set by GamePhysics.interpolate);
+    // fall back to the raw body position if it hasn't been computed yet.
+    const drawPos = body.renderPosition || body.position;
     CartesianToCylinder(
       mesh.position,
-      body.position.x + positionOffset.x,
-      body.position.y + positionOffset.y,
+      drawPos.x + positionOffset.x,
+      drawPos.y + positionOffset.y,
       body.opts.distance,
     );
     if (body.opts.syncLookAt) {
-      mesh.lookAt(0, body.position.y, 0);
+      mesh.lookAt(0, drawPos.y, 0);
     }
     mesh.scale.x = 1 + scaleOffset.x;
     mesh.scale.y = 1 + scaleOffset.y;

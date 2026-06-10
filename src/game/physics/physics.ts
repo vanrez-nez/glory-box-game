@@ -180,9 +180,42 @@ export default class GamePhysics {
     }
   }
 
+  // Render-interpolate every body's mesh between its position at the start of the
+  // last physics step (prevRenderPosition) and now (position), by `alpha` (0..1,
+  // mainloop's interpolationPercentage). Called once per drawn frame so motion is
+  // smooth even when a frame runs zero or several fixed steps. Platforms/static
+  // bodies sync to the current position (the moving-platform carry is timed to
+  // the fixed step — see prevPosition snapshot below — so interpolating them
+  // would fight it).
+  interpolate(alpha: any) {
+    const { bodies } = this;
+    for (let i = 0; i < bodies.length; i++) {
+      const b = bodies[i];
+      // Only enabled bodies were synced before (onUpdate ran inside body.update,
+      // which is gated on enabled) — keep that so disabled meshes stay frozen.
+      if (!b.enabled) { continue; }
+      const { prevRenderPosition: prev, renderPosition: render, position: pos } = b;
+      if (b.isPlatform || b.opts.isStatic) {
+        render.copy(pos);
+      } else {
+        // Shortest path across the wrap seam so a seam crossing doesn't sweep
+        // the body backwards across the whole cylinder for one frame.
+        const px = prev.x + this.wrapOffset(pos.x, prev.x);
+        render.x = px + (pos.x - px) * alpha;
+        render.y = prev.y + (pos.y - prev.y) * alpha;
+      }
+      b.opts.onUpdate(b);
+    }
+  }
+
   update(delta: any) {
     const { gravity, timeScale, bounds } = this.opts;
     const { bodies } = this;
+    // Snapshot each body's position before this step so the draw can interpolate
+    // from here to the post-step position.
+    for (let i = 0; i < bodies.length; i++) {
+      bodies[i].prevRenderPosition.copy(bodies[i].position);
+    }
     for (let i = 0; i < bodies.length; i++) {
       const b = bodies[i];
       const { opts } = b;
