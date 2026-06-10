@@ -200,5 +200,14 @@ export default class GamePhysics {
     }
     const collisionPairs = this.getCollisions(bodies);
     this.solveCollisions(collisionPairs);
+    // Snapshot moving-platform x AFTER carrying so each physics step's carry
+    // measures the platform's displacement since the previous step — independent
+    // of how many draws (which set position) happened in between.
+    for (let i = 0; i < bodies.length; i++) {
+      const b = bodies[i];
+      if (b.isMovingPlatform) {
+        b.prevPosition.x = b.position.x;
+      }
+    }
   }
 }

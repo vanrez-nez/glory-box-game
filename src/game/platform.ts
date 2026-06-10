@@ -30,6 +30,8 @@ export default class GamePlatform {
     this.body = this.getBody();
     this.oscillator = Math.random();
     this.body.position.set(this.opts.x, this.opts.y);
+    // seed prev so the first physics-step carry delta is 0, not the full position
+    this.body.prevPosition.copy(this.body.position);
     this.startPosition = this.body.position.clone();
     this.body.events.on(EVENTS.CollisionBegan, this.onCollisionBegan.bind(this));
   }
@@ -168,7 +170,10 @@ export default class GamePlatform {
     const { body, startPosition, opts } = this;
     if (this.isMovingPlatform()) {
       this.oscillator += delta;
-      body.prevPosition.x = body.position.x;
+      // Only move the visual/body position here (runs per-draw). prevPosition is
+      // snapshotted in the physics step so the player-carry measures displacement
+      // since the last carry (rate-independent — the loop draws faster than it
+      // steps physics, so tracking prev here under-carried the player).
       body.position.x = startPosition.x + Math.sin(this.oscillator) * opts.width;
     }
   }
