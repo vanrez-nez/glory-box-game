@@ -123,7 +123,7 @@ export default class Game {
     const physics = new GamePhysics({ bounds: this.getPhysicsBounds() });
     const engine = new Engine({ canvas: opts.canvasElement });
     const map = new GameMap({ physics, mapImageElement: opts.mapElement });
-    const playerHud = new GamePlayerHud({ camera: engine.camera });
+    const playerHud = new GamePlayerHud({ camera: engine.camera, scene: engine.scene });
     const enemyHud = new GameEnemyHud({ camera: engine.camera });
     const moodManager = new GameMoodManager({ engine, map, world });
     const gameState = new GameState({ store, map, enemy });

@@ -7,6 +7,7 @@ import GameSteeringTrailsSfx from '@/game/sfx/steering-trails-sfx';
 
 const DEFAULT = {
   camera: null,
+  scene: null,
 };
 
 export default class GamePlayerHud {
@@ -19,8 +20,12 @@ export default class GamePlayerHud {
     this.opts = { ...DEFAULT, ...opts };
     this.events = new EventEmitter3();
     this.group = new THREE.Group();
+    // Mesh parented to the scene (makio can't draw a camera-parented MeshLine),
+    // but the steering is simulated camera-local and baked to world each frame
+    // using this camera — so it looks camera-glued like the original.
     this.trailsSfx = new GameSteeringTrailsSfx({
-      parent: this.opts.camera,
+      parent: this.opts.scene,
+      camera: this.opts.camera,
     });
     this.loadModel();
     this.addFireballMesh();
@@ -90,6 +95,6 @@ export default class GamePlayerHud {
     const [x, y] = GetScreenCoords(0.5, 0.95, camera, GAME.HudDistanceFromCamera);
     fireball.position.set(x, y, -GAME.HudDistanceFromCamera);
     uniforms.u_time.value += delta * 0.15;
-    this.trailsSfx.update(fireball.position);
+    this.trailsSfx.update(fireball.position, camera);
   }
 }

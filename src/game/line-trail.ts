@@ -40,7 +40,24 @@ export default class LineTrail {
       dynamic: true,
       usage: THREE.DynamicDrawUsage,
     });
-    (mesh.material as any).depthTest = false;
+    // makio builds/configures the material lazily on first render, which resets
+    // material flags — so force the build now and set them on the finalized
+    // material. These mirror the original three.meshline MeshLineMaterial:
+    // fog=false (the old shader ignored scene fog, so trails don't fade into the
+    // black FogExp2); depthTest=false with depthWrite=TRUE — the trail ignores
+    // existing depth but still writes its own near depth, so farther geometry
+    // (e.g. the floor) fails its depth test and the trail stays on top. Setting
+    // depthWrite=false instead made the floor overdraw the trail ("behind floor").
+    mesh.ensureBuilt();
+    const mat = mesh.material as any;
+    mat.fog = false;
+    mat.depthTest = false;
+    mat.depthWrite = true;
+    // makio's MeshLine ribbon defaults to FrontSide; its front face depends on
+    // the line's orientation, so some trails (e.g. the pickup→fireball steering
+    // trails) land back-facing and get culled. The old GenericTrailMaterial used
+    // DoubleSide — restore it so trails are visible from any angle.
+    mat.side = THREE.DoubleSide;
     // Trails are short and move with their target; skip frustum culling rather
     // than maintain a bounding sphere as the old implementation did.
     mesh.frustumCulled = false;
