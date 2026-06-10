@@ -5,7 +5,7 @@ import { EVENTS } from '@/game/const';
 const DEFAULT = {
   index: -1,
   platforms: [],
-  collectibles: [],
+  props: [],
   sockets: [],
 };
 
@@ -51,8 +51,8 @@ export default class GameMapChunk {
   }
 
   getObjects() {
-    const { platforms, collectibles } = this.opts;
-    return ([] as any[]).concat(platforms, collectibles);
+    const { platforms, props } = this.opts;
+    return ([] as any[]).concat(platforms, props);
   }
 
   saveDefaults() {

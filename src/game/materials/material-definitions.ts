@@ -8,6 +8,7 @@ import FireballShader from '@/shaders/fireball';
 import CheckpointRingFxShader from '@/shaders/checkpoint-ring';
 import PickupBurstShader from '@/shaders/pickup-burst';
 import NebulaShader from '@/shaders/nebula';
+import InteriorMappingShader from '@/shaders/interior-mapping';
 
 /*
   Material definitions registry.
@@ -103,6 +104,7 @@ export const MATERIAL_DEFS: Record<string, MaterialDef> = {
   WorldSkyCylinder: shader(NebulaShader),
   WorldFxCylinder: shader(PickupBurstShader),
   WorldCheckpointRing: shader(CheckpointRingFxShader),
+  SocketInterior: shader(InteriorMappingShader),
 
   PlatformLight: basicColor,
 

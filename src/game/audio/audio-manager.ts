@@ -21,7 +21,9 @@ export class GameAudioManager {
   listener!: THREE.AudioListener;
   loader!: THREE.AudioLoader;
   loaded!: boolean;
+  unlocked!: boolean;
   queued!: any[];
+  playQueue!: any[];
   itemsLeft!: any;
   constructor(opts: any = {}) {
     this.opts = { ...DEFAULT, ...opts };
@@ -31,16 +33,26 @@ export class GameAudioManager {
     this.listener = new THREE.AudioListener();
     this.loader = new THREE.AudioLoader();
     this.loaded = false;
+    this.unlocked = false;
     this.queued = [];
+    this.playQueue = [];
     this.resumeOnGesture();
   }
 
   // Browsers block the AudioContext until a user gesture; resume it on the first
-  // interaction so autoplay loops + SFX actually sound.
+  // interaction, then flush any playback that was waiting on the unlock so we
+  // never call source.start() on a suspended context.
   resumeOnGesture() {
     const ctx = THREE.AudioContext.getContext() as AudioContext;
+    if (ctx.state === 'running') {
+      this.unlocked = true;
+      return;
+    }
     const resume = () => {
-      if (ctx.state === 'suspended') { ctx.resume(); }
+      ctx.resume().then(() => {
+        this.unlocked = true;
+        this.flushPlayQueue();
+      });
       window.removeEventListener('pointerdown', resume);
       window.removeEventListener('keydown', resume);
       window.removeEventListener('touchstart', resume);
@@ -48,6 +60,22 @@ export class GameAudioManager {
     window.addEventListener('pointerdown', resume);
     window.addEventListener('keydown', resume);
     window.addEventListener('touchstart', resume);
+  }
+
+  // Playback is allowed only once assets are decoded AND the context is unlocked.
+  isPlayable() {
+    return this.loaded && this.unlocked;
+  }
+
+  executeWhenPlayable(fn: any) {
+    if (this.isPlayable()) { fn(); } else { this.playQueue.push(fn); }
+  }
+
+  flushPlayQueue() {
+    if (!this.isPlayable()) { return; }
+    const queue = this.playQueue;
+    this.playQueue = [];
+    queue.forEach((fn: any) => fn());
   }
 
   // Called once the asset manifest is loaded (see GameLoader). Resolves each audio
@@ -75,6 +103,9 @@ export class GameAudioManager {
     this.initTracks();
     this.initMixes();
     this.processQueued();
+    // Tracks/mixes may already be waiting on the unlock (or it may have happened
+    // during load) — start anything now playable.
+    this.flushPlayQueue();
   }
 
   initTracks() {
@@ -196,10 +227,14 @@ export class GameAudioManager {
 
   loadTrack(trackId: any, opts: any) {
     const { tracks, listener } = this;
-    tracks[trackId] = new GameAudioTrack({
-      listener,
-      ...opts,
-    });
+    // Strip autoplay so the track doesn't self-start on a suspended context;
+    // the manager starts autoplay tracks through the playable gate instead.
+    const { autoplay, ...rest } = opts;
+    const track = new GameAudioTrack({ listener, ...rest });
+    tracks[trackId] = track;
+    if (autoplay) {
+      this.executeWhenPlayable(() => track.play());
+    }
   }
 
   setPositionalTrackParent(trackId: any, parent: any) {
@@ -225,7 +260,7 @@ export class GameAudioManager {
   }
 
   playMix(mixId: any) {
-    this.executeOnLoad(() => {
+    this.executeWhenPlayable(() => {
       const { mixes } = this;
       if (mixes[mixId]) {
         mixes[mixId].play();
@@ -234,7 +269,7 @@ export class GameAudioManager {
   }
 
   playTrack(trackId: any, spriteId?: any, when?: any) {
-    this.executeOnLoad(() => {
+    this.executeWhenPlayable(() => {
       const { tracks } = this;
       if (tracks[trackId]) {
         tracks[trackId].play(spriteId, when);

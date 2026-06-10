@@ -1,15 +1,10 @@
 import threads from 'threads';
 import { MAP, DIRECTIONS } from '@/game/const';
+import { MAP_COLORS } from '@/game/props/map-colors';
 
 const DEFAULT = {
   imageElement: null,
   onParse: () => {},
-};
-
-const MAP_PARSE_COLORS = {
-  '255,0,0': MAP.StaticPlatform,
-  '0,0,255': MAP.MovingPlatform,
-  '0,255,0': MAP.Glyph,
 };
 
 export default class GameMapParser {
@@ -111,7 +106,7 @@ export default class GameMapParser {
       mapData: this.mapImageData,
       width: this.width,
       height: this.height,
-      Colors: MAP_PARSE_COLORS,
+      Colors: MAP_COLORS,
       EmptyType: MAP.Empty,
     }).on('message', (output: any) => {
       this.tiles = output.tiles;

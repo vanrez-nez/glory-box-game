@@ -8,6 +8,7 @@ export const GAME = {
   HudDistanceFromCamera: 10,
   PlatformOffset: 2.45,
   CollectibleSocketOffset: 0,
+  DragonDenOffset: 0,
   CollectibleItemOffset: 1.9,
   PlayerOffset: 2.45,
   EnemyOffset: 5,
@@ -61,6 +62,7 @@ export const PHYSICS = {
   MovingPlatform: 6,
   Collectible: 7,
   Particle: 8,
+  DragonDen: 9,
 };
 
 export const LEVELS = {
@@ -82,6 +84,7 @@ export const MAP = {
   StaticPlatform: 1,
   MovingPlatform: 2,
   Glyph: 3,
+  DragonDen: 4,
 };
 
 export const COLLECTIBLE = {

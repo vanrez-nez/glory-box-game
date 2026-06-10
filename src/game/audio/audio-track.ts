@@ -52,6 +52,13 @@ export default class GameAudioTrack {
   }
 
   play(spriteId?: any, when = 0) {
+    // The AudioContext is suspended until a user gesture; calling source.start()
+    // on a suspended context throws the "AudioContext was not allowed to start"
+    // warning. Bail until it's running (the manager re-triggers autoplay/queued
+    // playback on unlock).
+    if (!this.audio || this.audio.context.state !== 'running') {
+      return;
+    }
     this.stop();
     this.currentSprite = spriteId;
     const [start, end] = this.range;

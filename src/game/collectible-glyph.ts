@@ -3,6 +3,7 @@ import * as THREE from 'three/webgpu';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { GAME } from '@/game/const';
 import { CartesianToCylinder } from '@/game/utils';
+import { createHexRingGeometry, createHexWindowGeometry } from '@/game/props/socket-geometry';
 
 const Offsets = [
   { x: 0.17, y: 0.83 },
@@ -42,43 +43,16 @@ export default class CollectibleGlyph {
     this.addGlyphMesh(offsets);
   }
 
-  static SetHexVertices(target: any, cellSize: any) {
-    const verts = [];
-    for (let i = 0; i < 6; i++) {
-      const angle = (Math.PI * 2 / 6) * i;
-      verts.push(new THREE.Vector2(
-        cellSize * Math.cos(angle),
-        cellSize * Math.sin(angle),
-      ));
-    }
-    target.moveTo(verts[0].x, verts[0].y);
-    for (let i = 0; i < 6; i++) {
-      target.lineTo(verts[i].x, verts[i].y);
-    }
-    target.autoClose = true;
-  }
-
   static GetSocketGeometry() {
     if (SocketGeometry === null) {
-      const shape = new THREE.Shape();
-      CollectibleGlyph.SetHexVertices(shape, 2.6);
-      const pathHole = new THREE.Path();
-      CollectibleGlyph.SetHexVertices(pathHole, 2);
-      shape.holes.push(pathHole);
-      const extrudeSettings = {
-        depth: 0.3,
-        bevelEnabled: false,
-      };
-      SocketGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+      SocketGeometry = createHexRingGeometry(2.6, 2, 0.3);
     }
     return SocketGeometry;
   }
 
   static GetGlyphGeometry() {
     if (GlyphGeometry === null) {
-      const shape = new THREE.Shape();
-      CollectibleGlyph.SetHexVertices(shape, 2);
-      GlyphGeometry = new THREE.ShapeGeometry(shape);
+      GlyphGeometry = createHexWindowGeometry(2);
     }
     return GlyphGeometry;
   }

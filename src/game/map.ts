@@ -8,6 +8,7 @@ import GameMapParser from '@/game/map-parser';
 import GamePlatform from '@/game/platform';
 import GameCollectible from '@/game/collectible';
 import GameMapChunk from '@/game/map-chunk';
+import { POINT_PROPS } from '@/game/props/prop-registry';
 
 const MAP_OFFSET_Y = -10;
 const MAP_CHUNK_SIZE = 128;
@@ -66,39 +67,75 @@ export default class GameMap {
   }
 
   dispose() {
+    // Stops any in-flight idle prebuild (the step guards on `initialized`).
+    this.initialized = false;
     this.prevPicks = [];
     this.masterChunks = {};
     this.chunkStates = {};
     this.randomPicks = {};
   }
 
+  // Master chunks are built lazily (on first pick) rather than all up front:
+  // building all 16 synchronously here — ~315 LineTrail material compiles plus
+  // socket merges — was the ~400ms startup freeze. Only the chunk(s) near spawn
+  // are needed for the first frame; the rest are prebuilt during idle time so
+  // ascent never hitches.
   initChunks() {
-    const { masterChunks, mapParser: map } = this;
-    const count = Math.floor(map.height / MAP_CHUNK_SIZE);
-    for (let idx = 0; idx < count; idx++) {
-      const start = idx * MAP_CHUNK_SIZE;
-      const size = MAP_CHUNK_SIZE;
-      const { platforms, collectibles } = this.getChunkObjects(start, size);
-      const chunk = new GameMapChunk({
-        index: idx,
-        platforms,
-        collectibles,
-        sockets: [
-          this.mergePlatformSockets(platforms),
-          this.mergeCollectibleSockets(collectibles),
-        ],
-      });
-      chunk.saveDefaults();
-      chunk.isRoot = true;
-      masterChunks[idx] = chunk;
-    }
     this.initialized = true;
+    this.prebuildMasters();
+  }
+
+  // Build one master chunk template (the old per-chunk init loop body).
+  buildMasterChunk(idx: number) {
+    const start = idx * MAP_CHUNK_SIZE;
+    const { platforms, props } = this.getChunkObjects(start, MAP_CHUNK_SIZE);
+    const collectibles = props.filter((p: any) => p instanceof GameCollectible);
+    const chunk = new GameMapChunk({
+      index: idx,
+      platforms,
+      props,
+      sockets: [
+        this.mergePlatformSockets(platforms),
+        this.mergeCollectibleSockets(collectibles),
+      ],
+    });
+    chunk.saveDefaults();
+    chunk.isRoot = true;
+    return chunk;
+  }
+
+  // Memoized accessor — builds the master on first access.
+  getMasterChunk(idx: number) {
+    const { masterChunks } = this;
+    if (masterChunks[idx] === undefined) {
+      masterChunks[idx] = this.buildMasterChunk(idx);
+    }
+    return masterChunks[idx];
+  }
+
+  // Background-build the masters the level system can actually pick (the
+  // CHUNK_LEVELS ranges — 4/9/14/15 are never used), one per idle callback, so
+  // they're ready before the player climbs to them without blocking a frame.
+  prebuildMasters() {
+    const used = new Set<number>();
+    Object.values(CHUNK_LEVELS).forEach(([start, end]: any) => {
+      range(start, end).forEach((i: number) => used.add(i));
+    });
+    const queue = [...used].filter(i => this.masterChunks[i] === undefined);
+    const schedule = (window as any).requestIdleCallback
+      || ((fn: any) => setTimeout(fn, 1));
+    const step = () => {
+      if (!this.initialized || queue.length === 0) { return; }
+      this.getMasterChunk(queue.shift() as number);
+      schedule(step);
+    };
+    schedule(step);
   }
 
   getChunkObjects(start: number, size: number) {
     const { mapParser: map } = this;
     const platforms = [];
-    const collectibles = [];
+    const props = [];
     const yStart = start % map.height;
     const yEnd = (start + size) % map.height;
     for (let y = yEnd; y >= yStart; y--) {
@@ -108,12 +145,13 @@ export default class GameMap {
         const currTile = map.getTileAt(x, y);
         if (currTile === MAP.Empty) {
           platformWidth = 0;
-        } else if (currTile === MAP.Glyph) {
-          const c = this.createCollectible({
+        } else if (POINT_PROPS[currTile]) {
+          // Single-tile props (collectible, dragon den) come from the registry.
+          const prop = this.createPointProp(currTile, {
             x: x - map.width / 2,
             y: yEnd - y,
           });
-          collectibles.push(c);
+          props.push(prop);
         } else {
           if (currTile === MAP.StaticPlatform ||
             currTile === MAP.MovingPlatform) {
@@ -132,20 +170,24 @@ export default class GameMap {
         }
       }
     }
-    return { platforms, collectibles };
+    return { platforms, props };
   }
 
   createPlatform(opts: any) {
     return new GamePlatform(opts);
   }
 
-  createCollectible(opts: any) {
-    const collectible = new GameCollectible(opts);
-    collectible.body.events.on(EVENTS.CollisionBegan,
-      this.onCollectibleCollisionBegan.bind(this, collectible));
-    collectible.events.on(EVENTS.CollectibleCollect,
-      this.onCollectibleCollect.bind(this, collectible));
-    return collectible;
+  createPointProp(type: number, opts: any) {
+    const prop = POINT_PROPS[type].create(opts);
+    // Collectibles are map-coupled: the map forwards their pickup/collect events
+    // up to game state and SFX. Other props (the den) need no wiring yet.
+    if (prop instanceof GameCollectible) {
+      prop.body.events.on(EVENTS.CollisionBegan,
+        this.onCollectibleCollisionBegan.bind(this, prop));
+      prop.events.on(EVENTS.CollectibleCollect,
+        this.onCollectibleCollect.bind(this, prop));
+    }
+    return prop;
   }
 
   updateChunks(positionY: number) {
@@ -155,12 +197,12 @@ export default class GameMap {
   }
 
   allocateChunkInstance(idx: number) {
-    const { mapChunks, masterChunks } = this;
+    const { mapChunks } = this;
     if (mapChunks[idx] === undefined) {
       const level = this.getLevel(idx);
       const pick = this.pickRandomChunk(level);
       const offset = idx * MAP_CHUNK_SIZE + MAP_OFFSET_Y;
-      const chunk = masterChunks[pick].getInstance(offset);
+      const chunk = this.getMasterChunk(pick).getInstance(offset);
       chunk.events.on(EVENTS.MapChunkLoaded, this.onChunkLoaded.bind(this));
       chunk.events.on(EVENTS.MapChunkUnloaded, this.onChunkUnloaded.bind(this));
       mapChunks[idx] = chunk;
@@ -228,15 +270,15 @@ export default class GameMap {
   }
 
   toggleChunk(chunk: any, enable: boolean) {
-    const { platforms, collectibles, sockets } = chunk.opts;
+    const { platforms, props, sockets } = chunk.opts;
     const pBodies = platforms.map((p: any) => p.body);
-    const cBodies = collectibles.map((c: any) => c.body);
+    const propBodies = props.map((p: any) => p.body);
     const pMeshes = platforms.map((p: any) => p.mesh);
-    const cMeshes = collectibles.map((c: any) => c.group);
+    const propMeshes = props.map((p: any) => p.group);
     this.togglePhysicsBodies(pBodies, enable);
-    this.togglePhysicsBodies(cBodies, enable);
+    this.togglePhysicsBodies(propBodies, enable);
     this.toggleDisplayObjects(pMeshes, enable);
-    this.toggleDisplayObjects(cMeshes, enable);
+    this.toggleDisplayObjects(propMeshes, enable);
     this.toggleDisplayObjects(sockets, enable);
   }
 
@@ -314,9 +356,9 @@ export default class GameMap {
       for (let i = 0; i < this.mapChunks.length; i++) {
         const chunk = mapChunks[i];
         if (chunk.loaded) {
-          const { collectibles, platforms } = chunk.opts;
-          for (let j = 0; j < collectibles.length; j++) {
-            collectibles[j].update(delta);
+          const { props, platforms } = chunk.opts;
+          for (let j = 0; j < props.length; j++) {
+            props[j].update(delta);
           }
           for (let j = 0; j < platforms.length; j++) {
             platforms[j].update(delta);
