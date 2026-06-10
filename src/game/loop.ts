@@ -19,11 +19,14 @@ export default class GameLoop {
   // (rAF-timestamp) clock, the SAME clock the body interpolation uses.
   stepCount!: number;
   lastInterpolation!: number;
+  // Wall-clock stamp for edit-mode fly (the game delta is frozen in edit mode).
+  lastEditMs!: number;
   constructor(opts: any) {
     this.opts = { ...DEFAULT, ...opts };
     this.bind();
     this.stepCount = 0;
     this.lastInterpolation = 0;
+    this.lastEditMs = 0;
   }
 
   bind() {
@@ -72,7 +75,7 @@ export default class GameLoop {
   // jitter, and no performance.now() callback noise).
   onDraw(interpolation: any) {
     const {
-      engine, enemy, player, map,
+      engine, gameInput, enemy, player, map,
       world, playerHud, enemyHud, physics,
     } = this.opts.components;
     const { fpsGraph } = this.opts;
@@ -84,6 +87,17 @@ export default class GameLoop {
     this.stepCount = 0;
     this.lastInterpolation = interpolation;
     delta = frozen ? 0 : Math.min(Math.max(delta, 0), MAX_FRAME_DELTA);
+
+    // Edit mode: fly the player on a real wall-clock delta (game delta is frozen),
+    // before the mesh sync below picks up the new body position.
+    if (GameConfig.StaticDesign) {
+      const now = performance.now();
+      const editDelta = this.lastEditMs ? Math.min((now - this.lastEditMs) / 1000, MAX_FRAME_DELTA) : 0;
+      this.lastEditMs = now;
+      player.editFly(gameInput.editAxes, editDelta);
+    } else {
+      this.lastEditMs = 0;
+    }
 
     fpsGraph && fpsGraph.begin();
     physics.interpolate(frozen ? 1 : interpolation);

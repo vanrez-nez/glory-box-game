@@ -241,12 +241,12 @@ export default class Game {
       this.tools.fpsGraph?.setRenderer(engine.getBackendName());
     }
     if (GameConfig.EnableTools) {
-      this.tools.addScreen('physics', physics);
       this.tools.addScreen('engine', engine);
+      this.tools.addScreen('physics', physics);
       this.tools.addScreen('player', player);
-      this.tools.addScreen('world', world);
       this.tools.addScreen('dragon', enemy.dragon);
-      this.tools.addScreen('materials');
+      this.tools.addScreen('world', world);
+      this.tools.buildMaterials();
       this.tools.persist();
     }
   }

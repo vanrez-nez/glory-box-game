@@ -5,7 +5,21 @@ import { StatsPanePluginBundle, type StatsPaneApi } from '@/game/stats-blade';
 
 // Bump whenever the dev-pane structure changes (tabs/bindings added or removed)
 // so a stale persisted state is dropped instead of corrupting the new layout.
-const TOOLS_STATE_VERSION = 2;
+const TOOLS_STATE_VERSION = 5;
+
+// Which tab each material (by registry key) is filed under. Only Player* and
+// Enemy* are routed; everything else (world / platforms / collectibles / sockets
+// / generic / fx) falls back to 'world'. Engine has no materials. Enemy* are the
+// dragon's materials (filed under Dragon, displayed as Dragon*).
+const MATERIAL_TAB: Record<string, string> = {
+  PlayerMaterial: 'player',
+  PlayerHitFx: 'player',
+  PlayerHudFireball: 'player',
+  EnemyHead: 'dragon',
+  EnemyArmor: 'dragon',
+  EnemyEyes: 'dragon',
+  EnemyRay: 'dragon',
+};
 
 export default class GameTools {
   pane!: any;
@@ -34,19 +48,17 @@ export default class GameTools {
     if (this.tab) { return; }
     this.tab = this.pane.addTab({
       pages: [
-        { title: 'Physics' },
         { title: 'Engine' },
         { title: 'Player' },
         { title: 'Dragon' },
-        { title: 'Materials' },
+        { title: 'World' },
       ],
     });
     this.pages = {
-      physics: this.tab.pages[0],
-      engine: this.tab.pages[1],
-      player: this.tab.pages[2],
-      dragon: this.tab.pages[3],
-      materials: this.tab.pages[4],
+      engine: this.tab.pages[0],
+      player: this.tab.pages[1],
+      dragon: this.tab.pages[2],
+      world: this.tab.pages[3],
     };
   }
 
@@ -69,10 +81,18 @@ export default class GameTools {
       case 'dragon':
         this.buildDragonScreen(obj);
         break;
-      case 'materials':
-        this.buildMaterialsScreen();
+      case 'world':
+        this.buildWorldScreen(obj);
         break;
     }
+  }
+
+  // World controls. The world/terrain materials are added later by buildMaterials.
+  buildWorldScreen(obj: any) {
+    this.ensureTabs();
+    const f = this.pages.world;
+    // Bind straight to the cylinder group's Object3D.visible.
+    f.addBinding(obj.mainCylinder.group, 'visible', { label: 'Cylinder Visible' });
   }
 
   // Live-tune the dragon movement/pose (binds to the dragon's mutable `params`).
@@ -131,11 +151,25 @@ export default class GameTools {
       localStorage.removeItem(key);
       window.location.reload();
     });
+    // Build/importState leaves non-active tab pages mis-laid-out until they're
+    // shown (the "click each tab to fix it" bug). Force it next frame.
+    requestAnimationFrame(() => this.relayout());
+  }
+
+  // Show every tab page once (then return to the first) — programmatically does
+  // what clicking each tab does, so all pages lay out correctly on load.
+  relayout() {
+    if (!this.tab) { return; }
+    const { pages } = this.tab;
+    for (let i = 0; i < pages.length; i++) {
+      pages[i].selected = true;
+    }
+    pages[0].selected = true;
   }
 
   buildPhysicsScreen(obj: any) {
     this.ensureTabs();
-    const f1 = this.pages.physics;
+    const f1 = this.pages.engine.addFolder({ title: 'Physics', expanded: false });
     f1.addBinding(obj.opts.gravity, 'x', { min: -0.5, max: 0.5, label: 'Gravity X' });
     f1.addBinding(obj.opts.gravity, 'y', { min: -0.5, max: 0.5, label: 'Gravity Y' });
   }
@@ -353,21 +387,30 @@ export default class GameTools {
     this.pane.refresh();
   }
 
-  buildMaterialsScreen() {
+  // Distribute every material's controls into a "Material" folder on its owning
+  // tab (call after the base screens are built). The export button lives in the
+  // World tab's Material folder.
+  buildMaterials() {
     this.ensureTabs();
-    const rootFolder = this.pages.materials;
+    const folders: Record<string, any> = {
+      player: this.pages.player.addFolder({ title: 'Material', expanded: false }),
+      dragon: this.pages.dragon.addFolder({ title: 'Material', expanded: false }),
+      world: this.pages.world.addFolder({ title: 'Material', expanded: false }),
+    };
     const matDict = MaterialFactory.getMaterialsByMaterialType();
     Object.keys(matDict).forEach((k) => {
-      this.buildMaterialGroup(rootFolder, k, matDict[k]);
+      this.buildMaterialGroup(folders[MATERIAL_TAB[k] || 'world'], k, matDict[k]);
     });
     const exportOutput = { text: '' };
-    rootFolder.addBinding(exportOutput, 'text', { label: 'Output' });
+    folders.world.addBinding(exportOutput, 'text', { label: 'Materials Output' });
     const exportFunc = this.exportMaterialsNode.bind(this, exportOutput);
-    rootFolder.addButton({ title: 'Export Materials Node' }).on('click', exportFunc);
+    folders.world.addButton({ title: 'Export Materials Node' }).on('click', exportFunc);
   }
 
   buildMaterialGroup(parentFolder: any, materialType: any, arr: any) {
-    const rootFolder = parentFolder.addFolder({ title: materialType, expanded: false });
+    // The dragon's materials read "Enemy*" in the registry but show as "Dragon*".
+    const title = String(materialType).replace(/^Enemy/, 'Dragon');
+    const rootFolder = parentFolder.addFolder({ title, expanded: false });
     arr.forEach((m: any, idx: any) => {
       const label = m.opts.label || materialType;
       let subfolder = null;
