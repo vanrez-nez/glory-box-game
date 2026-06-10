@@ -1,4 +1,4 @@
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import loader from '@/loader';
 import { GetScreenCoords } from '@/common/three-utils';
 import { GAME } from '@/game/const';
 import { MODEL_ASSETS } from '@/game/assets';
@@ -19,9 +19,8 @@ export default class GameEnemyHud {
   }
 
   loadModel() {
-    const loader = new GLTFLoader();
-    loader.load(MODEL_ASSETS.Dragon, (glft) => {
-      const scene = glft.scenes[0];
+    loader.loadModel(MODEL_ASSETS.Dragon).then((gltf) => {
+      const scene = (gltf.scenes[0] as any).clone(true);
       this.head = scene.getObjectByName('head');
       this.eyes = scene.getObjectByName('eyes');
       this.initHead();

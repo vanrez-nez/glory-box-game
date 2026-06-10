@@ -1,36 +1,20 @@
-import * as THREE from 'three/webgpu';
-
-const DEFAULT = {
-  map: null,
-};
+import loader from '@/loader';
+import { AudioManagerInstance as AudioManager } from '@/game/audio/audio-manager';
 
 export default class GameLoader {
-  opts!: Record<string, any>;
-  loader!: any;
-  constructor(opts: any) {
-    this.opts = { ...DEFAULT, ...opts };
-  }
-
-  async load() {
-    await Promise.all([
-      this.loadMap(),
-      this.loadAssets(),
-    ]);
-  }
-
-  async loadMap() {
-    const { map } = this.opts;
-    await map.load();
-  }
-
+  // Eager-load the asset manifest (images + model) and decode audio buffers.
+  // Must run BEFORE materials build (they read loaded images synchronously).
   async loadAssets() {
-    return new Promise<void>((resolve) => {
-      this.loader = THREE.DefaultLoadingManager;
-      this.loader.onProgress = (url: any, itemsLoaded: any, itemsTotal: any) => {
-        if (itemsLoaded === itemsTotal) {
-          resolve();
-        }
-      };
-    });
+    const res = await fetch('/manifest.json');
+    const manifest = await res.json();
+    await loader.load(manifest);
+    // Audio is loaded by AudioManager (its THREE.AudioLoader decodes into the
+    // listener's AudioContext); it resolves URLs from the now-loaded manifest.
+    await AudioManager.load();
+  }
+
+  // The level map loads independently (it needs the map component, built later).
+  async loadMap(map: any) {
+    await map.load();
   }
 }

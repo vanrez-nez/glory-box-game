@@ -1,9 +1,17 @@
 import * as THREE from 'three/webgpu';
-import { AUDIO_ASSETS } from '@/game/assets';
+import loader from '@/loader';
 import GameAudioTrack from '@/game/audio/audio-track';
 import GameAudioMix from '@/game/audio/audio-mix';
 
 const DEFAULT = {};
+
+// Manifest audio ids this manager needs (see public/manifest.json). Loaded via
+// THREE.AudioLoader so the decoded AudioBuffers share the listener's AudioContext.
+const AUDIO_IDS = [
+  'dragonRoar', 'dramaEnd', 'jumpAlt', 'windLoop', 'dragonNear',
+  'electricChargeDim', 'electricBlast', 'collect', 'footStep', 'playerHit',
+  'loopDrums',
+];
 
 export class GameAudioManager {
   opts!: Record<string, any>;
@@ -24,33 +32,42 @@ export class GameAudioManager {
     this.loader = new THREE.AudioLoader();
     this.loaded = false;
     this.queued = [];
-    this.preload([
-      // AUDIO_ASSETS.FxJump,
-      // 'static/audio/loop_drums.wav',
-      // 'static/audio/jump_alt.wav',
-      // 'static/audio/wind_loop.wav',
-      // 'static/audio/dragon_near.wav',
-      // 'static/audio/electric_charge_dim.wav',
-      // 'static/audio/electric_blast.wav',
-      // 'static/audio/collect.wav',
-      // 'static/audio/foot_step.wav',
-      // 'static/audio/player_hit.wav',
-      // 'static/audio/drama_end.wav',
-      // 'static/audio/dragon_roar.wav',
-    ]);
+    this.resumeOnGesture();
   }
 
-  preload(items: any) {
-    const { loader } = this;
-    this.itemsLeft = items.length;
-    items.forEach((item: any) => loader.load(item, this.onItemLoaded.bind(this, item)));
+  // Browsers block the AudioContext until a user gesture; resume it on the first
+  // interaction so autoplay loops + SFX actually sound.
+  resumeOnGesture() {
+    const ctx = THREE.AudioContext.getContext() as AudioContext;
+    const resume = () => {
+      if (ctx.state === 'suspended') { ctx.resume(); }
+      window.removeEventListener('pointerdown', resume);
+      window.removeEventListener('keydown', resume);
+      window.removeEventListener('touchstart', resume);
+    };
+    window.addEventListener('pointerdown', resume);
+    window.addEventListener('keydown', resume);
+    window.addEventListener('touchstart', resume);
   }
 
-  onItemLoaded(src: any, buffer: any) {
-    this.buffers[src] = buffer;
-    if (--this.itemsLeft === 0) {
-      this.onLoaderFinished();
-    }
+  // Called once the asset manifest is loaded (see GameLoader). Resolves each audio
+  // id to its manifest URL and decodes it into an AudioBuffer keyed by id.
+  async load() {
+    await Promise.all(AUDIO_IDS.map((id) => new Promise<void>((resolve) => {
+      const entry = loader.getEntry(id);
+      if (!entry) {
+        console.warn(`[audio] missing manifest entry: "${id}"`);
+        resolve();
+        return;
+      }
+      this.loader.load(
+        entry.src as string,
+        (buffer) => { this.buffers[id] = buffer; resolve(); },
+        undefined,
+        () => { console.warn(`[audio] failed to load: "${id}"`); resolve(); },
+      );
+    })));
+    this.onLoaderFinished();
   }
 
   onLoaderFinished() {
@@ -84,20 +101,20 @@ export class GameAudioManager {
     // });
 
     this.loadTrack('dragon_roar', {
-      buffer: buffers['static/audio/dragon_roar.wav'],
+      buffer: buffers.dragonRoar,
     });
 
     this.loadTrack('drama_end', {
-      buffer: buffers['static/audio/drama_end.wav'],
+      buffer: buffers.dramaEnd,
     });
 
     this.loadTrack('jump_1', {
-      buffer: buffers[AUDIO_ASSETS.FxJump],
+      buffer: buffers.jumpAlt,
       volume: 0.7,
     });
 
     this.loadTrack('wind_loop', {
-      buffer: buffers['static/audio/wind_loop.wav'],
+      buffer: buffers.windLoop,
       loop: true,
       positional: true,
       autoplay: true,
@@ -106,7 +123,7 @@ export class GameAudioManager {
     });
 
     this.loadTrack('dragon_near_loop', {
-      buffer: buffers['static/audio/dragon_near.wav'],
+      buffer: buffers.dragonNear,
       loop: true,
       positional: true,
       autoplay: true,
@@ -115,25 +132,25 @@ export class GameAudioManager {
     });
 
     this.loadTrack('electric_charge', {
-      buffer: buffers['static/audio/electric_charge_dim.wav'],
+      buffer: buffers.electricChargeDim,
       volume: 1,
     });
 
     this.loadTrack('electric_blast', {
-      buffer: buffers['static/audio/electric_blast.wav'],
+      buffer: buffers.electricBlast,
       volume: 1,
     });
 
     this.loadTrack('collect', {
-      buffer: buffers['static/audio/collect.wav'],
+      buffer: buffers.collect,
     });
 
     this.loadTrack('foot_step', {
-      buffer: buffers['static/audio/foot_step.wav'],
+      buffer: buffers.footStep,
     });
 
     this.loadTrack('player_hit', {
-      buffer: buffers['static/audio/player_hit.wav'],
+      buffer: buffers.playerHit,
     });
   }
 
@@ -141,7 +158,7 @@ export class GameAudioManager {
     this.loadMix('game_theme', {
       tracks: {
         drums: {
-          buffer: this.buffers['static/audio/loop_drums.wav'],
+          buffer: this.buffers.loopDrums,
           sprite: {
             speed_1: [0, 14769],
             speed_2: [14770, 29538],

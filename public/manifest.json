@@ -1,0 +1,28 @@
+{
+  "assets": [
+    { "type": "image", "id": "hullBase", "src": "/assets/images/macro_hull_basecolor.jpg" },
+    { "type": "image", "id": "hullEmissive", "src": "/assets/images/macro_hull_emissive.jpg" },
+    { "type": "image", "id": "hullNormal", "src": "/assets/images/macro_hull_normal.jpg" },
+    { "type": "image", "id": "groundBase", "src": "/assets/images/ground_basecolor.jpg" },
+    { "type": "image", "id": "groundNormal", "src": "/assets/images/ground_normal.jpg" },
+    { "type": "image", "id": "groundRoughness", "src": "/assets/images/ground_roughness.jpg" },
+    { "type": "image", "id": "glyphsEmissive", "src": "/assets/images/glyphs_emissive.jpg" },
+    { "type": "image", "id": "perlinNoise", "src": "/assets/images/noise.jpg" },
+    { "type": "image", "id": "ringEmissive", "src": "/assets/images/ring_emissive.png" },
+    { "type": "image", "id": "universeCube", "src": "/assets/images/universe_cube_0_cubef_cubert.jpg" },
+
+    { "type": "model", "id": "dragon", "src": "/assets/models/dragon.glb" },
+
+    { "type": "audio", "id": "dragonRoar", "src": "/assets/audio/dragon_roar.wav", "lazy": true },
+    { "type": "audio", "id": "dramaEnd", "src": "/assets/audio/drama_end.wav", "lazy": true },
+    { "type": "audio", "id": "jumpAlt", "src": "/assets/audio/jump_alt.wav", "lazy": true },
+    { "type": "audio", "id": "windLoop", "src": "/assets/audio/wind_loop.wav", "lazy": true },
+    { "type": "audio", "id": "dragonNear", "src": "/assets/audio/dragon_near.wav", "lazy": true },
+    { "type": "audio", "id": "electricChargeDim", "src": "/assets/audio/electric_charge_dim.wav", "lazy": true },
+    { "type": "audio", "id": "electricBlast", "src": "/assets/audio/electric_blast.wav", "lazy": true },
+    { "type": "audio", "id": "collect", "src": "/assets/audio/collect.wav", "lazy": true },
+    { "type": "audio", "id": "footStep", "src": "/assets/audio/foot_step.wav", "lazy": true },
+    { "type": "audio", "id": "playerHit", "src": "/assets/audio/player_hit.wav", "lazy": true },
+    { "type": "audio", "id": "loopDrums", "src": "/assets/audio/loop_drums.wav", "lazy": true }
+  ]
+}

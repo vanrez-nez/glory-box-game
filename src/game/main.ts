@@ -72,6 +72,10 @@ export default class Game {
       GameConfig is shared as a singleton through all the modules
     */
     GameConfig.set(this.opts.quality, true);
+    // Load all assets (manifest images/model + audio buffers) BEFORE building
+    // components — materials read their textures synchronously from the loader.
+    this.gameLoader = new GameLoader();
+    await this.gameLoader.loadAssets();
     this.initComponents();
     // WebGPURenderer must finish async backend init before the first render;
     // the loop is only started later (start()), but await here so resize and
@@ -92,7 +96,7 @@ export default class Game {
     engine.skybox = skyboxMesh;
     this.updateSize();
     this.attachEvents();
-    await this.initLoad();
+    await this.gameLoader.loadMap(this.components.map);
     this.addDevTools();
     this.initLoop();
     this.events.emit(EVENTS.GameReady);
@@ -104,12 +108,6 @@ export default class Game {
       fpsGraph: tools?.fpsGraph,
       components,
     });
-  }
-
-  async initLoad() {
-    const { map } = this.components;
-    this.gameLoader = new GameLoader({ map });
-    await this.gameLoader.load();
   }
 
   attachEvents() {

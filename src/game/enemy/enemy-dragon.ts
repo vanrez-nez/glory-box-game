@@ -1,6 +1,6 @@
 import EventEmitter3 from 'eventemitter3';
 import * as THREE from 'three/webgpu';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import loader from '@/loader';
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { AudioManagerInstance as AudioManager } from '@/game/audio/audio-manager';
 import { GAME, PHYSICS, EVENTS } from '@/game/const';
@@ -83,16 +83,20 @@ export default class GameEnemyDragon {
   }
 
   loadModel() {
-    const loader = new GLTFLoader();
-    loader.load(MODEL_ASSETS.Dragon, (glft) => {
-      const scene = glft.scenes[0];
-      this.head = scene.getObjectByName('head') as THREE.Mesh;
-      this.eyes = scene.getObjectByName('eyes') as THREE.Mesh;
-      this.tailSegment = scene.getObjectByName('tail_segment') as THREE.Mesh;
+    // Shared cached GLTF — clone the scene so this consumer owns its objects
+    // (enemy-hud reparents its own copy of head/eyes).
+    loader.loadModel(MODEL_ASSETS.Dragon).then((gltf) => {
+      const scene = (gltf.scenes[0] as any).clone(true);
+      this.head = scene.getObjectByName('head');
+      this.eyes = scene.getObjectByName('eyes');
+      this.tailSegment = scene.getObjectByName('tail_segment');
       this.opts.parent!.add(this.head);
       this.initHead();
       this.initTail();
       this.initSpine();
+      // Spatialize the ambient loops on the (now-loaded) dragon head.
+      AudioManager.setPositionalTrackParent('wind_loop', this.head);
+      AudioManager.setPositionalTrackParent('dragon_near_loop', this.head);
       this.modelLoaded = true;
     });
   }

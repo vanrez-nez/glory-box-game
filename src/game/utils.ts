@@ -1,9 +1,19 @@
 import * as THREE from 'three/webgpu';
 import { GameConfigInstance as GameConfig } from '@/game/config';
 import { GAME } from '@/game/const';
+import loader from '@/loader';
 
-export function GetTextureRepeat(url: any, repeatX: any, repeatY: any, offsetX = 0, offsetY = 0) {
-  const tex = new THREE.TextureLoader().load(url);
+// `id` is a manifest asset id (see public/manifest.json). The image must already
+// be loaded (the eager manifest batch resolves before materials build); we wrap
+// the cached HTMLImageElement in a fresh THREE.Texture so each usage can carry
+// its own repeat/offset.
+export function GetTextureRepeat(id: any, repeatX: any, repeatY: any, offsetX = 0, offsetY = 0) {
+  const image = loader.get<HTMLImageElement>(id);
+  if (!image) {
+    console.warn(`[GetTextureRepeat] asset not loaded: "${id}"`);
+  }
+  const tex = new THREE.Texture(image as any);
+  tex.needsUpdate = true;
   tex.wrapS = THREE.RepeatWrapping;
   tex.wrapT = THREE.RepeatWrapping;
   tex.repeat.set(repeatX, repeatY);

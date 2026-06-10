@@ -1,5 +1,4 @@
 import * as THREE from 'three/webgpu';
-import { AudioManagerInstance as AudioManager } from '@/game/audio/audio-manager';
 import GameEnemyDragon from '@/game/enemy/enemy-dragon';
 import GameEnemyRays from '@/game/enemy/enemy-rays';
 
@@ -18,10 +17,8 @@ export default class GameEnemy {
     this.dragon = new GameEnemyDragon({ parent: this.group });
     this.rays = new GameEnemyRays({ parent: this.group });
     this.bodies = this.rays.bodies.concat(this.dragon.body);
-    // These ambient loops were anchored to the (removed) vortex; keep them
-    // spatialized on the dragon so the soundscape is preserved.
-    AudioManager.setPositionalTrackParent('wind_loop', this.dragon.head);
-    AudioManager.setPositionalTrackParent('dragon_near_loop', this.dragon.head);
+    // The ambient loops are spatialized on the dragon head — attached by the
+    // dragon once its model has loaded (head doesn't exist synchronously here).
   }
 
   update(delta: any, camera: any, playerPosition: any) {

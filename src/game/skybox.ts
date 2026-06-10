@@ -4,7 +4,7 @@ import * as THREE from 'three/webgpu';
 import 'skybox-studio-runtime/starfield';
 import { Skybox } from 'skybox-studio-runtime';
 import manifest from '@/assets/skybox/manifest.json';
-import { IMAGE_ASSETS } from '@/game/assets';
+import loader from '@/loader';
 
 /*
   Skybox split into two responsibilities:
@@ -19,19 +19,20 @@ import { IMAGE_ASSETS } from '@/game/assets';
 */
 export class GameSkybox {
   manifest: any = manifest;
-  textureCube: THREE.CubeTexture;
   mesh: Skybox | null = null;
+  #cube?: THREE.CubeTexture;
 
-  constructor() {
-    this.textureCube = new THREE.CubeTextureLoader().load([
-      IMAGE_ASSETS.SkyboxPX,
-      IMAGE_ASSETS.SkyboxNX,
-      IMAGE_ASSETS.SkyboxPY,
-      IMAGE_ASSETS.SkyboxNY,
-      IMAGE_ASSETS.SkyboxPZ,
-      IMAGE_ASSETS.SkyboxNZ,
-    ]);
-    this.textureCube.mapping = THREE.CubeReflectionMapping;
+  // Lazy: this is a module-load singleton but the cube image only exists after the
+  // manifest loads. Materials read `textureCube` when they build (after load), so
+  // building it on first access is safe (all 6 faces share the one cube image).
+  get textureCube(): THREE.CubeTexture {
+    if (!this.#cube) {
+      const img = loader.get<HTMLImageElement>('universeCube') as any;
+      this.#cube = new THREE.CubeTexture([img, img, img, img, img, img]);
+      this.#cube.mapping = THREE.CubeReflectionMapping;
+      this.#cube.needsUpdate = true;
+    }
+    return this.#cube;
   }
 
   // Live visible backdrop. Needs the WebGPU renderer.
