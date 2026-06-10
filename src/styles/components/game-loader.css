@@ -1,0 +1,42 @@
+.GameLoader {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--revolver);
+}
+
+.GameLoader-spinner {
+  width: 42px;
+  height: 42px;
+  border: 3px solid rgba(70, 130, 180, 0.2);
+  border-top-color: var(--steel-blue);
+  border-radius: 50%;
+  animation: GameLoader-spin 0.8s linear infinite;
+}
+
+.GameLoader-label {
+  margin-top: 18px;
+  color: var(--steel-blue);
+  font-size: 12px;
+  letter-spacing: 0.35em;
+  text-indent: 0.35em; /* balance the trailing letter-spacing */
+}
+
+@keyframes GameLoader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Fade out when the game is ready; the loop is already rendering behind it. */
+.GameLoader-fade-leave-active {
+  transition: opacity 0.4s ease;
+}
+
+.GameLoader-fade-leave-to {
+  opacity: 0;
+}

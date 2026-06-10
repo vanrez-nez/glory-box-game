@@ -14,7 +14,11 @@ export default class GameLoader {
   }
 
   // The level map loads independently (it needs the map component, built later).
+  // Includes the CPU-heavy geometry construction (buildAllMasters) so this only
+  // resolves once the map is fully built — the caller emits GameReady after,
+  // keeping the load overlay up through geometry construction, not just decode.
   async loadMap(map: any) {
     await map.load();
+    await map.buildAllMasters();
   }
 }

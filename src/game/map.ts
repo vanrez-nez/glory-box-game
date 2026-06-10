@@ -75,14 +75,12 @@ export default class GameMap {
     this.randomPicks = {};
   }
 
-  // Master chunks are built lazily (on first pick) rather than all up front:
-  // building all 16 synchronously here — ~315 LineTrail material compiles plus
-  // socket merges — was the ~400ms startup freeze. Only the chunk(s) near spawn
-  // are needed for the first frame; the rest are prebuilt during idle time so
-  // ascent never hitches.
+  // Map parsing is done; geometry construction is handled by buildAllMasters()
+  // (awaited next, behind the load overlay) instead of synchronously here —
+  // building all 16 masters at once (~315 LineTrail compiles + socket merges)
+  // was the ~400ms startup freeze.
   initChunks() {
     this.initialized = true;
-    this.prebuildMasters();
   }
 
   // Build one master chunk template (the old per-chunk init loop body).
@@ -113,23 +111,32 @@ export default class GameMap {
     return masterChunks[idx];
   }
 
-  // Background-build the masters the level system can actually pick (the
-  // CHUNK_LEVELS ranges — 4/9/14/15 are never used), one per idle callback, so
-  // they're ready before the player climbs to them without blocking a frame.
-  prebuildMasters() {
+  // Build every master the level system can actually pick (the CHUNK_LEVELS
+  // ranges — 4/9/14/15 are never used). Frame-budgeted across animation frames
+  // so the page stays responsive (the load overlay keeps animating) instead of
+  // one long freeze. Awaited during init so the intro only begins once ALL
+  // geometry is constructed, not just once assets are decoded.
+  buildAllMasters(): Promise<void> {
     const used = new Set<number>();
     Object.values(CHUNK_LEVELS).forEach(([start, end]: any) => {
       range(start, end).forEach((i: number) => used.add(i));
     });
     const queue = [...used].filter(i => this.masterChunks[i] === undefined);
-    const schedule = (window as any).requestIdleCallback
-      || ((fn: any) => setTimeout(fn, 1));
-    const step = () => {
-      if (!this.initialized || queue.length === 0) { return; }
-      this.getMasterChunk(queue.shift() as number);
-      schedule(step);
-    };
-    schedule(step);
+    const raf = (fn: any) => (typeof requestAnimationFrame === 'function'
+      ? requestAnimationFrame(fn) : setTimeout(fn, 16));
+    const FRAME_BUDGET = 12; // ms — yield after this so a frame can paint
+    return new Promise<void>((resolve) => {
+      const step = () => {
+        // Disposed mid-build (or finished) — unwind so init() can complete.
+        if (!this.initialized || queue.length === 0) { resolve(); return; }
+        const startedAt = performance.now();
+        do {
+          this.getMasterChunk(queue.shift() as number);
+        } while (queue.length > 0 && performance.now() - startedAt < FRAME_BUDGET);
+        raf(step);
+      };
+      raf(step);
+    });
   }
 
   getChunkObjects(start: number, size: number) {
