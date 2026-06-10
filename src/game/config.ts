@@ -40,6 +40,29 @@ const RENDER = {
   PixelRatioMultiplier: 1,
 };
 
+// Dragon movement/pose tuning. Copied into a mutable `params` on the dragon at
+// construction and bound to the "Dragon" tweakpane screen for live tuning.
+// Distances are world units (the wall sits at GAME.CylinderRadius = 35); times
+// are seconds.
+export const DRAGON = {
+  speed: 22,           // head travel speed along its path (units/sec)
+  amplitude: 3.5,      // serpentine undulation amplitude (vertical)
+  wavelength: 16,      // undulation wavelength (arc units)
+  waveSpeed: 3,        // undulation temporal speed
+  bodyLength: 40,      // arc length the body spans behind the head
+  circleHeight: 5,     // radial offset above the wall while circling
+  bodySep: 7,          // attack: radial offset of the body above the wall
+  headDist: 1.5,       // attack: radial offset of the head (stays visible, near wall)
+  bendLength: 26,      // attack: how many front segments arc inward
+  hiddenDwell: 2.5,    // seconds hidden between appearances (appearance cadence)
+  activeDuration: 6,   // seconds spent out before diving back in
+  emergeTime: 1.0,     // seconds to rise out of a den
+  diveTime: 1.2,       // seconds to sink into a den
+  attackWeight: 0.5,   // probability an appearance is an attack (vs circle)
+  aimLag: 0.8,         // seconds of player-path lag the attack aims at
+  forceBehavior: 1,    // dev: 0 = random, 1 = force circle (wander), 2 = force attack
+};
+
 export class GameConfig {
   developerMode!: boolean;
   constructor() {

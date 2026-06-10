@@ -26,6 +26,10 @@ export default class Engine {
   camera!: THREE.PerspectiveCamera;
   scene!: THREE.Scene;
   postProcessing?: THREE.RenderPipeline;
+  // Runtime toggle (dev tools) for the post-processing pass — defaults to the
+  // config flag but can be switched live; only meaningful if the pipeline was
+  // built at init (it is when UsePostProcessing starts true).
+  usePostProcessing = GameConfig.UsePostProcessing;
   // BloomNode from three/addons/tsl/display/BloomNode; its strength/radius/
   // threshold are TSL uniform nodes (animate via `.value`, see mood-manager).
   bloomPass?: any;
@@ -228,7 +232,7 @@ export default class Engine {
     }
     // Synchronous render is the supported path now that init() is awaited before
     // the loop starts (renderAsync() is deprecated).
-    if (GameConfig.UsePostProcessing && postProcessing) {
+    if (this.usePostProcessing && postProcessing) {
       postProcessing.render();
     } else {
       renderer.render(scene, camera);

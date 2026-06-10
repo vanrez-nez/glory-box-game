@@ -9,6 +9,7 @@ import GamePlatform from '@/game/platform';
 import GameCollectible from '@/game/collectible';
 import GameMapChunk from '@/game/map-chunk';
 import { POINT_PROPS } from '@/game/props/prop-registry';
+import GameDragonDen from '@/game/props/dragon-den';
 
 const MAP_OFFSET_Y = -10;
 const MAP_CHUNK_SIZE = 128;
@@ -38,6 +39,9 @@ export default class GameMap {
   mapChunks: GameMapChunk[];
   chunkStates: Record<number, any>;
   randomPicks: Record<number, number[]>;
+  // Dragon dens currently loaded (maintained as chunks toggle) — the dragon
+  // dives in/out of these.
+  activeDens: GameDragonDen[];
   mapParser!: GameMapParser;
 
   constructor(opts: Partial<MapOptions> = {}) {
@@ -51,6 +55,12 @@ export default class GameMap {
     this.mapChunks = [];
     this.chunkStates = {};
     this.randomPicks = {};
+    this.activeDens = [];
+  }
+
+  // Dens currently in loaded chunks (the dragon's available in/out points).
+  getActiveDens() {
+    return this.activeDens;
   }
 
   async load() {
@@ -73,6 +83,7 @@ export default class GameMap {
     this.masterChunks = {};
     this.chunkStates = {};
     this.randomPicks = {};
+    this.activeDens = [];
   }
 
   // Map parsing is done; geometry construction is handled by buildAllMasters()
@@ -287,6 +298,23 @@ export default class GameMap {
     this.toggleDisplayObjects(pMeshes, enable);
     this.toggleDisplayObjects(propMeshes, enable);
     this.toggleDisplayObjects(sockets, enable);
+    this.toggleActiveDens(props, enable);
+  }
+
+  // Keep the active-den list in sync as chunks load/unload.
+  toggleActiveDens(props: any[], enable: boolean) {
+    const { activeDens } = this;
+    for (let i = 0; i < props.length; i++) {
+      const prop = props[i];
+      if (prop instanceof GameDragonDen) {
+        const idx = activeDens.indexOf(prop);
+        if (enable && idx === -1) {
+          activeDens.push(prop);
+        } else if (!enable && idx !== -1) {
+          activeDens.splice(idx, 1);
+        }
+      }
+    }
   }
 
   togglePhysicsBodies(bodies: any[], enabled: boolean) {

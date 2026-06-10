@@ -87,7 +87,7 @@ export default class GameLoop {
 
     fpsGraph && fpsGraph.begin();
     physics.interpolate(frozen ? 1 : interpolation);
-    enemy.update(delta, engine.camera, bodyPosition);
+    enemy.update(delta, engine.camera, bodyPosition, map);
     player.update(delta);
     world.update(delta, meshPosition);
     playerHud.update(delta);

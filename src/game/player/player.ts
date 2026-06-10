@@ -42,6 +42,8 @@ export default class GamePlayer {
   groundedTime = 0;
   locked = false;
   canDoubleJump = false;
+  // Dev god mode: invulnerable — enemy hits never trigger death (see Game.onPlayerDeath).
+  godMode = false;
   group: THREE.Group;
   mesh!: THREE.Mesh;
   playerBody!: GamePhysicsBody;

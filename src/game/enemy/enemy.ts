@@ -21,8 +21,8 @@ export default class GameEnemy {
     // dragon once its model has loaded (head doesn't exist synchronously here).
   }
 
-  update(delta: any, camera: any, playerPosition: any) {
-    this.dragon.update(delta, playerPosition);
+  update(delta: any, camera: any, playerPosition: any, map: any) {
+    this.dragon.update(delta, playerPosition, map);
     this.rays.update(delta, camera, playerPosition);
   }
 

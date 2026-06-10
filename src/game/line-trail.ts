@@ -85,6 +85,13 @@ export default class LineTrail {
     this.points[o + 2] = position.z;
   }
 
+  // Upload the current points as-is (no ring shift). For callers that rewrite
+  // every point each frame (the dragon spine) — pushPosition() would rotate the
+  // buffer and wrap the tail back to the head, closing a loop.
+  flush() {
+    this.mesh.setPositions(this.points, false);
+  }
+
   pushPosition(position: any) {
     const { points, opts } = this;
     // Drop the oldest point and append the newest at the end.

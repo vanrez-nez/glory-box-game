@@ -220,7 +220,8 @@ export default class Game {
   }
 
   onPlayerDeath() {
-    const { sfxManager } = this.components;
+    const { sfxManager, player } = this.components;
+    if (player.godMode) { return; } // invulnerable — ignore the death
     sfxManager.destroyPlayer();
     AudioManager.stopMix('game_theme');
     AudioManager.playTrack('drama_end');
@@ -233,7 +234,7 @@ export default class Game {
     if (!GameConfig.EnableTools && !GameConfig.EnableStats) {
       return;
     }
-    const { physics, engine, player, world } = this.components;
+    const { physics, engine, player, world, enemy } = this.components;
     this.tools = new GameTools();
     if (GameConfig.EnableStats) {
       this.tools.addFpsGraph();
@@ -244,6 +245,7 @@ export default class Game {
       this.tools.addScreen('engine', engine);
       this.tools.addScreen('player', player);
       this.tools.addScreen('world', world);
+      this.tools.addScreen('dragon', enemy.dragon);
       this.tools.addScreen('materials');
       this.tools.persist();
     }

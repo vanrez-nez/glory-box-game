@@ -3,6 +3,10 @@ import { GameConfigInstance as GameConfig } from '@/game/config';
 import { Pane } from 'tweakpane';
 import { StatsPanePluginBundle, type StatsPaneApi } from '@/game/stats-blade';
 
+// Bump whenever the dev-pane structure changes (tabs/bindings added or removed)
+// so a stale persisted state is dropped instead of corrupting the new layout.
+const TOOLS_STATE_VERSION = 2;
+
 export default class GameTools {
   pane!: any;
   tab?: any;
@@ -33,6 +37,7 @@ export default class GameTools {
         { title: 'Physics' },
         { title: 'Engine' },
         { title: 'Player' },
+        { title: 'Dragon' },
         { title: 'Materials' },
       ],
     });
@@ -40,7 +45,8 @@ export default class GameTools {
       physics: this.tab.pages[0],
       engine: this.tab.pages[1],
       player: this.tab.pages[2],
-      materials: this.tab.pages[3],
+      dragon: this.tab.pages[3],
+      materials: this.tab.pages[4],
     };
   }
 
@@ -60,29 +66,66 @@ export default class GameTools {
       case 'engine':
         this.buildEngineScreen(obj);
         break;
+      case 'dragon':
+        this.buildDragonScreen(obj);
+        break;
       case 'materials':
         this.buildMaterialsScreen();
         break;
     }
   }
 
+  // Live-tune the dragon movement/pose (binds to the dragon's mutable `params`).
+  buildDragonScreen(obj: any) {
+    this.ensureTabs();
+    const f = this.pages.dragon;
+    const p = obj.params;
+    f.addBinding(p, 'speed', { min: 5, max: 60, label: 'Speed' });
+    f.addBinding(p, 'amplitude', { min: 0, max: 12, label: 'Undulation Amp' });
+    f.addBinding(p, 'wavelength', { min: 4, max: 40, label: 'Wavelength' });
+    f.addBinding(p, 'waveSpeed', { min: 0, max: 10, label: 'Wave Speed' });
+    f.addBinding(p, 'bodyLength', { min: 10, max: 80, label: 'Body Length' });
+    f.addBinding(p, 'circleHeight', { min: 0, max: 15, label: 'Circle Height' });
+    f.addBinding(p, 'bodySep', { min: 0, max: 15, label: 'Attack Body Sep' });
+    f.addBinding(p, 'headDist', { min: -5, max: 8, label: 'Attack Head Dist' });
+    f.addBinding(p, 'bendLength', { min: 1, max: 60, step: 1, label: 'Attack Bend Len' });
+    f.addBinding(p, 'hiddenDwell', { min: 0, max: 10, label: 'Hidden Dwell' });
+    f.addBinding(p, 'activeDuration', { min: 1, max: 15, label: 'Active Duration' });
+    f.addBinding(p, 'emergeTime', { min: 0.2, max: 3, label: 'Emerge Time' });
+    f.addBinding(p, 'diveTime', { min: 0.2, max: 3, label: 'Dive Time' });
+    f.addBinding(p, 'attackWeight', { min: 0, max: 1, label: 'Attack Weight' });
+    f.addBinding(p, 'aimLag', { min: 0, max: 3, label: 'Aim Lag' });
+    f.addBinding(p, 'forceBehavior', { min: 0, max: 2, step: 1, label: 'Force (0/1c/2a)' });
+  }
+
   /*
     Persists the whole pane state to localStorage so dev tweaks survive reloads
     (a lightweight replacement for dat.gui's named-preset "remember" system).
-    Also adds a Reset button to clear the saved state.
+    Versioned: importing a saved state whose structure no longer matches the pane
+    (after bindings/tabs are added/removed) corrupts the layout — bindings shift,
+    pages bleed together — so a mismatched/stale blob is discarded instead.
+    BUMP TOOLS_STATE_VERSION whenever the pane structure changes.
   */
   persist() {
     const key = 'glory-box:tools-state';
     const saved = localStorage.getItem(key);
     if (saved) {
       try {
-        this.pane.importState(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.v === TOOLS_STATE_VERSION && parsed.state) {
+          this.pane.importState(parsed.state);
+        } else {
+          localStorage.removeItem(key);
+        }
       } catch {
         localStorage.removeItem(key);
       }
     }
     this.pane.on('change', () => {
-      localStorage.setItem(key, JSON.stringify(this.pane.exportState()));
+      localStorage.setItem(key, JSON.stringify({
+        v: TOOLS_STATE_VERSION,
+        state: this.pane.exportState(),
+      }));
     });
     this.pane.addButton({ title: 'Reset Tweaks' }).on('click', () => {
       localStorage.removeItem(key);
@@ -101,6 +144,7 @@ export default class GameTools {
     this.ensureTabs();
     const f1 = this.pages.player;
 
+    f1.addBinding(obj, 'godMode', { label: 'God Mode' });
     f1.addBinding(obj.playerBody.opts, 'mass', { min: 0.01, max: 0.3, label: 'Mass' });
     f1.addBinding(obj.playerBody.opts, 'friction', { min: 0.01, max: 0.3, label: 'Friction' });
 
@@ -118,6 +162,7 @@ export default class GameTools {
     const rootFolder = this.pages.engine;
     const { renderer, bloomPass, scene, ambientLight } = obj;
     const f0 = rootFolder.addFolder({ title: 'Renderer' });
+    f0.addBinding(obj, 'usePostProcessing', { label: 'Post Processing' });
     f0.addBinding(renderer, 'toneMappingExposure', { min: 0.0, max: 10 });
     if (GameConfig.UsePostProcessing) {
       // Bloom Pass — BloomNode exposes its params as TSL uniform nodes, so the
