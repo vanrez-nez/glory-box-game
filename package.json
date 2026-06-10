@@ -7,6 +7,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:proxy": "bash scripts/devsite.sh",
     "start": "vite",
     "type-check": "vue-tsc --noEmit",
     "build": "vue-tsc --noEmit && vite build",
