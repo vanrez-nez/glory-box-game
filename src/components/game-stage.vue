@@ -27,11 +27,12 @@ export default defineComponent({
   methods: {
     recreate() {
       const canvas = this.$refs.canvas as HTMLCanvasElement;
-      const map = this.$refs.map as HTMLImageElement;
       if (isEmpty(this.game)) {
         const game = new Game({
           canvasElement: canvas,
-          mapElement: map,
+          // Texture color builder unwired — the map no longer parses the image.
+          // Positioning is moving to the virtual hex grid (placed via the editor).
+          mapElement: null,
           store: this.$store,
         });
         this.game = game;

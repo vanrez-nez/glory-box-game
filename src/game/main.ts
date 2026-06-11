@@ -8,7 +8,6 @@ import { GAME, EVENTS } from '@/game/const';
 import Engine from '@/game/engine';
 import GameLoader from '@/game/loader';
 import GameState from '@/game/state';
-import GameTools from '@/game/tools';
 import GameInput from '@/game/input';
 import GamePhysics from '@/game/physics/physics';
 import GamePlayer from '@/game/player/player';
@@ -55,7 +54,8 @@ export default class Game {
   components!: GameComponents;
   loop!: GameLoop;
   gameLoader!: GameLoader;
-  tools?: GameTools;
+  // Dev-only editor handle (attached behind import.meta.env.DEV; absent in prod).
+  editor?: { dispose(): void };
 
   constructor(opts: Partial<GameOptions> = {}) {
     this.opts = { ...DEFAULT, ...opts };
@@ -65,11 +65,6 @@ export default class Game {
   }
 
   async init() {
-    /*
-      GameConfig is shared as a singleton through all the modules. Developer
-      mode is enabled here (it gates the dev tools / edit-mode features).
-    */
-    GameConfig.set(true);
     // Load all assets (manifest images/model + audio buffers) BEFORE building
     // components — materials read their textures synchronously from the loader.
     this.gameLoader = new GameLoader();
@@ -95,17 +90,18 @@ export default class Game {
     this.updateSize();
     this.attachEvents();
     await this.gameLoader.loadMap(this.components.map);
-    this.addDevTools();
     this.initLoop();
+    // Dev-only editor: loaded behind import.meta.env.DEV so Rollup tree-shakes the
+    // whole src/editor module (tweakpane, overlay, tile-editor…) out of production.
+    if (import.meta.env.DEV) {
+      const { attachEditor } = await import('@/editor');
+      this.editor = attachEditor(this);
+    }
     this.events.emit(EVENTS.GameReady);
   }
 
   initLoop() {
-    const { components, tools } = this;
-    this.loop = new GameLoop({
-      fpsGraph: tools?.fpsGraph,
-      components,
-    });
+    this.loop = new GameLoop({ components: this.components });
   }
 
   attachEvents() {
@@ -114,17 +110,6 @@ export default class Game {
     gameState.events.on(EVENTS.GameResume, this.resume.bind(this));
     gameState.events.on(EVENTS.PlayerDeath, this.onPlayerDeath.bind(this));
     window.addEventListener('resize', this.updateSize.bind(this));
-    window.addEventListener('keydown', this.onEditModeKey.bind(this));
-  }
-
-  // Cmd/Ctrl+E toggles edit mode (developer mode's free camera + frozen world).
-  onEditModeKey(e: KeyboardEvent) {
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'e') {
-      e.preventDefault();
-      const on = !GameConfig.StaticDesign;
-      GameConfig.setStaticDesign(on);
-      this.components.engine.setEditMode(on);
-    }
   }
 
   getPhysicsBounds() {
@@ -214,6 +199,7 @@ export default class Game {
   dispose() {
     const { components } = this;
     this.loop.unbind();
+    this.editor?.dispose();
     components.gameState.dispose();
     MaterialFactory.clear();
     components.engine.dispose();
@@ -228,27 +214,6 @@ export default class Game {
     setTimeout(() => {
       this.restart();
     }, 3000);
-  }
-
-  addDevTools() {
-    if (!GameConfig.EnableTools && !GameConfig.EnableStats) {
-      return;
-    }
-    const { physics, engine, player, world, enemy } = this.components;
-    this.tools = new GameTools();
-    if (GameConfig.EnableStats) {
-      this.tools.addFpsGraph();
-      this.tools.fpsGraph?.setRenderer(engine.getBackendName());
-    }
-    if (GameConfig.EnableTools) {
-      this.tools.addScreen('engine', engine);
-      this.tools.addScreen('physics', physics);
-      this.tools.addScreen('player', player);
-      this.tools.addScreen('dragon', enemy.dragon);
-      this.tools.addScreen('world', world);
-      this.tools.buildMaterials();
-      this.tools.persist();
-    }
   }
 
   updateSize() {

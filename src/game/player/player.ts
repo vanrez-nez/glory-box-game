@@ -34,10 +34,6 @@ const DEFAULT: PlayerOptions = {
   descentGravity: -0.34,
 };
 
-// Edit-mode fly speed: x is map-units around the cylinder (128 = full circle),
-// y is world-units of elevation. Per second.
-const EDIT_FLY_SPEED = 36;
-
 export default class GamePlayer {
   opts: PlayerOptions;
   jumpLocked = false;
@@ -285,14 +281,5 @@ export default class GamePlayer {
   update(_delta: number) {
     this.updateScaleOffset();
     this.updateLights();
-  }
-
-  // Edit mode: physics is frozen, so move the body directly in cylinder axes —
-  // x around the cylinder (sides), y elevation (up/down). The mesh follows on the
-  // next physics.interpolate(1).
-  editFly(axes: { x: number; y: number }, delta: number) {
-    const { playerBody } = this;
-    playerBody.position.x += axes.x * EDIT_FLY_SPEED * delta;
-    playerBody.position.y += axes.y * EDIT_FLY_SPEED * delta;
   }
 }

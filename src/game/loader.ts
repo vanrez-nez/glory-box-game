@@ -19,6 +19,10 @@ export default class GameLoader {
   // keeping the load overlay up through geometry construction, not just decode.
   async loadMap(map: any) {
     await map.load();
-    await map.buildAllMasters();
+    // Only build chunk geometry if the map actually parsed a source (image map).
+    // With the texture color builder unwired, the map is dormant — nothing to build.
+    if (map.initialized) {
+      await map.buildAllMasters();
+    }
   }
 }

@@ -1,11 +1,11 @@
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { GameConfigInstance as GameConfig } from '@/game/config';
 import { Pane } from 'tweakpane';
-import { StatsPanePluginBundle, type StatsPaneApi } from '@/game/stats-blade';
+import { StatsPanePluginBundle, type StatsPaneApi } from '@/editor/stats-blade';
 
 // Bump whenever the dev-pane structure changes (tabs/bindings added or removed)
 // so a stale persisted state is dropped instead of corrupting the new layout.
-const TOOLS_STATE_VERSION = 5;
+const TOOLS_STATE_VERSION = 6;
 
 // Which tab each material (by registry key) is filed under. Only Player* and
 // Enemy* are routed; everything else (world / platforms / collectibles / sockets
@@ -52,6 +52,7 @@ export default class GameTools {
         { title: 'Player' },
         { title: 'Dragon' },
         { title: 'World' },
+        { title: 'Editor' },
       ],
     });
     this.pages = {
@@ -59,6 +60,7 @@ export default class GameTools {
       player: this.tab.pages[1],
       dragon: this.tab.pages[2],
       world: this.tab.pages[3],
+      editor: this.tab.pages[4],
     };
   }
 
@@ -84,15 +86,29 @@ export default class GameTools {
       case 'world':
         this.buildWorldScreen(obj);
         break;
+      case 'editor':
+        this.buildEditorScreen(obj);
+        break;
     }
   }
 
-  // World controls. The world/terrain materials are added later by buildMaterials.
-  buildWorldScreen(obj: any) {
+  // Editor tab: cylinder/grid visibility + the virtual hex grid's subdivision.
+  // `obj` = { mainCylinder, hexGrid (math), overlay (editor visualisation) }.
+  buildEditorScreen(obj: any) {
     this.ensureTabs();
-    const f = this.pages.world;
-    // Bind straight to the cylinder group's Object3D.visible.
+    const f = this.pages.editor;
     f.addBinding(obj.mainCylinder.group, 'visible', { label: 'Cylinder Visible' });
+    // Grid auto-shows in edit mode; this is a manual gate within edit mode.
+    f.addBinding(obj.overlay, 'enabled', { label: 'Grid Visible' });
+    f.addBinding(obj.hexGrid.params, 'columns', {
+      min: 3, max: 64, step: 1, label: 'Hex Columns',
+    }).on('change', () => obj.overlay.rebuild());
+  }
+
+  // World tab hosts the world/terrain materials (added by buildMaterials). The
+  // cylinder/grid controls live in the Editor tab (buildEditorScreen).
+  buildWorldScreen(_obj: any) {
+    this.ensureTabs();
   }
 
   // Live-tune the dragon movement/pose (binds to the dragon's mutable `params`).

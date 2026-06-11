@@ -1,5 +1,4 @@
 import MainLoop from 'mainloop.js';
-import { GameConfigInstance as GameConfig } from '@/game/config';
 
 const DEFAULT = {
   components: null,
@@ -19,14 +18,18 @@ export default class GameLoop {
   // (rAF-timestamp) clock, the SAME clock the body interpolation uses.
   stepCount!: number;
   lastInterpolation!: number;
-  // Wall-clock stamp for edit-mode fly (the game delta is frozen in edit mode).
-  lastEditMs!: number;
+  // Generic "freeze the simulation" flag (the editor sets it for edit mode):
+  // physics steps are skipped and visuals hold, but rendering continues.
+  frozen = false;
+  // Optional per-frame hooks (the editor uses them for its per-frame work + FPS
+  // bracketing). The game core never sets these.
+  onFrameStart?: () => void;
+  onFrameEnd?: () => void;
   constructor(opts: any) {
     this.opts = { ...DEFAULT, ...opts };
     this.bind();
     this.stepCount = 0;
     this.lastInterpolation = 0;
-    this.lastEditMs = 0;
   }
 
   bind() {
@@ -56,9 +59,10 @@ export default class GameLoop {
   }
 
   // Fixed-step SIMULATION (always dt = 1/60). Input/forces run here — at the
-  // physics rate, independent of display refresh — then the physics step.
+  // physics rate, independent of display refresh — then the physics step. Skipped
+  // while frozen (edit mode) so the world holds still.
   onUpdate(stepMs: any) {
-    if (GameConfig.StaticDesign) {
+    if (this.frozen) {
       return;
     }
     const dt = stepMs / 1000;
@@ -74,32 +78,20 @@ export default class GameLoop {
   // so visuals stay locked to the same clock as the interpolation (no relative
   // jitter, and no performance.now() callback noise).
   onDraw(interpolation: any) {
+    this.onFrameStart?.();
     const {
-      engine, gameInput, enemy, player, map,
+      engine, enemy, player, map,
       world, playerHud, enemyHud, physics,
     } = this.opts.components;
-    const { fpsGraph } = this.opts;
     const { position: bodyPosition } = player.playerBody;
     const { position: meshPosition } = player.mesh;
-    const frozen = this.paused || GameConfig.StaticDesign;
+    const frozen = this.paused || this.frozen;
 
     let delta = (this.stepCount + interpolation - this.lastInterpolation) * FIXED_DELTA;
     this.stepCount = 0;
     this.lastInterpolation = interpolation;
     delta = frozen ? 0 : Math.min(Math.max(delta, 0), MAX_FRAME_DELTA);
 
-    // Edit mode: fly the player on a real wall-clock delta (game delta is frozen),
-    // before the mesh sync below picks up the new body position.
-    if (GameConfig.StaticDesign) {
-      const now = performance.now();
-      const editDelta = this.lastEditMs ? Math.min((now - this.lastEditMs) / 1000, MAX_FRAME_DELTA) : 0;
-      this.lastEditMs = now;
-      player.editFly(gameInput.editAxes, editDelta);
-    } else {
-      this.lastEditMs = 0;
-    }
-
-    fpsGraph && fpsGraph.begin();
     physics.interpolate(frozen ? 1 : interpolation);
     enemy.update(delta, engine.camera, bodyPosition, map);
     player.update(delta);
@@ -108,7 +100,7 @@ export default class GameLoop {
     enemyHud.update(delta);
     map.update(delta, bodyPosition);
     engine.render(delta);
-    fpsGraph && fpsGraph.end();
+    this.onFrameEnd?.();
   }
 
   onEnd(fps: any, panic: any) {

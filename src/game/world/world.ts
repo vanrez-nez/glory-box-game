@@ -4,10 +4,12 @@ import { GameConfigInstance as GameConfig } from '@/game/config';
 import { GAME } from '@/game/const';
 import GameLobby from '@/game/lobby';
 import WorldCylinder from '@/game/world/cylinder';
+import HexGrid from '@/game/world/hex-grid';
 
 export default class GameWorld {
   group!: THREE.Group;
   mainCylinder!: any;
+  hexGrid!: HexGrid;
   lobby!: any;
   skyCylinder!: THREE.Mesh;
   floor!: any;
@@ -17,6 +19,7 @@ export default class GameWorld {
     this.group.name = 'GameWorld';
     this.addFloor();
     this.addMainCylinder();
+    this.addHexGrid();
     this.addFxCylinder();
     this.addSkyCylinder();
   }
@@ -24,6 +27,13 @@ export default class GameWorld {
   addMainCylinder() {
     this.mainCylinder = new WorldCylinder({});
     this.group.add(this.mainCylinder.group);
+  }
+
+  // Virtual hex grid laid over the cylinder — pure coordinate math (the game's
+  // positioning substrate). Its editor visualisation (HexGridOverlay) is created
+  // and added to this.group by the editor when it attaches (dev only).
+  addHexGrid() {
+    this.hexGrid = new HexGrid();
   }
 
   addLobby() {
@@ -91,6 +101,8 @@ export default class GameWorld {
   update(delta: any, playerPosition: any) {
     const { skyCylinder, mainCylinder } = this;
     mainCylinder.update(delta, playerPosition);
+    // hexGrid.update() (band follow) is driven by the loop so it can track the
+    // edit camera's pan height in edit mode, not just the player.
     if (GameConfig.EnableSkyShader) {
       const { uniforms } = skyCylinder.material as any;
       uniforms.u_time.value += delta * 0.35;

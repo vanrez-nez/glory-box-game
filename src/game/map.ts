@@ -65,6 +65,13 @@ export default class GameMap {
 
   async load() {
     const { opts } = this;
+    // Texture color builder unwired: with no image there's no parser, so the map
+    // stays dormant (initialized = false) — no chunks/props are built and the
+    // chunk pipeline below is never reached. Positioning moves to the virtual hex
+    // grid (HexGrid). Re-passing a map image restores the old behaviour.
+    if (!opts.mapImageElement) {
+      return Promise.resolve();
+    }
     return new Promise<void>((resolve) => {
       this.mapParser = new GameMapParser({
         imageElement: opts.mapImageElement,

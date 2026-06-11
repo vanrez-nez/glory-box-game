@@ -1,15 +1,10 @@
 import * as THREE from 'three/webgpu';
 
+// Plain game-side debug flags (editor/dev features live in src/editor now).
 const DEV_CONFIG = {
-  EnableTools: true,
-  EnableStats: true,
-  EnableOrbitControls: false,
-  EnableAxes: false,
+  // Wireframe colliding bodies (read in utils.ts SyncBodyPhysicsMesh). The dev
+  // editor may flip it; default off.
   DebugCollisions: false,
-  // Static design mode: detach the camera from the player (free orbit) and
-  // freeze the world so the cylinder layout can be inspected. Implies orbit
-  // controls. Dev-mode only.
-  StaticDesign: false,
 };
 
 // Ungated numeric world tuning (not dev/quality gated). The cylinder wrap is
@@ -63,29 +58,16 @@ export const DRAGON = {
   forceBehavior: 1,    // dev: 0 = random, 1 = force circle (wander), 2 = force attack
 };
 
-export class GameConfig {
-  developerMode!: boolean;
-  constructor() {
-    this.developerMode = false;
-  }
-
-  set(developerMode: any) {
-    this.developerMode = developerMode;
-  }
-
-  // Runtime toggle for edit mode (free camera + frozen world). The StaticDesign
-  // getter reads DEV_CONFIG, so flipping it here flips the getter (dev-mode gated).
-  setStaticDesign(on: boolean) {
-    DEV_CONFIG.StaticDesign = on;
-  }
-}
+// Holds no state now (dev/editor gating moved to src/editor); the getters below
+// expose the config tables as a singleton.
+export class GameConfig {}
 
 // dynamically assign all object keys from DEV_CONFIG, RENDER and WORLD
 // as getters of the object
 function setupGetters(o: any) {
   Object.keys(DEV_CONFIG).forEach((key) => {
     Object.defineProperty(o, key, {
-      get() { return (DEV_CONFIG as any)[key] && this.developerMode; },
+      get() { return (DEV_CONFIG as any)[key]; },
     });
   });
   // single render baseline (ungated render feature toggles)

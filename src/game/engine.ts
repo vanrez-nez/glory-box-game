@@ -2,7 +2,6 @@ import * as THREE from 'three/webgpu';
 import { pass } from 'three/tsl';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 import { fxaa } from 'three/addons/tsl/display/FXAANode.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GameConfigInstance as GameConfig } from '@/game/config';
 import { GAME } from '@/game/const';
 import { CylinderFromCartesian, CylinderToCartesian } from '@/game/utils';
@@ -17,11 +16,6 @@ const DEFAULT: EngineOptions = {};
 // the old fixed per-frame lerp factors (0.1 look / 0.05 position) at 60Hz.
 const CAMERA_TARGET_RATE = 6.3;
 const CAMERA_POS_RATE = 3.1;
-
-// Edit-mode camera: scroll orbits/pans. radians per horizontal wheel unit, and
-// world-units per vertical wheel unit.
-const EDIT_AZIMUTH_SPEED = 0.0016;
-const EDIT_HEIGHT_SPEED = 0.06;
 
 export default class Engine {
   opts: EngineOptions;
@@ -39,18 +33,14 @@ export default class Engine {
   // threshold are TSL uniform nodes (animate via `.value`, see mood-manager).
   bloomPass?: any;
   ambientLight!: THREE.AmbientLight;
-  orbitControls!: OrbitControls;
-  axesHelper!: THREE.AxesHelper;
   skybox?: THREE.Object3D;
   cameraOffset!: THREE.Vector3;
   cameraTarget!: THREE.Vector3;
   cameraTargetTo!: THREE.Vector3;
   cameraVector!: THREE.Vector3;
-  // Edit-mode (StaticDesign) free camera: orbits the cylinder axis at `editHeight`,
-  // driven by scroll (horizontal → azimuth, vertical → elevation).
-  editAzimuth = 0;
-  editHeight = 0;
-  editRadius = GAME.CameraDistance;
+  // Optional camera driver (the editor installs its free-fly camera here). When
+  // unset, render() uses followTarget. Keeps all edit-camera logic out of core.
+  cameraController?: (delta: number) => void;
 
   constructor(opts: Partial<EngineOptions> = {}) {
     this.opts = { ...DEFAULT, ...opts };
@@ -66,7 +56,6 @@ export default class Engine {
     this.cameraTargetTo = new THREE.Vector3();
     // vector to handle camera positions
     this.cameraVector = new THREE.Vector3();
-    this.initHelpers();
   }
 
   /*
@@ -148,60 +137,6 @@ export default class Engine {
     this.postProcessing = postProcessing;
   }
 
-  initHelpers() {
-    const { scene, camera, renderer } = this;
-    // Create the orbit camera in developer mode so edit mode (Cmd+E) can toggle it
-    // at runtime; it's only active while orbit/static design is on.
-    if (GameConfig.developerMode) {
-      const c = new OrbitControls(camera, renderer.domElement) as any;
-      c.enableDamping = true;
-      c.dampingFactor = 0.25;
-      c.minDistance = 1;
-      c.maxDistance = 1000;
-      c.enableKeys = false;
-      c.enabled = GameConfig.EnableOrbitControls;
-      this.orbitControls = c;
-      // Edit-mode scroll → orbit (horizontal) + elevation (vertical).
-      renderer.domElement.addEventListener('wheel', this.onEditWheel.bind(this), { passive: false });
-    }
-    if (GameConfig.EnableAxes) {
-      this.axesHelper = new THREE.AxesHelper(500);
-      scene.add(this.axesHelper);
-    }
-  }
-
-  // Enter/leave edit mode. render() switches to the edit camera while
-  // StaticDesign is on; on entry, seed azimuth/height from the player's spot so
-  // the view doesn't jump. The orbit-drag controls stay off (scroll drives it).
-  setEditMode(on: boolean) {
-    if (on) {
-      const [, theta] = CylinderFromCartesian(this.cameraTarget);
-      this.editAzimuth = theta;
-      this.editHeight = this.cameraTarget.y + 6;
-    }
-  }
-
-  // Edit camera: orbit the cylinder axis at editAzimuth, looking at the axis
-  // point at editHeight.
-  updateEditCamera() {
-    const { camera, editAzimuth, editHeight } = this;
-    const r = GAME.CylinderRadius + this.editRadius;
-    camera.position.set(Math.sin(editAzimuth) * r, editHeight, Math.cos(editAzimuth) * r);
-    camera.lookAt(0, editHeight, 0);
-  }
-
-  // Scroll while in edit mode: trackpad horizontal (or Shift+wheel) orbits;
-  // vertical wheel pans elevation. Outside edit mode this is a no-op (page scroll
-  // is left alone).
-  onEditWheel(e: WheelEvent) {
-    if (!GameConfig.StaticDesign) { return; }
-    e.preventDefault();
-    const horizontal = e.deltaX || (e.shiftKey ? e.deltaY : 0);
-    const vertical = e.shiftKey ? 0 : e.deltaY;
-    this.editAzimuth -= horizontal * EDIT_AZIMUTH_SPEED;
-    this.editHeight -= vertical * EDIT_HEIGHT_SPEED;
-  }
-
   dispose() {
     this.scene.remove(...this.scene.children);
     this.renderer.dispose();
@@ -249,12 +184,9 @@ export default class Engine {
 
   render(delta = 0) {
     const { renderer, scene, camera, postProcessing } = this;
-    if (GameConfig.StaticDesign) {
-      // Free edit camera: scroll orbits the cylinder + pans elevation.
-      this.updateEditCamera();
-    } else if (GameConfig.EnableOrbitControls) {
-      this.orbitControls.update();
-      this.orbitControls.target = this.cameraTarget;
+    // The editor may install a free-fly camera driver; otherwise follow the player.
+    if (this.cameraController) {
+      this.cameraController(delta);
     } else {
       this.followTarget(delta);
     }

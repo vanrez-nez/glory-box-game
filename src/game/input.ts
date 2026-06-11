@@ -1,5 +1,5 @@
 import EventEmitter3 from 'eventemitter3';
-import { InputManager, KEYBOARD } from '@/common/input-manager';
+import { InputManager } from '@/common/input-manager';
 import { KEYBOARD_CONTROLS, GAMEPAD_CONTROLS, EVENTS } from '@/game/const';
 
 const GAMEPAD_INDEX = 0;
@@ -73,16 +73,5 @@ export default class GameInput {
   get state() {
     this.updateActionsState();
     return this.actionsState;
-  }
-
-  // Raw arrow-key axes for edit-mode flying: x = around the cylinder (sides),
-  // y = elevation (up/down). Read straight from the keyboard so it's independent
-  // of the gameplay Jump/Left/Right actions.
-  get editAxes() {
-    const { keyboard } = this.inputManager.state;
-    return {
-      x: (keyboard[KEYBOARD.ArrowRight] ? 1 : 0) - (keyboard[KEYBOARD.ArrowLeft] ? 1 : 0),
-      y: (keyboard[KEYBOARD.ArrowUp] ? 1 : 0) - (keyboard[KEYBOARD.ArrowDown] ? 1 : 0),
-    };
   }
 }
