@@ -1,5 +1,6 @@
 import loader from '@/loader';
 import { AudioManagerInstance as AudioManager } from '@/game/audio/audio-manager';
+import levelData from '@/game/level/level.json';
 
 export default class GameLoader {
   // Eager-load the asset manifest (images + model) and decode audio buffers.
@@ -19,10 +20,11 @@ export default class GameLoader {
   // keeping the load overlay up through geometry construction, not just decode.
   async loadMap(map: any) {
     await map.load();
-    // Only build chunk geometry if the map actually parsed a source (image map).
-    // With the texture color builder unwired, the map is dormant — nothing to build.
     if (map.initialized) {
       await map.buildAllMasters();
     }
+    // Spawn the committed level (production renders this; in dev the editor
+    // overrides it from localStorage on attach).
+    map.loadLevel((levelData as any).records || {});
   }
 }

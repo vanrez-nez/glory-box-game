@@ -1,11 +1,16 @@
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
 import { GameConfigInstance as GameConfig } from '@/game/config';
+import { COLLECTIBLE } from '@/game/const';
 import { Pane } from 'tweakpane';
 import { StatsPanePluginBundle, type StatsPaneApi } from '@/editor/stats-blade';
+import { ITEM_TYPES, ITEM_CATALOG } from '@/editor/items';
+import type { EditorState, ItemType } from '@/editor/store';
 
 // Bump whenever the dev-pane structure changes (tabs/bindings added or removed)
 // so a stale persisted state is dropped instead of corrupting the new layout.
-const TOOLS_STATE_VERSION = 6;
+const TOOLS_STATE_VERSION = 7;
+
+const DEN_DIRECTIONS = { input: 'input', output: 'output', both: 'both' };
 
 // Which tab each material (by registry key) is filed under. Only Player* and
 // Enemy* are routed; everything else (world / platforms / collectibles / sockets
@@ -26,6 +31,8 @@ export default class GameTools {
   tab?: any;
   pages: Record<string, any> = {};
   fpsGraph?: StatsPaneApi;
+  // Per-item placement folders in the Editor tab (toggled by selection/insert).
+  editorFolders: Partial<Record<ItemType, any>> = {};
   constructor() {
     this.pane = new Pane({ title: 'Dev Tools' });
     this.pane.registerPlugin(StatsPanePluginBundle);
@@ -92,17 +99,67 @@ export default class GameTools {
     }
   }
 
-  // Editor tab: cylinder/grid visibility + the virtual hex grid's subdivision.
-  // `obj` = { mainCylinder, hexGrid (math), overlay (editor visualisation) }.
+  // Editor tab: cylinder/grid controls, the per-item placement folders (bound to
+  // the placement controller's editable insert metadata), and level export/import.
+  // `obj` = { mainCylinder, hexGrid, overlay, placement, actions }.
   buildEditorScreen(obj: any) {
     this.ensureTabs();
     const f = this.pages.editor;
     f.addBinding(obj.mainCylinder.group, 'visible', { label: 'Cylinder Visible' });
     // Grid auto-shows in edit mode; this is a manual gate within edit mode.
     f.addBinding(obj.overlay, 'enabled', { label: 'Grid Visible' });
+    // Resizing the grid re-derives every placed component from its cell record.
     f.addBinding(obj.hexGrid.params, 'columns', {
       min: 3, max: 64, step: 1, label: 'Hex Columns',
-    }).on('change', () => obj.overlay.rebuild());
+    }).on('change', () => obj.actions.onColumnsChanged());
+
+    const { placement, actions } = obj;
+    for (const type of ITEM_TYPES) {
+      const meta = placement.insertMeta[type];
+      const folder = f.addFolder({ title: ITEM_CATALOG[type].label, expanded: true, hidden: true });
+      if (type === 'staticPad' || type === 'movingPad') {
+        folder.addBinding(meta, 'width', { min: 1, max: 8, step: 1, label: 'Track (cells)' });
+        if (type === 'movingPad') {
+          folder.addBinding(meta, 'padPercent', { min: 0.1, max: 1, step: 0.05, label: 'Pad %' });
+        }
+      } else if (type === 'collectible') {
+        folder.addBinding(meta, 'glyph', { options: COLLECTIBLE, label: 'Glyph' });
+      } else if (type === 'den') {
+        folder.addBinding(meta, 'direction', { options: DEN_DIRECTIONS, label: 'Direction' });
+      }
+      folder.on('change', () => placement.applyMeta(type));
+      this.editorFolders[type] = folder;
+    }
+
+    const level = f.addFolder({ title: 'Level', expanded: false });
+    level.addButton({ title: 'Export JSON' }).on('click', actions.downloadLevel);
+    level.addButton({ title: 'Import JSON' }).on('click', () => this.pickLevelFile(actions.importLevel));
+    level.addButton({ title: 'Clear All' }).on('click', actions.clearLevel);
+  }
+
+  // Hidden file input → read the chosen JSON → hand the text to the import action.
+  pickLevelFile(onText: (json: string) => void) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json,.json';
+    input.onchange = () => {
+      const file = input.files && input.files[0];
+      if (!file) { return; }
+      file.text().then(onText);
+    };
+    input.click();
+  }
+
+  // Show the folder matching the inserted type (insert) or the selected item's
+  // type (select); hide the rest.
+  updateEditorFolders(state: EditorState) {
+    const relevant: ItemType | null = state.mode === 'insert'
+      ? state.insertType
+      : (state.selectedId ? state.records[state.selectedId]?.type ?? null : null);
+    for (const type of ITEM_TYPES) {
+      const folder = this.editorFolders[type];
+      if (folder) { folder.hidden = (type !== relevant); }
+    }
   }
 
   // World tab hosts the world/terrain materials (added by buildMaterials). The

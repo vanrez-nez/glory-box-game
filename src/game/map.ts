@@ -10,6 +10,12 @@ import GameCollectible from '@/game/collectible';
 import GameMapChunk from '@/game/map-chunk';
 import { POINT_PROPS } from '@/game/props/prop-registry';
 import GameDragonDen from '@/game/props/dragon-den';
+import type HexGrid from '@/game/world/hex-grid';
+import type { PlacedItem } from '@/game/level/types';
+import {
+  spawnRecord, despawnEntry, tickEntry,
+  type SpawnCtx, type SpawnedEntry,
+} from '@/game/level/level-spawner';
 
 const MAP_OFFSET_Y = -10;
 const MAP_CHUNK_SIZE = 128;
@@ -21,11 +27,13 @@ const CHUNK_LEVELS = {
 
 interface MapOptions {
   physics: any;
+  hexGrid: HexGrid | null;
   mapImageElement: HTMLImageElement | null;
 }
 
 const DEFAULT: MapOptions = {
   physics: null,
+  hexGrid: null,
   mapImageElement: null,
 };
 
@@ -39,10 +47,13 @@ export default class GameMap {
   mapChunks: GameMapChunk[];
   chunkStates: Record<number, any>;
   randomPicks: Record<number, number[]>;
-  // Dragon dens currently loaded (maintained as chunks toggle) — the dragon
-  // dives in/out of these.
+  // Dragon dens currently loaded (placed-level dens) — the dragon dives in/out.
   activeDens: GameDragonDen[];
   mapParser!: GameMapParser;
+  // Editor-placed level: records (data) + their spawned game props. The GAME owns
+  // spawning/ticking/physics of these; the editor only mutates the records.
+  records: Record<string, PlacedItem>;
+  placed: Map<string, SpawnedEntry>;
 
   constructor(opts: Partial<MapOptions> = {}) {
     this.opts = { ...DEFAULT, ...opts };
@@ -56,6 +67,56 @@ export default class GameMap {
     this.chunkStates = {};
     this.randomPicks = {};
     this.activeDens = [];
+    this.records = {};
+    this.placed = new Map();
+  }
+
+  // --- placed level (spawned + ticked + physics by the game) ----------------
+
+  private get spawnCtx(): SpawnCtx {
+    return {
+      group: this.group,
+      physics: this.opts.physics,
+      hexGrid: this.opts.hexGrid as HexGrid,
+      activeDens: this.activeDens,
+    };
+  }
+
+  // Spawn a level from records (replacing whatever's currently placed).
+  loadLevel(records: Record<string, PlacedItem>) {
+    this.disposePlaced();
+    this.records = {};
+    Object.keys(records || {}).forEach((id) => this.addRecord(records[id]));
+  }
+
+  reloadLevel(records: Record<string, PlacedItem>) {
+    this.loadLevel(records);
+  }
+
+  addRecord(record: PlacedItem) {
+    if (this.placed.has(record.id)) { this.removeRecord(record.id); }
+    this.records[record.id] = record;
+    const entry = spawnRecord(record, this.spawnCtx);
+    if (entry) { this.placed.set(record.id, entry); }
+  }
+
+  removeRecord(id: string) {
+    const entry = this.placed.get(id);
+    if (entry) { despawnEntry(entry, this.spawnCtx); this.placed.delete(id); }
+    delete this.records[id];
+  }
+
+  updateRecord(record: PlacedItem) {
+    this.addRecord(record); // addRecord despawns the prior entry first
+  }
+
+  getRecords() {
+    return this.records;
+  }
+
+  private disposePlaced() {
+    this.placed.forEach((entry) => despawnEntry(entry, this.spawnCtx));
+    this.placed.clear();
   }
 
   // Dens currently in loaded chunks (the dragon's available in/out points).
@@ -86,6 +147,8 @@ export default class GameMap {
   dispose() {
     // Stops any in-flight idle prebuild (the step guards on `initialized`).
     this.initialized = false;
+    this.disposePlaced();
+    this.records = {};
     this.prevPicks = [];
     this.masterChunks = {};
     this.chunkStates = {};
@@ -395,6 +458,11 @@ export default class GameMap {
   // platform animation (moving platforms run here, per-draw, so they stay smooth
   // at the display refresh; the physics carry snapshots their displacement).
   update(delta: number, playerPosition: THREE.Vector3) {
+    // Tick the placed level (moving pads, collectible particles). delta is 0 while
+    // frozen (edit mode), so they hold still and the moving-platform carry stays
+    // consistent on un-pause — same path as the original chunk tick.
+    this.placed.forEach((entry) => tickEntry(entry, delta));
+
     const { mapChunks, initialized } = this;
     if (!initialized) { return; }
     this.updateChunks(playerPosition.y);

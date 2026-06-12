@@ -51,7 +51,11 @@ export default class GameCollectible {
       getStateFn: this.getState.bind(this),
       setStateFn: this.setState.bind(this),
     });
-    const pick = Collectibles[~~(Math.random() * Collectibles.length)];
+    // Editor placement can pin a specific glyph via opts.type; map-spawned
+    // collectibles leave it undefined and get a random glyph (original behaviour).
+    const pick = opts.type != null
+      ? (Collectibles.find(c => c.type === opts.type) ?? Collectibles[0])
+      : Collectibles[~~(Math.random() * Collectibles.length)];
     this.color = pick.color;
     this.type = pick.type;
     this.particles = [];

@@ -3,13 +3,14 @@ import { GameConfigInstance as GameConfig } from '@/game/config';
 import { GAME } from '@/game/const';
 import { CylinderFromCartesian } from '@/game/utils';
 import HexGrid from '@/game/world/hex-grid';
+import type { CellId } from '@/editor/store';
 
 interface TileEditorOptions {
   camera: THREE.PerspectiveCamera;
   canvas: HTMLElement;
   hexGrid: HexGrid;
   parent: THREE.Object3D;
-  // True while editor edit-mode is active (replaces the old GameConfig flag).
+  // True while editor edit-mode is active.
   isActive: () => boolean;
 }
 
@@ -20,15 +21,13 @@ const HOVER_PROJECT = 0.26;
 const HOVER_COLOR = 0xffffff;
 const SELECT_COLOR = 0x33ff99;
 
-interface CellId { col: number; row: number; }
-
 /*
-  Editor tile picking: in edit mode (StaticDesign) the cursor highlights the hex
-  tile under it, a click selects the front tile (analytic ray↔cylinder cast from
-  the camera), and Shift+click toggles tiles for multi-select. Picking is purely
-  mathematical (ray vs cylinder of GAME.CylinderRadius) so it matches the virtual
-  hex grid's coordinate frame and works even when the cylinder mesh is hidden.
-  Selection is the substrate the future placement UI builds on.
+  Editor tile picking + highlights. Per frame it raycasts the cursor onto the
+  cylinder (analytic ray↔cylinder of GAME.CylinderRadius, matching the virtual hex
+  grid's frame, works even when the cylinder mesh is hidden) → the hovered cell,
+  and draws a hover highlight. Clicks are handled by the editor (index.ts), which
+  reads `getHoverCell()`; the selected item's cells are highlighted via
+  `setSelectionCells()` (selection identity lives in the placement store).
 */
 export default class TileEditor {
   opts: TileEditorOptions;
@@ -38,7 +37,6 @@ export default class TileEditor {
   group: THREE.Group;
   hover: THREE.Mesh;
   selectionMesh: THREE.Mesh;
-  selection: Set<string>;
   private hoverCell: CellId | null = null;
   private hit = new THREE.Vector3();
 
@@ -47,7 +45,6 @@ export default class TileEditor {
     this.raycaster = new THREE.Raycaster();
     this.ndc = new THREE.Vector2();
     this.hasPointer = false;
-    this.selection = new Set();
 
     this.group = new THREE.Group();
     this.group.name = 'TileEditor';
@@ -72,43 +69,33 @@ export default class TileEditor {
     this.group.add(this.selectionMesh);
 
     opts.canvas.addEventListener('mousemove', this.onMouseMove);
-    opts.canvas.addEventListener('click', this.onClick);
-  }
-
-  private setNdc(e: MouseEvent) {
-    const rect = this.opts.canvas.getBoundingClientRect();
-    this.ndc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    this.ndc.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-    this.hasPointer = true;
   }
 
   private onMouseMove = (e: MouseEvent) => {
     if (!this.opts.isActive()) { return; }
-    this.setNdc(e);
+    const rect = this.opts.canvas.getBoundingClientRect();
+    this.ndc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    this.ndc.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    this.hasPointer = true;
   };
 
-  private onClick = (e: MouseEvent) => {
-    if (!this.opts.isActive()) { return; }
-    this.setNdc(e);
-    const cell = this.pickCell();
-    if (!cell) {
-      // Plain click on empty space clears; Shift keeps the selection.
-      if (!e.shiftKey && this.selection.size) {
-        this.selection.clear();
-        this.rebuildSelection();
-      }
-      return;
-    }
-    const key = `${cell.col},${cell.row}`;
-    if (e.shiftKey) {
-      if (this.selection.has(key)) { this.selection.delete(key); }
-      else { this.selection.add(key); }
-    } else {
-      this.selection.clear();
-      this.selection.add(key);
-    }
-    this.rebuildSelection();
-  };
+  // The cell currently under the cursor (recomputed each frame in update()).
+  getHoverCell(): CellId | null {
+    return this.hoverCell;
+  }
+
+  // Recompute the hovered cell right now (used on click for frame-accurate picks).
+  pick(): CellId | null {
+    this.opts.camera.updateMatrixWorld();
+    this.hoverCell = this.pickCell();
+    return this.hoverCell;
+  }
+
+  // Highlight the given cells as the current selection (driven by the store).
+  setSelectionCells(cells: CellId[]) {
+    this.selectionMesh.geometry.dispose();
+    this.selectionMesh.geometry = this.buildFan(cells, SELECT_PROJECT);
+  }
 
   // Analytic ray↔cylinder (radius GAME.CylinderRadius, axis Y); nearest positive
   // root = the front wall. Returns the hex cell under the cursor, or null on miss.
@@ -149,20 +136,11 @@ export default class TileEditor {
     return geo;
   }
 
-  private rebuildSelection() {
-    const cells: CellId[] = [];
-    this.selection.forEach((k) => {
-      const [col, row] = k.split(',').map(Number);
-      cells.push({ col, row });
-    });
-    this.selectionMesh.geometry.dispose();
-    this.selectionMesh.geometry = this.buildFan(cells, SELECT_PROJECT);
-  }
-
-  // Per-frame: refresh the hover highlight from the latest cursor position.
+  // Per-frame: refresh the hovered cell + hover highlight from the cursor.
   update() {
     if (!this.opts.isActive()) {
       if (this.group.visible) { this.group.visible = false; }
+      this.hoverCell = null;
       return;
     }
     this.group.visible = true;
@@ -180,6 +158,5 @@ export default class TileEditor {
 
   dispose() {
     this.opts.canvas.removeEventListener('mousemove', this.onMouseMove);
-    this.opts.canvas.removeEventListener('click', this.onClick);
   }
 }

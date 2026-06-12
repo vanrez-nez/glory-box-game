@@ -5,6 +5,9 @@ import { KEYBOARD } from '@/common/input-manager';
 import GameTools from '@/editor/tools';
 import HexGridOverlay from '@/editor/hex-grid-overlay';
 import TileEditor from '@/editor/tile-editor';
+import Placement from '@/editor/placement';
+import { mountOverlay } from '@/editor/overlay-mount';
+import { editorStore, type CellId } from '@/editor/store';
 
 // Edit camera: scroll orbits/pans. radians per horizontal wheel unit, world-units
 // per vertical wheel unit. EDIT_RADIUS = distance out from the wall.
@@ -22,30 +25,35 @@ export interface EditorHandle {
   dispose(): void;
 }
 
+const keyToCell = (key: string): CellId => {
+  const [col, row] = key.split(',').map(Number);
+  return { col, row };
+};
+
 /*
   Dev-only editor. Attaches to a running Game via the game's generic extension API
   (engine.cameraController slot + loop.frozen/onFrameStart/onFrameEnd hooks) — the
   game never imports this module statically; main.ts pulls it in behind
   `import.meta.env.DEV` so Rollup drops it from production. Owns: the tweakpane dev
-  tools, the hex-grid overlay, tile picking/selection, the free-fly edit camera +
-  fly, and the Cmd/Ctrl+E toggle.
+  tools, hex-grid overlay, tile picking, free-fly camera + fly, the Cmd/Ctrl+E
+  toggle, AND the placement/save system (zustand store + prop spawner + overlay).
 */
 export function attachEditor(game: Game): EditorHandle {
   const c = game.components;
-  const { engine, world, player, physics, gameInput, enemy } = c;
+  const { engine, world, player, physics, gameInput, enemy, map } = c;
   const { loop } = game;
 
   // Edit-mode state (replaces the old GameConfig.StaticDesign flag).
   let active = false;
   const isActive = () => active;
-  // Edit camera orbit state (scroll) + free-look offsets (right-drag) + fly clock.
+  // Edit camera orbit state (scroll) + free-look offsets (right-drag).
   let azimuth = 0;
   let height = 0;
   let lookYaw = 0;
   let lookPitch = 0;
-  let lastEditMs = 0;
+  let lastFrameMs = 0;
 
-  // Visualisation of the (game-side) hex grid + tile picking, both gated on active.
+  // Hex-grid overlay + tile picking, both gated on `active`.
   const overlay = new HexGridOverlay(world.hexGrid, world.group, isActive);
   const tileEditor = new TileEditor({
     camera: engine.camera,
@@ -55,7 +63,47 @@ export function attachEditor(game: Game): EditorHandle {
     isActive,
   });
 
-  // Tweakpane dev tools (FPS graph + tuning screens).
+  // Placement: store-backed records + footprint preview. The GAME map spawns/ticks
+  // the real props (placement only mutates records + calls map.add/remove/update).
+  const placement = new Placement({ hexGrid: world.hexGrid, parent: world.group, map });
+  const overlayUI = mountOverlay();
+  // Dev hand-off: if localStorage has a working copy, it overrides the bundled
+  // level the loader spawned; otherwise adopt the bundled level into the store.
+  if (Object.keys(editorStore.getState().records).length) {
+    map.loadLevel(editorStore.getState().records);
+  } else {
+    editorStore.getState().importJSON(JSON.stringify({ records: map.getRecords() }));
+  }
+
+  // --- level export / import / clear (store is the editing copy; map respawns) ---
+  const downloadLevel = () => {
+    const blob = new Blob([editorStore.getState().exportJSON()], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'level.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+  const importLevel = (json: string) => {
+    editorStore.getState().importJSON(json);
+    map.loadLevel(editorStore.getState().records);
+    refreshFromStore();
+  };
+  const clearLevel = () => {
+    editorStore.getState().clear();
+    map.loadLevel({});
+    refreshFromStore();
+  };
+  // Hex-grid scale changed → rebuild the overlay and re-derive every placed
+  // component from its (cell-based) record at the new cell size: the world resizes.
+  const onColumnsChanged = () => {
+    overlay.rebuild();
+    map.reloadLevel(editorStore.getState().records);
+    refreshFromStore();
+  };
+
+  // Tweakpane dev tools (FPS graph + tuning screens + the editor placement UI).
   const tools = new GameTools();
   tools.addFpsGraph();
   tools.fpsGraph?.setRenderer(engine.getBackendName());
@@ -64,13 +112,30 @@ export function attachEditor(game: Game): EditorHandle {
   tools.addScreen('player', player);
   tools.addScreen('dragon', enemy.dragon);
   tools.addScreen('world', world);
-  tools.addScreen('editor', { mainCylinder: world.mainCylinder, hexGrid: world.hexGrid, overlay });
+  tools.addScreen('editor', {
+    mainCylinder: world.mainCylinder,
+    hexGrid: world.hexGrid,
+    overlay,
+    placement,
+    actions: { downloadLevel, importLevel, clearLevel, onColumnsChanged },
+  });
   tools.buildMaterials();
   tools.persist();
 
-  // Free-fly edit camera (installed on engine.cameraController while active):
-  // position orbits the cylinder axis (scroll); the look direction defaults toward
-  // the axis but is rotated by the right-drag yaw/pitch offsets (free-look).
+  // Reflect the store into the scene + tweakpane: selection highlight, the editable
+  // insert metadata, and per-item folder visibility.
+  function refreshFromStore() {
+    const s = editorStore.getState();
+    const rec = s.selectedId ? s.records[s.selectedId] : null;
+    tileEditor.setSelectionCells(rec ? rec.cells.map(keyToCell) : []);
+    placement.syncSelectedMeta();
+    tools.updateEditorFolders(s);
+    (tools.pane as any)?.refresh?.();
+  }
+  const unsubStore = editorStore.subscribe(refreshFromStore);
+  refreshFromStore();
+
+  // Free-fly edit camera (installed on engine.cameraController while active).
   const cameraController = (_delta: number) => {
     const r = GAME.CylinderRadius + EDIT_RADIUS;
     const px = Math.sin(azimuth) * r;
@@ -86,24 +151,26 @@ export function attachEditor(game: Game): EditorHandle {
   };
 
   // Edit-fly: arrow keys move the (frozen) player body directly in cylinder axes.
-  const editFly = () => {
+  const editFly = (dt: number) => {
     const kb = gameInput.inputManager.state.keyboard;
     const ax = (kb[KEYBOARD.ArrowRight] ? 1 : 0) - (kb[KEYBOARD.ArrowLeft] ? 1 : 0);
     const ay = (kb[KEYBOARD.ArrowUp] ? 1 : 0) - (kb[KEYBOARD.ArrowDown] ? 1 : 0);
-    const now = performance.now();
-    const dt = lastEditMs ? Math.min((now - lastEditMs) / 1000, MAX_FRAME_DELTA) : 0;
-    lastEditMs = now;
     player.playerBody.position.x += ax * EDIT_FLY_SPEED * dt;
     player.playerBody.position.y += ay * EDIT_FLY_SPEED * dt;
   };
 
   // Per-frame editor work via the loop hooks. onFrameStart runs before
-  // physics.interpolate, so edit-fly's body move is reflected the same frame.
+  // physics.interpolate so edit-fly's body move is reflected the same frame.
   loop.onFrameStart = () => {
     tools.fpsGraph?.begin();
-    if (active) { editFly(); }
+    const now = performance.now();
+    const dt = lastFrameMs ? Math.min((now - lastFrameMs) / 1000, MAX_FRAME_DELTA) : 0;
+    lastFrameMs = now;
+    if (active) { editFly(dt); }
     overlay.update(height);
     tileEditor.update();
+    placement.updatePreview(active ? tileEditor.getHoverCell() : null);
+    // Note: placed props are ticked by the GAME (map.update), not here.
   };
   loop.onFrameEnd = () => {
     tools.fpsGraph?.end();
@@ -113,8 +180,6 @@ export function attachEditor(game: Game): EditorHandle {
     active = on;
     loop.frozen = on;
     if (on) {
-      // Seed the camera from the player's spot so entering doesn't jump; start
-      // looking at the cylinder (no free-look offset).
       const [, theta] = CylinderFromCartesian(engine.cameraTarget);
       azimuth = theta;
       height = engine.cameraTarget.y + 6;
@@ -123,20 +188,49 @@ export function attachEditor(game: Game): EditorHandle {
       engine.cameraController = cameraController;
     } else {
       engine.cameraController = undefined;
-      lastEditMs = 0;
     }
   };
 
+  const exitInsert = () => {
+    const s = editorStore.getState();
+    s.setMode('select');
+    s.setInsertType(null);
+    overlayUI.close();
+  };
+
+  // Window keydown in CAPTURE phase so we can suppress the game's Escape→pause
+  // while in edit mode (the input manager listens on document in the bubble phase).
   const onKeyDown = (e: KeyboardEvent) => {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'e') {
       e.preventDefault();
       setActive(!active);
+      return;
+    }
+    if (!active) { return; }
+    const s = editorStore.getState();
+    if (e.key === 'i' || e.key === 'I') {
+      e.preventDefault();
+      overlayUI.open();
+    } else if (e.key === 'Escape') {
+      // Don't let the game pause while editing; cancel insert if inserting.
+      e.preventDefault();
+      e.stopPropagation();
+      if (s.mode === 'insert') { exitInsert(); }
+    } else if (e.key === 'Delete' || e.key === 'Backspace') {
+      if (s.mode === 'select') { e.preventDefault(); placement.deleteSelected(); }
     }
   };
-  window.addEventListener('keydown', onKeyDown);
+  window.addEventListener('keydown', onKeyDown, { capture: true });
 
-  // Scroll orbits (trackpad horizontal / Shift+wheel) + pans (vertical) — only
-  // while active, so page scroll is untouched otherwise.
+  // Left-click: place (insert) or select (select), at a frame-accurate pick.
+  const onClick = (e: MouseEvent) => {
+    if (!active || e.button !== 0) { return; }
+    const cell = tileEditor.pick();
+    if (editorStore.getState().mode === 'insert') { placement.placeAt(cell); }
+    else { placement.pickSelect(cell); }
+  };
+
+  // Scroll orbits (trackpad horizontal / Shift+wheel) + pans (vertical) — active only.
   const onWheel = (e: WheelEvent) => {
     if (!active) { return; }
     e.preventDefault();
@@ -147,10 +241,9 @@ export function attachEditor(game: Game): EditorHandle {
   };
   const canvas = engine.renderer.domElement;
   canvas.addEventListener('wheel', onWheel, { passive: false });
+  canvas.addEventListener('click', onClick);
 
-  // Right-click drag = free-look (yaw + pitch) from the current camera position.
-  // mousedown on the canvas starts it; move/up on window so the drag survives the
-  // cursor leaving the canvas. Context menu is suppressed while active.
+  // Right-click drag = free-look (yaw + pitch). Context menu suppressed while active.
   let dragging = false;
   let lastX = 0;
   let lastY = 0;
@@ -179,16 +272,21 @@ export function attachEditor(game: Game): EditorHandle {
 
   return {
     dispose() {
-      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keydown', onKeyDown, { capture: true } as any);
       canvas.removeEventListener('wheel', onWheel);
+      canvas.removeEventListener('click', onClick);
       canvas.removeEventListener('contextmenu', onContextMenu);
       canvas.removeEventListener('mousedown', onMouseDown);
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
+      unsubStore();
       loop.onFrameStart = undefined;
       loop.onFrameEnd = undefined;
       loop.frozen = false;
       engine.cameraController = undefined;
+      // The placed level is game-owned (map) — leave it; only tear down editor UI.
+      placement.dispose();
+      overlayUI.dispose();
       tileEditor.dispose();
       overlay.dispose();
       (tools.pane as any)?.dispose?.();

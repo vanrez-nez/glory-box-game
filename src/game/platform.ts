@@ -12,6 +12,10 @@ const DEFAULT = {
   x: 0,
   y: 0,
   width: 1,
+  // Track = the socket arc + (moving) the movement range, decoupled from the
+  // visible/collision pad `width`. Default reproduces the legacy behaviour:
+  // moving socket = 3×width (pad slides ±width), static socket = width.
+  trackWidth: null as number | null,
   type: MAP.StaticPlatform,
 };
 
@@ -81,18 +85,24 @@ export default class GamePlatform {
     return geo;
   }
 
+  // Track width (socket arc + movement extent). Explicit opts.trackWidth wins;
+  // otherwise the legacy default (moving = 3×pad, static = pad).
+  getTrackWidth() {
+    const { opts } = this;
+    if (opts.trackWidth != null) { return opts.trackWidth; }
+    return this.isMovingPlatform() ? opts.width * 3 : opts.width;
+  }
+
   getSocketGeometry() {
     const { opts } = this;
-    const width = this.isMovingPlatform() ? opts.width * 3 : opts.width;
-    const length = GameConfig.ThetaPerUnit * width;
+    const length = GameConfig.ThetaPerUnit * this.getTrackWidth();
     const outerGeo = this.getSocketArcGeometry(opts.x, opts.y, length, 0.2, 1.2);
     return outerGeo;
   }
 
   getSocketLightsGeometry() {
     const { opts } = this;
-    const width = this.isMovingPlatform() ? opts.width * 3 : opts.width;
-    const length = GameConfig.ThetaPerUnit * width;
+    const length = GameConfig.ThetaPerUnit * this.getTrackWidth();
     const innerGeo = this.getSocketArcGeometry(opts.x, opts.y, length - 0.02, 0.35, 0.1);
     return innerGeo;
   }
@@ -176,7 +186,10 @@ export default class GamePlatform {
     const { body, startPosition, opts } = this;
     if (this.isMovingPlatform()) {
       this.oscillator += delta;
-      body.position.x = startPosition.x + Math.sin(this.oscillator) * opts.width;
+      // Amplitude so the pad's edges just reach the track edges: (track - pad)/2.
+      // For the legacy 3×width track this is exactly opts.width (unchanged).
+      const amplitude = (this.getTrackWidth() - opts.width) / 2;
+      body.position.x = startPosition.x + Math.sin(this.oscillator) * amplitude;
     }
   }
 

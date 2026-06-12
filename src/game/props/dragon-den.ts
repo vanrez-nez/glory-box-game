@@ -23,9 +23,14 @@ let FrameGeometry: THREE.BufferGeometry | null = null;
 let WindowGeometry: THREE.BufferGeometry | null = null;
 const tmpLook = new THREE.Vector3();
 
+export type DenDirection = 'input' | 'output' | 'both';
+
 const DEFAULT = {
   x: 0,
   y: 0,
+  // Which dragon transitions this den allows: emerge-from (input), dive-into
+  // (output), or both. Default 'both' = original behaviour (every den is both).
+  direction: 'both' as DenDirection,
 };
 
 export default class GameDragonDen implements CylinderProp {

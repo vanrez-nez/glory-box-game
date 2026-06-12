@@ -133,7 +133,7 @@ export default class Game {
     const world = new GameWorld({});
     const physics = new GamePhysics({ bounds: this.getPhysicsBounds() });
     const engine = new Engine({ canvas: opts.canvasElement });
-    const map = new GameMap({ physics, mapImageElement: opts.mapElement });
+    const map = new GameMap({ physics, hexGrid: world.hexGrid });
     const playerHud = new GamePlayerHud({ camera: engine.camera, scene: engine.scene });
     const enemyHud = new GameEnemyHud({ camera: engine.camera });
     const moodManager = new GameMoodManager({ engine, map, world });

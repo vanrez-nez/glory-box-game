@@ -207,22 +207,31 @@ export default class GameEnemyDragon {
     return Math.random() < this.params.attackWeight ? 'attack' : 'circle';
   }
 
+  // A den's allowed direction ('both' default keeps legacy/map dens bidirectional).
+  private denDir(den: any) {
+    return den.opts?.direction ?? 'both';
+  }
+
+  // Emerge only from dens that allow it (input / both).
   private pickEmergeDen(map: any, playerY: number) {
     const dens = map.getActiveDens();
     let best = null;
     let bestD = Infinity;
     for (let i = 0; i < dens.length; i++) {
+      if (this.denDir(dens[i]) === 'output') { continue; }
       const dy = Math.abs(dens[i].body.position.y - playerY);
       if (dy < bestD) { bestD = dy; best = dens[i]; }
     }
     return best;
   }
 
+  // Dive only into dens that allow it (output / both).
   private pickTargetDen(map: any) {
     const dens = map.getActiveDens();
     let best = null;
     let bestD = Infinity;
     for (let i = 0; i < dens.length; i++) {
+      if (this.denDir(dens[i]) === 'input') { continue; }
       const ty = this.denThetaY(dens[i]);
       let dth = Math.abs(this.lerpAngle(this.theta, ty.theta, 1) - this.theta);
       dth *= GAME.CylinderRadius;
