@@ -86,9 +86,15 @@ export default class GamePlatform {
   }
 
   getSocketArcGeometry(x: any, y: any, length: any, depth: any, height: any) {
+    // Thin radial band (0.15) kept just IN FRONT of the wall. A ~1-unit-thick arc
+    // here dipped its inner half behind the wall (radius CylinderRadius), so its
+    // side walls crossed r=CylinderRadius and z-fought the wall hex faces — the
+    // discontinuous seam, obvious in the head-on edit camera. The depthOffset below
+    // anchors the OUTER face `depth` proud; with the band this thin the inner face
+    // stays in front of the wall too, so nothing crosses the surface.
     const geo = ArcGeometry(
-      GAME.CylinderRadius - 0.5,
-      GAME.CylinderRadius + 0.5,
+      GAME.CylinderRadius - 0.075,
+      GAME.CylinderRadius + 0.075,
       -length * 0.5,
       length,
       height,
