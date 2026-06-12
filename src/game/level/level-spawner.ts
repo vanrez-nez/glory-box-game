@@ -37,9 +37,35 @@ function positionProp(prop: any, x: number, y: number) {
   if (b.opts.onUpdate) { b.opts.onUpdate(b); }
 }
 
+// Pads centre on their FOOTPRINT, not the anchor cell. The footprint (see the
+// editor's horizontalRun) is `width` cells starting floor((w-1)/2) left of the
+// anchor: for ODD widths the anchor IS the centre cell, but for EVEN widths the
+// anchor is the left-of-centre cell, so the run's geometric centre sits half a
+// cell to the +col side. Shift x to match, or the pad + its socket render half a
+// cell off from the highlighted slots.
+function padCenterX(anchorX: number, width: number, cs: number): number {
+  const w = Math.max(1, Math.round(width));
+  const shift = ((w - 1) / 2 - Math.floor((w - 1) / 2)) * cs;
+  return anchorX + shift;
+}
+
+function isPadType(type: string): boolean {
+  return type === 'staticPad' || type === 'movingPad';
+}
+
+// Map-space (x,y) a record's prop should sit at: pads centre on their footprint
+// (even-width half-cell shift), everything else on the anchor cell.
+function spawnPosition(record: PlacedItem, ctx: SpawnCtx): { x: number; y: number } {
+  const c = ctx.hexGrid.cellCenter(record.anchor.col, record.anchor.row);
+  if (isPadType(record.type)) {
+    return { x: padCenterX(c.x, record.meta?.width ?? 1, ctx.hexGrid.columnSpacingX), y: c.y };
+  }
+  return { x: c.x, y: c.y };
+}
+
 function build(record: PlacedItem, ctx: SpawnCtx): any {
   const { hexGrid } = ctx;
-  const c = hexGrid.cellCenter(record.anchor.col, record.anchor.row);
+  const c = spawnPosition(record, ctx);
   const meta = record.meta || {};
   switch (record.type) {
     case 'staticPad':
@@ -110,7 +136,7 @@ function buildSocket(prop: any, type: string): THREE.Group | null {
 export function spawnRecord(record: PlacedItem, ctx: SpawnCtx): SpawnedEntry | null {
   const prop = build(record, ctx);
   if (!prop) { return null; }
-  const c = ctx.hexGrid.cellCenter(record.anchor.col, record.anchor.row);
+  const c = spawnPosition(record, ctx);
   ctx.group.add(prop.mesh ?? prop.group);
   positionProp(prop, c.x, c.y);
   const socket = buildSocket(prop, record.type) ?? undefined;

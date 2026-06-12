@@ -204,7 +204,14 @@ class StatsPaneView implements View {
     const panel = this.panels[this.activePanelIndex]
 
     if (panel) {
-      this.labelTextElement.textContent = panel.getLabel()
+      // Only touch the DOM when the label actually changes. Writing textContent
+      // unconditionally replaces the text node every frame — a childList mutation
+      // that wakes any MutationObserver on the page (e.g. password-manager autofill
+      // content scripts) into re-scanning the whole dev pane each frame.
+      const label = panel.getLabel()
+      if (this.labelTextElement.textContent !== label) {
+        this.labelTextElement.textContent = label
+      }
       panel.drawTo(this.context)
     }
   }

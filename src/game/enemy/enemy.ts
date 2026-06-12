@@ -31,6 +31,11 @@ export default class GameEnemy {
     this.rays.restart();
   }
 
+  // Toggle the attack rays' visibility (the editor hides them in edit mode).
+  setRaysVisible(visible: boolean) {
+    this.rays.setVisible(visible);
+  }
+
   get dragonEvents() {
     return this.dragon.events;
   }

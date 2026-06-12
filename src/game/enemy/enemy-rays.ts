@@ -17,6 +17,9 @@ export default class GameEnemyRays {
   clock!: THREE.Timer;
   events!: EventEmitter3;
   scheduler!: any;
+  // When true the editor has hidden the rays: skip ticking/firing entirely so the
+  // per-ray update() can't re-show its mesh (it sets mesh.visible = running/frame).
+  hidden = false;
   constructor(opts: any) {
     this.opts = { ...DEFAULT, ...opts };
     this.lastRayTime = 0;
@@ -44,6 +47,13 @@ export default class GameEnemyRays {
       bodies.push(sfx.body);
       opts.parent.add(sfx.mesh);
     }
+  }
+
+  // Show/hide every ray (the editor hides them in edit mode). While hidden the
+  // update loop is skipped, so an in-flight ray simply resumes when shown again.
+  setVisible(visible: boolean) {
+    this.hidden = !visible;
+    this.rays.forEach((r: any) => { r.mesh.visible = false; });
   }
 
   onEnemyRayCollision(ray: any) {
@@ -101,6 +111,7 @@ export default class GameEnemyRays {
   }
 
   update(delta: any, camera: any, playerPosition: any) {
+    if (this.hidden) { return; }
     this.clock.update();
     this.updateRays(delta, camera, playerPosition);
     this.fireRays(playerPosition);

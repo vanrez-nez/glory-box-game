@@ -217,7 +217,12 @@ export function attachEditor(game: Game): EditorHandle {
   const setActive = (on: boolean) => {
     active = on;
     loop.frozen = on;
+    // Hide the dragon's attack rays while editing (they clutter the slot view),
+    // and force the hex grid visible on entry so it's always there to place against
+    // (regardless of any persisted "Grid Visible" toggle).
+    enemy.setRaysVisible(!on);
     if (on) {
+      overlay.enabled = true;
       const [, theta] = CylinderFromCartesian(engine.cameraTarget);
       azimuth = theta;
       height = engine.cameraTarget.y + 6;
@@ -227,6 +232,8 @@ export function attachEditor(game: Game): EditorHandle {
     } else {
       engine.cameraController = undefined;
     }
+    // Reflect the forced grid state in the tweakpane "Grid Visible" toggle.
+    (tools.pane as any)?.refresh?.();
   };
 
   const exitInsert = () => {
