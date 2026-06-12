@@ -10,7 +10,7 @@ export interface HexGridParams {
 }
 
 const DEFAULT_PARAMS: HexGridParams = {
-  columns: 18,
+  columns: 64,
 };
 
 interface Cell { x: number; y: number; }
