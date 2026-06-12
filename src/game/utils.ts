@@ -96,3 +96,15 @@ export function SyncBodyPhysicsMesh(mesh: any, body: any) {
     mesh.scale.z = 1 + scaleOffset.z;
   }
 }
+
+// Arc pads curve with the wall (geometry centred on the cylinder's Y axis), so
+// they MOVE by ROTATING around Y rather than re-projecting a flat box onto the
+// surface. This keeps a shifted (moving) pad's edges at the correct map-x angle —
+// no chord skew — so equal map-x padding renders as equal visual padding.
+export function SyncArcPadMesh(mesh: any, body: any) {
+  if (!mesh) { return; }
+  const positionOffset = mesh.positionOffset || vPositionZero;
+  const drawPos = body.renderPosition || body.position;
+  mesh.rotation.y = (drawPos.x + positionOffset.x) * GameConfig.ThetaPerUnit;
+  mesh.position.set(0, drawPos.y + positionOffset.y, 0);
+}

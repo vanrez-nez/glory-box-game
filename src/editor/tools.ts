@@ -112,6 +112,10 @@ export default class GameTools {
     f.addBinding(obj.hexGrid.params, 'columns', {
       min: 3, max: 64, step: 1, label: 'Hex Columns',
     }).on('change', () => obj.actions.onColumnsChanged());
+    // Global inner padding (cells, per side) — shrinks all pads + their sockets.
+    f.addBinding(obj.settings, 'padding', {
+      min: 0, max: 0.45, step: 0.01, label: 'Pad Padding',
+    }).on('change', () => obj.actions.setPadding(obj.settings.padding));
 
     const { placement, actions } = obj;
     for (const type of ITEM_TYPES) {

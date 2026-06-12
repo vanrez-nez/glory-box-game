@@ -54,6 +54,8 @@ export default class GameMap {
   // spawning/ticking/physics of these; the editor only mutates the records.
   records: Record<string, PlacedItem>;
   placed: Map<string, SpawnedEntry>;
+  // Global inner pad padding (CELLS, per side) applied to all pads.
+  padding: number;
 
   constructor(opts: Partial<MapOptions> = {}) {
     this.opts = { ...DEFAULT, ...opts };
@@ -69,6 +71,7 @@ export default class GameMap {
     this.activeDens = [];
     this.records = {};
     this.placed = new Map();
+    this.padding = 0.1;
   }
 
   // --- placed level (spawned + ticked + physics by the game) ----------------
@@ -79,14 +82,35 @@ export default class GameMap {
       physics: this.opts.physics,
       hexGrid: this.opts.hexGrid as HexGrid,
       activeDens: this.activeDens,
+      padding: this.padding,
     };
   }
 
-  // Spawn a level from records (replacing whatever's currently placed).
+  // Set the global pad padding and respawn the level so it takes effect.
+  setPadding(padding: number) {
+    this.padding = padding;
+    this.reloadLevel(this.records);
+  }
+
+  // Spawn a level from records (replacing whatever's currently placed). Spawn
+  // boundary for BOTH dev (editor store) and prod (level.json), so it's the place
+  // to enforce "no two pads share a cell": first record to claim a cell wins, any
+  // later record that overlaps (or has no footprint) is skipped, not spawned.
   loadLevel(records: Record<string, PlacedItem>) {
     this.disposePlaced();
     this.records = {};
-    Object.keys(records || {}).forEach((id) => this.addRecord(records[id]));
+    const occupied = new Set<string>();
+    Object.keys(records || {}).forEach((id) => {
+      const rec = records[id];
+      const cells = rec?.cells ?? [];
+      if (cells.length === 0 || cells.some((key) => occupied.has(key))) {
+        // eslint-disable-next-line no-console
+        console.warn(`[map] skipping invalid/overlapping record "${id}"`);
+        return;
+      }
+      cells.forEach((key) => occupied.add(key));
+      this.addRecord(rec);
+    });
   }
 
   reloadLevel(records: Record<string, PlacedItem>) {

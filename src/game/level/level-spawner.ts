@@ -12,6 +12,11 @@ export interface SpawnCtx {
   physics: any;
   hexGrid: HexGrid;
   activeDens: any[];
+  // Global padding (in CELLS, per side) applied to ALL pads. The socket spans the
+  // full track; padding reserves an equal gap at each track end (the fill/movement
+  // region is track − 2·padding). A static pad fills that region; a moving block
+  // slides within it, stopping `padding` short of either end.
+  padding: number;
 }
 
 export interface SpawnedEntry {
@@ -32,23 +37,35 @@ function positionProp(prop: any, x: number, y: number) {
   if (b.opts.onUpdate) { b.opts.onUpdate(b); }
 }
 
-function build(record: PlacedItem, hexGrid: HexGrid): any {
+function build(record: PlacedItem, ctx: SpawnCtx): any {
+  const { hexGrid } = ctx;
   const c = hexGrid.cellCenter(record.anchor.col, record.anchor.row);
   const meta = record.meta || {};
   switch (record.type) {
     case 'staticPad':
     case 'movingPad': {
-      // meta.width = TRACK in CELLS → world arc spans exactly that many columns.
-      // Static: the pad fills the track. Moving: a padPercent-fraction pad
-      // oscillates within the track (trackWidth drives socket + movement).
-      const track = (meta.width ?? 1) * hexGrid.columnSpacingX;
+      // meta.width = TRACK in CELLS. Both pad types use the SAME track. `padding`
+      // (per side) reserves a gap at each track end; the pad lives in
+      // channel = track − 2·padding.
+      //  - STATIC: pad fills the channel → `padding` each end.
+      //  - MOVING: `movement` (0..1) is how much of the channel the pad gives up to
+      //    travel. The pad is sized channel·(1−movement) and swings ±(channel·movement/2),
+      //    so at BOTH extremes its edge still stops exactly `padding` from the track
+      //    end — identical to the static pad. movement = 0 ⇒ same pad as static.
+      const cs = hexGrid.columnSpacingX;
+      const track = (meta.width ?? 1) * cs;
+      const p = (ctx.padding ?? 0) * cs;
+      const channel = Math.max(0.05, track - 2 * p);
       if (record.type === 'movingPad') {
-        const pad = (meta.padPercent ?? 1 / 3) * track;
+        const movement = Math.min(Math.max(meta.padPercent ?? 1 / 3, 0), 0.99);
+        const pad = Math.max(0.05, channel * (1 - movement));
         return new GamePlatform({
-          x: c.x, y: c.y, width: pad, trackWidth: track, type: MAP.MovingPlatform,
+          x: c.x, y: c.y, width: pad, trackWidth: track, padding: p, type: MAP.MovingPlatform,
         });
       }
-      return new GamePlatform({ x: c.x, y: c.y, width: track, type: MAP.StaticPlatform });
+      return new GamePlatform({
+        x: c.x, y: c.y, width: channel, trackWidth: track, padding: p, type: MAP.StaticPlatform,
+      });
     }
     case 'collectible':
       return new GameCollectible({ x: c.x, y: c.y, type: meta.glyph ?? 0 });
@@ -91,13 +108,17 @@ function buildSocket(prop: any, type: string): THREE.Group | null {
 // Spawn the real game prop for a record: build it, add mesh + socket to the group,
 // register the body with physics, and (dens) push into activeDens for the dragon.
 export function spawnRecord(record: PlacedItem, ctx: SpawnCtx): SpawnedEntry | null {
-  const prop = build(record, ctx.hexGrid);
+  const prop = build(record, ctx);
   if (!prop) { return null; }
   const c = ctx.hexGrid.cellCenter(record.anchor.col, record.anchor.row);
   ctx.group.add(prop.mesh ?? prop.group);
   positionProp(prop, c.x, c.y);
   const socket = buildSocket(prop, record.type) ?? undefined;
   if (socket) { ctx.group.add(socket); }
+  if (record.type === 'staticPad' || record.type === 'movingPad') {
+    (globalThis as any).__pads = ((globalThis as any).__pads ?? []);
+    (globalThis as any).__pads.push({ type: record.type, prop });
+  }
   ctx.physics.add(prop.body);
   if (record.type === 'den') { ctx.activeDens.push(prop); }
   return { prop, socket };

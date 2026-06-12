@@ -7,7 +7,8 @@ import HexGridOverlay from '@/editor/hex-grid-overlay';
 import TileEditor from '@/editor/tile-editor';
 import Placement from '@/editor/placement';
 import { mountOverlay } from '@/editor/overlay-mount';
-import { editorStore, type CellId } from '@/editor/store';
+import { ITEM_CATALOG } from '@/editor/items';
+import { editorStore, cellKey, type CellId } from '@/editor/store';
 
 // Edit camera: scroll orbits/pans. radians per horizontal wheel unit, world-units
 // per vertical wheel unit. EDIT_RADIUS = distance out from the wall.
@@ -67,13 +68,40 @@ export function attachEditor(game: Game): EditorHandle {
   // the real props (placement only mutates records + calls map.add/remove/update).
   const placement = new Placement({ hexGrid: world.hexGrid, parent: world.group, map });
   const overlayUI = mountOverlay();
+
+  // A record's `cells` are column-count dependent (footprint wraps at the grid's
+  // column count). The column count is a live tweak that is NOT persisted, so a
+  // level saved at one column count and reloaded at another carries stale cells —
+  // breaking occupancy, the footprint preview, and selection highlights (the pad
+  // still renders, since rendering uses the anchor). Re-derive every record's
+  // cells from its anchor on the CURRENT grid so cells always match. Self-heals
+  // already-stale data; idempotent when cells are already correct.
+  const resyncRecordsToGrid = () => {
+    const s = editorStore.getState();
+    const records: Record<string, any> = {};
+    for (const id in s.records) {
+      const rec = s.records[id];
+      const desc = ITEM_CATALOG[rec.type];
+      if (!desc) { continue; }
+      const cells = desc.footprint(rec.anchor, rec.meta, world.hexGrid).map(cellKey);
+      records[id] = { ...rec, cells };
+    }
+    s.importJSON(JSON.stringify({ padding: s.padding, records }));
+  };
+
   // Dev hand-off: if localStorage has a working copy, it overrides the bundled
   // level the loader spawned; otherwise adopt the bundled level into the store.
   if (Object.keys(editorStore.getState().records).length) {
+    resyncRecordsToGrid();
+    map.padding = editorStore.getState().padding;
     map.loadLevel(editorStore.getState().records);
   } else {
-    editorStore.getState().importJSON(JSON.stringify({ records: map.getRecords() }));
+    editorStore.getState().importJSON(JSON.stringify({
+      padding: map.padding, records: map.getRecords(),
+    }));
   }
+  // Stable object the "Pad Padding" tweakpane control binds to.
+  const settings = { padding: editorStore.getState().padding };
 
   // --- level export / import / clear (store is the editing copy; map respawns) ---
   const downloadLevel = () => {
@@ -87,6 +115,8 @@ export function attachEditor(game: Game): EditorHandle {
   };
   const importLevel = (json: string) => {
     editorStore.getState().importJSON(json);
+    map.padding = editorStore.getState().padding;
+    settings.padding = editorStore.getState().padding;
     map.loadLevel(editorStore.getState().records);
     refreshFromStore();
   };
@@ -99,7 +129,14 @@ export function attachEditor(game: Game): EditorHandle {
   // component from its (cell-based) record at the new cell size: the world resizes.
   const onColumnsChanged = () => {
     overlay.rebuild();
+    resyncRecordsToGrid(); // cells wrap at the column count → re-derive for the new grid
     map.reloadLevel(editorStore.getState().records);
+    refreshFromStore();
+  };
+  // Global pad padding changed → save it and respawn the level (map.setPadding).
+  const setPadding = (padding: number) => {
+    editorStore.getState().setPadding(padding);
+    map.setPadding(padding);
     refreshFromStore();
   };
 
@@ -117,7 +154,8 @@ export function attachEditor(game: Game): EditorHandle {
     hexGrid: world.hexGrid,
     overlay,
     placement,
-    actions: { downloadLevel, importLevel, clearLevel, onColumnsChanged },
+    settings,
+    actions: { downloadLevel, importLevel, clearLevel, onColumnsChanged, setPadding },
   });
   tools.buildMaterials();
   tools.persist();

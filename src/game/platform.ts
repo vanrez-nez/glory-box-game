@@ -4,7 +4,7 @@ import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/mat
 import { GameConfigInstance as GameConfig } from '@/game/config';
 import { PHYSICS, MAP, EVENTS, GAME } from '@/game/const';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { CartesianToCylinder, SyncBodyPhysicsMesh } from '@/game/utils';
+import { CartesianToCylinder, SyncArcPadMesh } from '@/game/utils';
 import { ArcGeometry } from '@/common/three-utils';
 import GamePhysicsBody from '@/game/physics/physics-body';
 
@@ -12,10 +12,13 @@ const DEFAULT = {
   x: 0,
   y: 0,
   width: 1,
-  // Track = the socket arc + (moving) the movement range, decoupled from the
-  // visible/collision pad `width`. Default reproduces the legacy behaviour:
-  // moving socket = 3×width (pad slides ±width), static socket = width.
+  // Track = the SOCKET width (full cell slot), rendered the same for static and
+  // moving. Decoupled from the visible/collision pad `width`. Default reproduces
+  // the legacy behaviour: moving socket = 3×width, static socket = width.
   trackWidth: null as number | null,
+  // Per-side padding (world units) inset between the socket edge and the fill/
+  // movement region: the channel the pad/block lives in is trackWidth − 2·padding.
+  padding: 0,
   type: MAP.StaticPlatform,
 };
 
@@ -64,6 +67,24 @@ export default class GamePlatform {
     return CACHED_GEOMETRIES[hash];
   }
 
+  // Arc "slab" centred on the cylinder's Y axis at theta=0 (+Z), curving like the
+  // socket: `width` map-x units become an angular sweep (width·ThetaPerUnit) at
+  // radius [rIn,rOut] and `heightY` tall, Y-centred. The pad is moved by rotating
+  // this around Y (SyncArcPadMesh), so map-x maps linearly to the visual angle —
+  // the whole point of the arc fix. Cached by its params.
+  static GetArcSlab(width: any, rIn: any, rOut: any, heightY: any) {
+    const hash = `arc_${width}_${rIn}_${rOut}_${heightY}`;
+    if (!CACHED_GEOMETRIES[hash]) {
+      const ang = GameConfig.ThetaPerUnit * width;
+      const geo = ArcGeometry(rIn, rOut, -ang / 2, ang, heightY);
+      geo.rotateX(Math.PI / 2);
+      geo.rotateY(-Math.PI / 2);     // ring centre → +Z (cylinder theta=0)
+      geo.translate(0, heightY / 2, 0); // centre the Y extent on 0
+      CACHED_GEOMETRIES[hash] = geo;
+    }
+    return CACHED_GEOMETRIES[hash];
+  }
+
   getSocketArcGeometry(x: any, y: any, length: any, depth: any, height: any) {
     const geo = ArcGeometry(
       GAME.CylinderRadius - 0.5,
@@ -85,14 +106,19 @@ export default class GamePlatform {
     return geo;
   }
 
-  // Track width (socket arc + movement extent). Explicit opts.trackWidth wins;
-  // otherwise the legacy default (moving = 3×pad, static = pad).
+  // Track width = the SOCKET width = the full cell slot (meta.width cells). The
+  // spawner passes it as opts.trackWidth, identical for static and moving so two
+  // pads of the same slot count get the SAME track. (Legacy default kept for any
+  // direct construction without a trackWidth.)
   getTrackWidth() {
     const { opts } = this;
     if (opts.trackWidth != null) { return opts.trackWidth; }
     return this.isMovingPlatform() ? opts.width * 3 : opts.width;
   }
 
+  // Socket = the full, stationary track. The static pad fills it (minus padding);
+  // the moving block slides WITHIN it, bounded so its edge stops `padding` short
+  // of the track end — the same cap a static pad leaves.
   getSocketGeometry() {
     const { opts } = this;
     const length = GameConfig.ThetaPerUnit * this.getTrackWidth();
@@ -114,8 +140,13 @@ export default class GamePlatform {
   getMesh() {
     const { opts } = this;
     const g = new THREE.Group();
-    const lightGeo = GamePlatform.GetBoxGeomery(opts.width, 0.7, GAME.PlatformZSize);
-    const stepsGeo = GamePlatform.GetStepsGeometry(opts.width);
+    // Pad radial centre (it sits PlatformOffset proud of the wall). Steps = dark
+    // body; light = coloured stripe on the OUTER face (toward the camera). Both
+    // span the SAME angular width = opts.width·ThetaPerUnit, so the coloured edge
+    // lands exactly on the slot bound (no more 0.95 cosmetic inset).
+    const r = GAME.CylinderRadius + GAME.PlatformOffset;
+    const stepsGeo = GamePlatform.GetArcSlab(opts.width, r - 1.2, r + 0.6, 0.8);
+    const lightGeo = GamePlatform.GetArcSlab(opts.width, r + 0.6, r + 1.0, 0.7);
     const stepsMat = MaterialFactory.getMaterial('PlatformSteps', {
       name: 'plt_steps',
       width: opts.width,
@@ -128,15 +159,8 @@ export default class GamePlatform {
     }, cacheId);
     const meshSteps = new THREE.Mesh(stepsGeo, stepsMat);
     const meshLight = new THREE.Mesh(lightGeo, lightMat);
-    meshSteps.position.y = 0.2;
     meshSteps.castShadow = true;
     meshSteps.receiveShadow = true;
-    meshLight.position.y = -0.2;
-    meshLight.scale.set(0.95, 0.4, 0.95);
-    meshSteps.matrixAutoUpdate = false;
-    meshSteps.updateMatrix();
-    meshLight.matrixAutoUpdate = false;
-    meshLight.updateMatrix();
     this.lightMaterial = meshLight.material;
     g.add(meshSteps);
     g.add(meshLight);
@@ -157,16 +181,22 @@ export default class GamePlatform {
       mass: 0.01,
       friction: 0.05,
       isStatic: true,
-      onUpdate: SyncBodyPhysicsMesh.bind(this, mesh),
-      // Collision footprint = visible pad width + a forgiveness threshold so the
-      // player gets a little invisible ground past each edge (the mesh stays
-      // opts.width; only the body is widened).
-      scale: new THREE.Vector2(opts.width + GameConfig.PlatformContactThreshold, 1),
+      // Arc pad: the mesh is centred on the cylinder axis and moved by rotating
+      // around Y (SyncArcPadMesh), so it curves with the wall and a shifted moving
+      // pad keeps its edges at the right map-x angle. Physics stays in map-x.
+      onUpdate: SyncArcPadMesh.bind(this, mesh),
+      // The body authors scale.x in WORLD units (it divides by worldPerUnit =
+      // CylinderRadius·ThetaPerUnit to get the map-x footprint). The arc mesh spans
+      // opts.width in MAP-X, so convert: world = opts.width · worldPerUnit. After the
+      // body's divide, the collision footprint is exactly opts.width map-x — matching
+      // the visible pad — plus a small world forgiveness threshold past each edge.
+      scale: new THREE.Vector2(
+        opts.width * (GAME.CylinderRadius * GameConfig.ThetaPerUnit)
+          + GameConfig.PlatformContactThreshold,
+        1,
+      ),
       distance: GAME.PlatformOffset,
       collisionTargets: [PHYSICS.Player],
-      // rotate the pad tangent to the cylinder (matches the socket arc); without
-      // this the box pads keep a fixed world orientation and only line up at theta=0.
-      syncLookAt: true,
     });
   }
 
@@ -186,9 +216,10 @@ export default class GamePlatform {
     const { body, startPosition, opts } = this;
     if (this.isMovingPlatform()) {
       this.oscillator += delta;
-      // Amplitude so the pad's edges just reach the track edges: (track - pad)/2.
-      // For the legacy 3×width track this is exactly opts.width (unchanged).
-      const amplitude = (this.getTrackWidth() - opts.width) / 2;
+      // Travel = half the slack between the pad and its channel, so at each extreme
+      // the pad edge stops exactly `padding` from the track end (same as a static pad).
+      const channel = this.getTrackWidth() - 2 * opts.padding;
+      const amplitude = (channel - opts.width) / 2;
       body.position.x = startPosition.x + Math.sin(this.oscillator) * amplitude;
     }
   }

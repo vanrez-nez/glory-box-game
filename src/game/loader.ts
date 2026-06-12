@@ -25,6 +25,7 @@ export default class GameLoader {
     }
     // Spawn the committed level (production renders this; in dev the editor
     // overrides it from localStorage on attach).
+    map.padding = (levelData as any).padding ?? map.padding;
     map.loadLevel((levelData as any).records || {});
   }
 }

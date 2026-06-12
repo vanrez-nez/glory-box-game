@@ -8,12 +8,30 @@ export { cellKey };
 export type { ItemType, CellId, PlacedItem, DenDirection } from '@/game/level/types';
 export type EditorMode = 'select' | 'insert';
 
-function buildOccupancy(records: Record<string, PlacedItem>) {
+// Validate a record set so two pads can NEVER share a cell. Records are taken in
+// order; the first to claim a cell keeps it, any later record that collides (or
+// has no footprint) is dropped. Returns the cleaned records + their occupancy.
+// Used on every bulk load (import / rehydrate) — interactive placement is already
+// guarded by add(). This makes "no overlapping pads" an invariant of the store,
+// not just of the placement UI.
+function sanitizeRecords(records: Record<string, PlacedItem>): {
+  records: Record<string, PlacedItem>;
+  occupancy: Record<string, string>;
+} {
   const occ: Record<string, string> = {};
+  const kept: Record<string, PlacedItem> = {};
   for (const id in records) {
-    for (const key of records[id].cells) { occ[key] = id; }
+    const rec = records[id];
+    const cells = rec?.cells ?? [];
+    if (cells.length === 0 || cells.some((key) => occ[key])) {
+      // eslint-disable-next-line no-console
+      console.warn(`[editor] dropping invalid/overlapping record "${id}"`);
+      continue;
+    }
+    for (const key of cells) { occ[key] = id; }
+    kept[id] = rec;
   }
-  return occ;
+  return { records: kept, occupancy: occ };
 }
 
 // ---- store -----------------------------------------------------------------
@@ -28,6 +46,8 @@ export interface EditorState {
   mode: EditorMode;
   insertType: ItemType | null;
   selectedId: string | null;
+  // Global inner pad padding (CELLS, per side) — saved with the level.
+  padding: number;
 
   // Place a record iff none of its cells are occupied. Returns success.
   add(record: PlacedItem): boolean;
@@ -35,6 +55,7 @@ export interface EditorState {
   select(id: string | null): void;
   setMode(mode: EditorMode): void;
   setInsertType(type: ItemType | null): void;
+  setPadding(padding: number): void;
   updateMeta(id: string, partial: Record<string, any>): void;
   clear(): void;
   exportJSON(): string;
@@ -55,6 +76,7 @@ export const editorStore = createStore<EditorState>()(
       mode: 'select',
       insertType: null,
       selectedId: null,
+      padding: 0.1,
 
       add(record) {
         const { occupancy, records } = get();
@@ -95,17 +117,24 @@ export const editorStore = createStore<EditorState>()(
         set({ records: { ...records, [id]: { ...rec, meta: { ...rec.meta, ...partial } } } });
       },
 
+      setPadding(padding) { set({ padding }); },
+
       clear() { set({ records: {}, occupancy: {}, selectedId: null }); },
 
       exportJSON() {
-        return JSON.stringify({ version: STORE_VERSION, records: get().records }, null, 2);
+        const { records, padding } = get();
+        return JSON.stringify({ version: STORE_VERSION, padding, records }, null, 2);
       },
 
       importJSON(json) {
         try {
           const data = JSON.parse(json);
-          const records = (data && data.records) || {};
-          set({ records, occupancy: buildOccupancy(records), selectedId: null });
+          const clean = sanitizeRecords((data && data.records) || {});
+          const next: Partial<EditorState> = {
+            records: clean.records, occupancy: clean.occupancy, selectedId: null,
+          };
+          if (typeof data.padding === 'number') { next.padding = data.padding; }
+          set(next as EditorState);
         } catch {
           // ignore malformed input
         }
@@ -115,10 +144,14 @@ export const editorStore = createStore<EditorState>()(
       name: STORAGE_KEY,
       version: STORE_VERSION,
       storage: createJSONStorage(() => localStorage),
-      // Persist only the records; occupancy is derived, UI state is transient.
-      partialize: (s) => ({ records: s.records }) as EditorState,
+      // Persist records + padding; occupancy is derived, UI state is transient.
+      partialize: (s) => ({ records: s.records, padding: s.padding }) as EditorState,
       onRehydrateStorage: () => (state) => {
-        if (state) { state.occupancy = buildOccupancy(state.records); }
+        if (state) {
+          const clean = sanitizeRecords(state.records);
+          state.records = clean.records;
+          state.occupancy = clean.occupancy;
+        }
       },
     },
   ),
