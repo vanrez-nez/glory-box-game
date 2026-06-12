@@ -115,10 +115,6 @@ export function spawnRecord(record: PlacedItem, ctx: SpawnCtx): SpawnedEntry | n
   positionProp(prop, c.x, c.y);
   const socket = buildSocket(prop, record.type) ?? undefined;
   if (socket) { ctx.group.add(socket); }
-  if (record.type === 'staticPad' || record.type === 'movingPad') {
-    (globalThis as any).__pads = ((globalThis as any).__pads ?? []);
-    (globalThis as any).__pads.push({ type: record.type, prop });
-  }
   ctx.physics.add(prop.body);
   if (record.type === 'den') { ctx.activeDens.push(prop); }
   return { prop, socket };

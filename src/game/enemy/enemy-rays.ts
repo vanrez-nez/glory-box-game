@@ -55,10 +55,20 @@ export default class GameEnemyRays {
     const { rays } = this;
     for (let i = 0; i < rays.length; i++) {
       const ray = rays[i];
-      if (ray.running) {
-        ray.mesh.lookAt(camera.position);
-      }
+      // update() first so mesh.position is current, then aim the billboard.
       ray.update(delta, playerPosition.y);
+      if (ray.running) {
+        // Face the camera HORIZONTALLY only (azimuth around Y) so the cylinder's
+        // bright core (uv 0.5, the −Z side → +π) always points at the camera and
+        // stays centred. lookAt() tilts with camera pitch and, once X/Z are zeroed,
+        // leaves a corrupted Y that pushes the ray core off-centre.
+        const m = ray.mesh;
+        const az = Math.atan2(
+          camera.position.x - m.position.x,
+          camera.position.z - m.position.z,
+        );
+        m.rotation.set(0, az + Math.PI, 0);
+      }
     }
   }
 

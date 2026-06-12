@@ -122,11 +122,12 @@ export default class GameEnemyRaySfx {
     mesh.visible = this.running;
     if (this.running === true) {
       mPos.y = offsetY;
-      mesh.rotation.set(0, mesh.rotation.y + Math.PI, 0);
       body.position.set(positionX, mPos.y);
       body.scale.y = mesh.scale.y;
       const project = GAME.PlayerOffset;
       CartesianToCylinder(mPos, positionX, mPos.y, project);
+      // Billboard azimuth is set by GameEnemyRays.updateRays (camera-facing,
+      // horizontal only) AFTER this runs, so the position is current first.
       uniforms.u_time.value += delta;
       uniforms.u_offsetY.value = offsetY;
       const xRes = Math.sqrt(mPos.x * mPos.x + mPos.z * mPos.z);
