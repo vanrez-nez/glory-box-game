@@ -4,7 +4,9 @@ import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/mat
 import { GAME } from '@/game/const';
 import WorldCylinderRing from '@/game/world/cylinder-ring';
 
-const CYLINDER_HEIGHT = 128;
+// Shared so the dragon's den-segment math (dragon-serpentine.ts) and chunking stay
+// locked to the same vertical tiling unit.
+const CYLINDER_HEIGHT = GAME.SegmentHeight;
 const CYLINDER_GAP = 0;
 
 const DEFAULT = {};

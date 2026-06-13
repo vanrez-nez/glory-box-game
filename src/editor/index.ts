@@ -5,6 +5,7 @@ import { KEYBOARD } from '@/common/input-manager';
 import GameTools from '@/editor/tools';
 import HexGridOverlay from '@/editor/hex-grid-overlay';
 import TileEditor from '@/editor/tile-editor';
+import DragonTracks from '@/editor/dragon-tracks';
 import Placement from '@/editor/placement';
 import { mountOverlay } from '@/editor/overlay-mount';
 import { ITEM_CATALOG } from '@/editor/items';
@@ -68,6 +69,17 @@ export function attachEditor(game: Game): EditorHandle {
   // the real props (placement only mutates records + calls map.add/remove/update).
   const placement = new Placement({ hexGrid: world.hexGrid, parent: world.group, map });
   const overlayUI = mountOverlay();
+
+  // Dragon trail debug overlay (toggled by "Display Dragon Tracks").
+  const dragonTracks = new DragonTracks(enemy.dragon, world.group);
+  const showTracks = { enabled: false };
+  // "Spawn Dragon": force a fresh appearance (pick the dens, place the head) and reveal it.
+  const pickDen = () => {
+    enemy.dragon.spawnAppearance(map, player.playerBody.position.y);
+    showTracks.enabled = true;
+    dragonTracks.update(true); // reveal the overlay immediately
+    (tools.pane as any)?.refresh?.();
+  };
 
   // A record's `cells` are column-count dependent (footprint wraps at the grid's
   // column count). The column count is a live tweak that is NOT persisted, so a
@@ -155,7 +167,8 @@ export function attachEditor(game: Game): EditorHandle {
     overlay,
     placement,
     settings,
-    actions: { downloadLevel, importLevel, clearLevel, onColumnsChanged, setPadding },
+    showTracks,
+    actions: { downloadLevel, importLevel, clearLevel, onColumnsChanged, setPadding, pickDen },
   });
   tools.buildMaterials();
   tools.persist();
@@ -207,6 +220,7 @@ export function attachEditor(game: Game): EditorHandle {
     if (active) { editFly(dt); }
     overlay.update(height);
     tileEditor.update();
+    dragonTracks.update(showTracks.enabled);
     placement.updatePreview(active ? tileEditor.getHoverCell() : null);
     // Note: placed props are ticked by the GAME (map.update), not here.
   };
@@ -333,6 +347,7 @@ export function attachEditor(game: Game): EditorHandle {
       placement.dispose();
       overlayUI.dispose();
       tileEditor.dispose();
+      dragonTracks.dispose();
       overlay.dispose();
       (tools.pane as any)?.dispose?.();
     },

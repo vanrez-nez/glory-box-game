@@ -5,6 +5,10 @@ import {
 
 export const GAME = {
   CylinderRadius: 35,
+  // Vertical tiling unit (world units): the wall, map chunks, and the dragon's
+  // den-segment all step by this. MUST match CYLINDER_HEIGHT in world/cylinder.ts
+  // and MAP_CHUNK_SIZE in map.ts.
+  SegmentHeight: 128,
   HudDistanceFromCamera: 10,
   PlatformOffset: 2.45,
   CollectibleSocketOffset: 0,

@@ -8,7 +8,7 @@ import type { EditorState, ItemType } from '@/editor/store';
 
 // Bump whenever the dev-pane structure changes (tabs/bindings added or removed)
 // so a stale persisted state is dropped instead of corrupting the new layout.
-const TOOLS_STATE_VERSION = 7;
+const TOOLS_STATE_VERSION = 16;
 
 const DEN_DIRECTIONS = { input: 'input', output: 'output', both: 'both' };
 
@@ -117,6 +117,11 @@ export default class GameTools {
       min: 0, max: 0.45, step: 0.01, label: 'Pad Padding',
     }).on('change', () => obj.actions.setPadding(obj.settings.padding));
 
+    // Dragon debug: toggle the journey-spline overlay; "Pick Den" re-plans a
+    // journey and draws it (highlighting the start/end dens).
+    f.addBinding(obj.showTracks, 'enabled', { label: 'Display Dragon Tracks' });
+    f.addButton({ title: 'Spawn Dragon' }).on('click', obj.actions.pickDen);
+
     const { placement, actions } = obj;
     for (const type of ITEM_TYPES) {
       const meta = placement.insertMeta[type];
@@ -172,7 +177,9 @@ export default class GameTools {
     this.ensureTabs();
   }
 
-  // Live-tune the dragon movement/pose (binds to the dragon's mutable `params`).
+  // Live-tune the dragon movement (binds to the dragon's mutable `params`). The dragon is a
+  // gait-first serpenoid now (enemy/dragon-serpentine.ts): a sine drives the head's heading,
+  // the body follows the head's trail. Tuning = gait shape + steering + den goals.
   buildDragonScreen(obj: any) {
     this.ensureTabs();
     const f = this.pages.dragon;
@@ -180,19 +187,17 @@ export default class GameTools {
     f.addBinding(p, 'speed', { min: 5, max: 60, label: 'Speed' });
     f.addBinding(p, 'amplitude', { min: 0, max: 12, label: 'Undulation Amp' });
     f.addBinding(p, 'wavelength', { min: 4, max: 40, label: 'Wavelength' });
-    f.addBinding(p, 'waveSpeed', { min: 0, max: 10, label: 'Wave Speed' });
     f.addBinding(p, 'bodyLength', { min: 10, max: 80, label: 'Body Length' });
-    f.addBinding(p, 'circleHeight', { min: 0, max: 15, label: 'Circle Height' });
-    f.addBinding(p, 'bodySep', { min: 0, max: 15, label: 'Attack Body Sep' });
-    f.addBinding(p, 'headDist', { min: -5, max: 8, label: 'Attack Head Dist' });
-    f.addBinding(p, 'bendLength', { min: 1, max: 60, step: 1, label: 'Attack Bend Len' });
+    f.addBinding(p, 'bodyRadius', { min: 0.1, max: 3, label: 'Body Radius' });
+    f.addBinding(p, 'circleHeight', { min: 0, max: 15, label: 'Out Height' });
+    f.addBinding(p, 'agility', { min: 0.4, max: 4, label: 'Agility' });
+    f.addBinding(p, 'maxTurn', { min: 0.4, max: 6, label: 'Max Turn' });
+    f.addBinding(p, 'arrivalRadius', { min: 0.5, max: 8, label: 'Arrival Radius' });
+    f.addBinding(p, 'emergeTime', { min: 0.1, max: 3, label: 'Emerge Time' });
+    f.addBinding(p, 'diveTime', { min: 0.1, max: 3, label: 'Dive Time' });
     f.addBinding(p, 'hiddenDwell', { min: 0, max: 10, label: 'Hidden Dwell' });
-    f.addBinding(p, 'activeDuration', { min: 1, max: 15, label: 'Active Duration' });
-    f.addBinding(p, 'emergeTime', { min: 0.2, max: 3, label: 'Emerge Time' });
-    f.addBinding(p, 'diveTime', { min: 0.2, max: 3, label: 'Dive Time' });
-    f.addBinding(p, 'attackWeight', { min: 0, max: 1, label: 'Attack Weight' });
-    f.addBinding(p, 'aimLag', { min: 0, max: 3, label: 'Aim Lag' });
-    f.addBinding(p, 'forceBehavior', { min: 0, max: 2, step: 1, label: 'Force (0/1c/2a)' });
+    f.addBinding(p, 'playerYSigma', { min: 4, max: 64, label: 'Entry Y Bias' });
+    f.addBinding(p, 'maxHops', { min: 1, max: 10, step: 1, label: 'Max Hops' });
   }
 
   /*

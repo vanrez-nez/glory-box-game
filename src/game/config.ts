@@ -39,23 +39,30 @@ const RENDER = {
 // construction and bound to the "Dragon" tweakpane screen for live tuning.
 // Distances are world units (the wall sits at GAME.CylinderRadius = 35); times
 // are seconds.
+// Gait-first serpenoid controller (see enemy/dragon-serpentine.ts + enemy-dragon.ts):
+// a sinusoid drives the HEAD's heading, the head writes a world trail, the body follows
+// the trail at fixed arc spacing. No precomputed rail. Amplitudes are world-unit
+// semi-amplitudes converted to angular swing internally (ψ = 2π·a / wavelength, capped).
 export const DRAGON = {
-  speed: 22,           // head travel speed along its path (units/sec)
-  amplitude: 3.5,      // serpentine undulation amplitude (vertical)
-  wavelength: 16,      // undulation wavelength (arc units)
-  waveSpeed: 3,        // undulation temporal speed
-  bodyLength: 40,      // arc length the body spans behind the head
-  circleHeight: 5,     // radial offset above the wall while circling
-  bodySep: 7,          // attack: radial offset of the body above the wall
-  headDist: 1.5,       // attack: radial offset of the head (stays visible, near wall)
-  bendLength: 26,      // attack: how many front segments arc inward
-  hiddenDwell: 2.5,    // seconds hidden between appearances (appearance cadence)
-  activeDuration: 6,   // seconds spent out before diving back in
-  emergeTime: 1.0,     // seconds to rise out of a den
-  diveTime: 1.2,       // seconds to sink into a den
-  attackWeight: 0.5,   // probability an appearance is an attack (vs circle)
-  aimLag: 0.8,         // seconds of player-path lag the attack aims at
-  forceBehavior: 1,    // dev: 0 = random, 1 = force circle (wander), 2 = force attack
+  speed: 22,           // base forward speed (world units/sec, before wiggle compensation)
+  amplitude: 3.5,      // lateral serpentine semi-amplitude (world units)
+  wavelength: 16,      // serpentine wavelength λ (world units) — sets waves along the body
+  bodyLength: 40,      // world length the body spans behind the head (= N·L)
+  bodyRadius: 0.7,     // body sphere radius at the shoulders (tapers toward the tail)
+  circleHeight: 5,     // radial offset beyond the wall while travelling (out radius = R + this)
+  hiddenDwell: 2.5,    // seconds hidden between appearances (cadence)
+  // --- steering ---
+  agility: 1.6,        // proportional turn gain toward the target (capped by maxTurn)
+  maxTurn: 2.0,        // rad/sec cap on how fast the heading can bank/pitch
+  arrivalRadius: 2.0,  // distance to the target den that triggers the dive
+  // --- emerge / dive smoothing (sigmoid amplitude + radius envelopes) ---
+  emergeTime: 0.6,     // seconds to ramp amplitude 0→full + radius hidden→out on emerge
+  diveTime: 0.6,       // seconds to ramp amplitude full→0 + radius out→hidden on dive
+  // --- den-to-den goals (see enemy/dragon-serpentine.ts) ---
+  playerYSigma: 32,    // entry-den weighting: Gaussian sigma (world-y) toward player
+  maxHops: 1,          // dens threaded per appearance (1 = emerge→dive→hide; >1 chains via
+                       // a hidden under-wall 'transit' — see enemy-dragon, needs convergence
+                       // tuning before raising the default)
 };
 
 // Holds no state now (dev/editor gating moved to src/editor); the getters below
