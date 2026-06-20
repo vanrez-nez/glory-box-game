@@ -39,30 +39,34 @@ const RENDER = {
 // construction and bound to the "Dragon" tweakpane screen for live tuning.
 // Distances are world units (the wall sits at GAME.CylinderRadius = 35); times
 // are seconds.
-// Gait-first serpenoid controller (see enemy/dragon-serpentine.ts + enemy-dragon.ts):
-// a sinusoid drives the HEAD's heading, the head writes a world trail, the body follows
-// the trail at fixed arc spacing. No precomputed rail. Amplitudes are world-unit
-// semi-amplitudes converted to angular swing internally (ψ = 2π·a / wavelength, capped).
+// Path-first serpenoid-gait controller (ported from the user's reference HTML; see
+// enemy-dragon.ts + enemy/dragon-serpentine.ts). One appearance = one threaded lap: the head
+// rides a CatmullRomCurve3 that passes EXACTLY through the entry + target den openings, and the
+// serpenoid weave is a positional offset (two axes) damped to ~0 at each opening, so the curve
+// threads the holes by construction. The body is the head's resampled trail. Amplitudes are
+// world-unit semi-amplitudes (≈ ×7 the reference's R=5 values for this R=35 cylinder); these are
+// STARTING values to dial in the pane, not claimed-correct.
 export const DRAGON = {
-  speed: 22,           // base forward speed (world units/sec, before wiggle compensation)
-  amplitude: 3.5,      // lateral serpentine semi-amplitude (world units)
-  wavelength: 16,      // serpentine wavelength λ (world units) — sets waves along the body
-  bodyLength: 40,      // world length the body spans behind the head (= N·L)
+  // --- serpenoid weave (positional offset on the curve) ---
+  ampH: 2.5,           // lateral (around-the-wall) weave semi-amplitude (world units)
+  ampV: 1.5,           // normal (in/out of the wall) weave semi-amplitude (world units)
+  delta: Math.PI / 2,  // phase offset between the two weave axes (π/2 = figure-eight roll)
+  k: 0.2,              // phase lag → number of waves along the body (waves ≈ beadCount·k/2π)
+  omega: 2.6,          // gait frequency → forward speed (speed = SPEED_K·ω / loss)
+  denFade: 14,         // weave-damp window: flat at the opening (≤ DENR·1.15) → full by denFade
+  // --- curvature-driven weave (reference's "turn-driven" mode): the weave swells in gentle
+  // turns and is suppressed (per cross-axis) in sharp ones, smoothed + capped so a bend can't
+  // blow it up. Curvature is normalised by R so these are scale-invariant. ---
+  dynamicWeave: true,  // off = constant ampH/ampV; on = curvature-modulated
+  turnAmp: 0.7,        // how much the weave swells with turn sharpness
+  suppress: 0.85,      // how much cross-axis sharpness damps an axis (0..1)
+  // --- body ---
+  bodyLength: 40,      // world length the body spans behind the head (= beadCount·L)
   bodyRadius: 0.7,     // body sphere radius at the shoulders (tapers toward the tail)
-  circleHeight: 5,     // radial offset beyond the wall while travelling (out radius = R + this)
+  circleHeight: 2,     // radial offset beyond the wall for the exterior arc (out radius = R + this)
+  // --- lifecycle / den selection (see enemy/dragon-serpentine.ts) ---
   hiddenDwell: 2.5,    // seconds hidden between appearances (cadence)
-  // --- steering ---
-  agility: 1.6,        // proportional turn gain toward the target (capped by maxTurn)
-  maxTurn: 2.0,        // rad/sec cap on how fast the heading can bank/pitch
-  arrivalRadius: 2.0,  // distance to the target den that triggers the dive
-  // --- emerge / dive smoothing (sigmoid amplitude + radius envelopes) ---
-  emergeTime: 0.6,     // seconds to ramp amplitude 0→full + radius hidden→out on emerge
-  diveTime: 0.6,       // seconds to ramp amplitude full→0 + radius out→hidden on dive
-  // --- den-to-den goals (see enemy/dragon-serpentine.ts) ---
   playerYSigma: 32,    // entry-den weighting: Gaussian sigma (world-y) toward player
-  maxHops: 1,          // dens threaded per appearance (1 = emerge→dive→hide; >1 chains via
-                       // a hidden under-wall 'transit' — see enemy-dragon, needs convergence
-                       // tuning before raising the default)
 };
 
 // Holds no state now (dev/editor gating moved to src/editor); the getters below

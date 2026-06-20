@@ -5,13 +5,27 @@ import { DRAGON } from '@/game/config';
 import { GAME, PHYSICS } from '@/game/const';
 import GamePhysicsBody from '@/game/physics/physics-body';
 import {
-  pickHop, gait, pathSpeed, resampleTrail,
-  worldRadius, denWorld, HIDDEN_DEPTH,
+  pickHop, gait, resampleTrail,
+  worldRadius, denWorld, denTheta, cylToWorld,
+  HIDDEN_DEPTH, DEN_OPENING_RADIUS,
 } from '@/game/enemy/dragon-serpentine';
 import type GameDragonDen from '@/game/props/dragon-den';
 
 const { smoothstep, clamp } = THREE.MathUtils;
 const WUP = new THREE.Vector3(0, 1, 0);
+const TWO_PI = Math.PI * 2;
+const ARC_POINTS = 4;       // exterior-arc subdivisions between the two dens (curve control points)
+const SPIRAL_SPAN = 0.7;    // angular span (rad) of the spiral in/out of a den hole (smooths the corner)
+const SPIRAL_STEPS = 6;     // control points per spiral
+
+// Curvature-driven weave constants (ported from the reference, scaled to be SCALE-INVARIANT by
+// normalising curvature κ → κ·R). Each equals the reference's raw-κ value × 5 (its R), so the same
+// numbers hold at our R=35. See rideCurve.
+const TURN_EASE_K = 0.44;     // advance slowdown per unit normalised curvature (ref 2.2 / 5)
+const CURV_CLAMP = 2.0;       // clamp on per-axis normalised curvature (ref 0.4 × 5)
+const CURV_WREF = 1.75;       // normalised-curvature scale for the suppress ramp (ref 0.35 × 5)
+const WEAVE_SWELL_K = 2.1;    // swell coefficient (ref 1.5, re-derived for normalised κ at ×7 world)
+const WEAVE_SWELL_CAP = 2.0;  // max world-unit swell added to an axis (ref 0.30 × 7)
 
 interface DragonOptions {
   parent: THREE.Object3D | null;
@@ -24,21 +38,29 @@ const DEFAULT: DragonOptions = {
 };
 
 type DragonState = 'hidden' | 'active';
-// Phase within an appearance: rise out of a den → slither at out-radius → dive into the
-// target den → (when chaining) crawl UNDER the wall, hidden, to the next entry den → emerge
-// again. After the final dive the body keeps draining into the hole (chainEnding).
-type Phase = 'emerge' | 'travel' | 'dive' | 'transit';
+// Phase within an appearance, for the overlay only: emerging out of the entry den, travelling the
+// exterior arc, diving into the target den. Derived from which third of the lap u is in.
+type Phase = 'emerge' | 'travel' | 'dive';
 
 /*
-  Gait-first serpenoid dragon (see memory dragon-gait-first + the approved plan). A sinusoid
-  drives the HEAD's heading; the head writes a world-space trail; the body follows that trail
-  at fixed arc spacing. There is no precomputed rail — the head is a live steerable controller,
-  so map/goal influences are just steering nudges. The cylinder enters only through den targets
-  and "altitude" = distance from the cylinder axis (travel just beyond the wall; emerge/dive
-  ramp that radius through a den hole).
+  Path-first serpenoid-gait dragon (ported from the user's reference HTML; supersedes the earlier
+  "no rail" gait-first attempt). ONE APPEARANCE = ONE THREADED LAP:
 
-  Rendering is a DEBUG representation: an InstancedMesh of tapered spheres + a connecting line
-  + a head cone. The GLTF mesh returns once movement is dialled in.
+    • beginAppearance → pickHop gives an entry den + a target den.
+    • buildAppearanceCurve builds a CatmullRomCurve3 (centripetal) that passes EXACTLY through
+      both den openings: entryHidden → entryOut → exterior arc at the out-radius → targetOut →
+      targetHidden. Because the openings are control points, the head threads them by construction.
+    • Per frame the head rides the curve (rideCurve). The serpenoid weave is a positional offset on
+      two axes (lateral r2, normal r3), DAMPED to ~0 near each opening (gain via smoothstep), so the
+      weave never pushes the head off a hole while crossing it — flat at the den, full in the open.
+    • When the lap completes the head drains inward along the end tangent (into the target hole) until
+      the body is fully hidden, then hide → dwell → reappear.
+
+  The body is the head's world trail resampled at fixed arc length (resampleTrail), so every vertebra
+  passes through the exact points the head did — including the den openings.
+
+  Rendering is a DEBUG representation: an InstancedMesh of tapered spheres + a connecting line + a
+  head cone. The GLTF mesh returns once movement is dialled in.
 */
 export default class GameEnemyDragon {
   opts: DragonOptions;
@@ -55,26 +77,26 @@ export default class GameEnemyDragon {
   phaseT: number;   // seconds in the current 'hidden' dwell
   clock: number;
 
-  // --- head controller (world space) ---
-  private P = new THREE.Vector3();   // head position
-  private F = new THREE.Vector3(1, 0, 0); // forward (unit)
-  private Rg = new THREE.Vector3(0, 0, -1); // right (unit)
-  private Ug = new THREE.Vector3(0, 1, 0);  // up (unit)
-  private headDist = 0;              // distance flown — drives the wave phase
+  // --- head ride (world space) ---
+  private P = new THREE.Vector3();   // head position (curve point + damped weave)
+  private headDist = 0;              // distance flown — drives the weave phase
+  private lapDist = 0;               // arc length travelled along the appearance curve
+  private smYaw = 0;                 // smoothed normalised path curvature on the lateral axis
+  private smPit = 0;                 // smoothed normalised path curvature on the normal axis
   private trail: THREE.Vector3[] = [];
 
-  // --- appearance / hop state ---
-  private phase: Phase = 'emerge';
-  private phaseTime = 0;             // seconds in the current emerge/dive ramp
-  private ampScale = 0;              // 0..1 undulation envelope (sigmoid on emerge/dive)
-  private desiredRadius = 0;         // current "altitude" target (emerge/dive envelope)
+  // --- appearance curve ---
+  private curve: THREE.CatmullRomCurve3 | null = null;
+  private curveLen = 1;
+  private endTangent = new THREE.Vector3(0, 0, -1); // tangent at u=1 (radially into the target hole)
   private entryDen: GameDragonDen | null = null;
   private targetDen: GameDragonDen | null = null;
-  private lastDen: GameDragonDen | null = null;
-  private hopCount = 0;
-  private chainEnding = false;       // last dive done; body draining into the final den
+  private entryWall = new THREE.Vector3();  // entry opening centre on the wall (weave-damp focus)
+  private targetWall = new THREE.Vector3(); // target opening centre on the wall
+  private phase: Phase = 'emerge';
+  private chainEnding = false;       // lap done; head drains the body into the target hole
   private bodyVisible = false;       // any bead outside the wall (set in updateBody)
-  private trailVersion = 0;          // bumped on each appearance so the editor can resync
+  private trailVersion = 0;          // bumped per appearance so the editor overlay can resync
 
   // --- body beads (sample the trail each frame) ---
   D: THREE.Vector3[];
@@ -83,11 +105,15 @@ export default class GameEnemyDragon {
   private _dummy = new THREE.Object3D();
   private _green = new THREE.Color(0x2fae84);
   private _col = new THREE.Color();
-  private _des = new THREE.Vector3();
-  private _axis = new THREE.Vector3();
+  private _base = new THREE.Vector3();
+  private _t = new THREE.Vector3();
+  private _r2 = new THREE.Vector3();
+  private _r3 = new THREE.Vector3();
   private _fwd = new THREE.Vector3();
-  private _tmp = new THREE.Vector3();
-  private _q = new THREE.Quaternion();
+  private _ct0 = new THREE.Vector3();   // tangent at u−eps (curvature sample)
+  private _ct1 = new THREE.Vector3();   // tangent at u+eps
+  private _curv = new THREE.Vector3();  // curvature vector (dT/ds)
+  private _smooth = new THREE.Vector3(); // body Laplacian-smoothing scratch
 
   constructor(opts: Partial<DragonOptions> = {}) {
     this.opts = { ...DEFAULT, ...opts };
@@ -159,9 +185,11 @@ export default class GameEnemyDragon {
     this.state = 'hidden';
     this.phaseT = 0;
     this.trail.length = 0;
-    this.lastDen = null;
     this.chainEnding = false;
     this.bodyVisible = false;
+    this.curve = null;
+    this.smYaw = 0;
+    this.smPit = 0;
   }
 
   // --- editor / debug accessors ----------------------------------------------
@@ -177,7 +205,7 @@ export default class GameEnemyDragon {
   }
 
   // Editor "Spawn Dragon" button: force a fresh appearance (the loop is frozen in edit mode,
-  // so this just plans the hop + places the head at the chosen den).
+  // so this just builds the curve + places the head at the entry den).
   spawnAppearance(map: any, playerY: number): boolean {
     if (this.beginAppearance(map, playerY)) { this.setState('active'); return true; }
     return false;
@@ -188,31 +216,9 @@ export default class GameEnemyDragon {
   private get outRadius() { return GAME.CylinderRadius + this.params.circleHeight; }
   private get hiddenRadius() { return GAME.CylinderRadius - HIDDEN_DEPTH; }
 
-  // Out-radius point above a den (the travel goal) / hidden point at a den (the dive goal).
-  private denOutPoint(out: THREE.Vector3, den: GameDragonDen) {
-    return denWorld(out, den, this.outRadius);
-  }
-
-  private denHiddenPoint(out: THREE.Vector3, den: GameDragonDen) {
-    return denWorld(out, den, this.hiddenRadius);
-  }
-
   private setState(s: DragonState) {
     this.state = s;
     this.phaseT = 0;
-  }
-
-  // Rebuild the orthonormal head frame. "Up" is the RADIAL direction (the wall's surface
-  // normal at the head), not world-Y — so the lateral (yaw) weave stays on the wall surface
-  // and only the pitch weave goes in/out of the wall. Using world-up here makes the weave
-  // fight the radius controller near the cylinder and cusp the path.
-  private rebuildFrame() {
-    this._tmp.set(this.P.x, 0, this.P.z);                 // radial up (out from the axis)
-    if (this._tmp.lengthSq() < 1e-6) { this._tmp.copy(WUP); } else { this._tmp.normalize(); }
-    this.Rg.crossVectors(this._tmp, this.F);              // right = up × forward (tangent)
-    if (this.Rg.lengthSq() < 1e-6) { this.Rg.set(0, 0, -1); }
-    this.Rg.normalize();
-    this.Ug.crossVectors(this.F, this.Rg).normalize();    // up ≈ radial, exactly ⟂ to F
   }
 
   // --- appearance lifecycle --------------------------------------------------
@@ -222,54 +228,87 @@ export default class GameEnemyDragon {
     if (!hop) { return false; }
     this.entryDen = hop.entry;
     this.targetDen = hop.target;
-    this.lastDen = null;
-    this.hopCount = 0;
     this.chainEnding = false;
-    this.startHop();
+    this.buildAppearanceCurve();
+    this.startRide();
     this.trailVersion += 1;
     return true;
   }
 
-  // Spawn (or re-spawn, when chaining) the head inside the entry den and aim it at the target.
-  private startHop() {
-    this.denHiddenPoint(this.P, this.entryDen!);
-    this.headDist = 0;
-    this.phase = 'emerge';
-    this.phaseTime = 0;
-    this.ampScale = 0;
-    this.desiredRadius = this.hiddenRadius;
-    // Aim out of the den toward the target's out-point, so it rises while moving.
-    this.denOutPoint(this._des, this.targetDen!);
-    this.F.copy(this._des).sub(this.P);
-    if (this.F.lengthSq() < 1e-6) { this.F.copy(this.P).normalize(); } // radial fallback
-    this.F.normalize();
-    this.rebuildFrame();
-    // Seed the trail so the body has something to follow (it uncoils from the den as the
-    // trail grows; beads beyond the trail collapse onto the den, staying hidden).
-    this.trail.length = 0;
-    this.trail.push(this.P.clone());
+  // Build the lap curve: a centripetal Catmull-Rom from inside the entry den, out through the
+  // entry opening, along the exterior arc, and back into the target den. The wall crossings are
+  // SPIRALS (ported from the reference) — the angle eases toward the den angle while the radius
+  // changes LINEARLY, so the tangent turns gradually from radial to tangential (no corner/cusp at
+  // the hole), yet the crossing still lands exactly on the opening. Caches the end tangent
+  // (radially into the target hole) for the drain, and the two opening centres for the weave damp.
+  private buildAppearanceCurve() {
+    const entry = this.entryDen!;
+    const target = this.targetDen!;
+    const outR = this.outRadius;
+    const hidR = this.hiddenRadius;
+    const R = GAME.CylinderRadius;
+    const ey = entry.body.position.y;
+    const ty = target.body.position.y;
+    const aE = denTheta(entry);
+    const aT = denTheta(target);
+    let d = aT - aE;
+    while (d > Math.PI) { d -= TWO_PI; }
+    while (d < -Math.PI) { d += TWO_PI; }
+    const dir = d >= 0 ? 1 : -1;
+    // spiral span, clamped so the exterior arc keeps room between the two spirals.
+    const spin = Math.min(SPIRAL_SPAN, Math.max(0.12, Math.abs(d) / 2 - 0.05));
+    const v = () => new THREE.Vector3();
+
+    const pts: THREE.Vector3[] = [
+      cylToWorld(v(), aE, ey, hidR),  // entryHidden — inside the wall
+      cylToWorld(v(), aE, ey, R),     // entry opening — on the wall
+    ];
+    // EMERGE spiral: nose out of the hole. Angle eases aE → aE+dir·spin (slow at the wall, ea=f²)
+    // while the radius climbs linearly R → outR — radial→tangential with no corner.
+    for (let s = 1; s <= SPIRAL_STEPS; s++) {
+      const f = s / SPIRAL_STEPS; const ea = f * f;
+      pts.push(cylToWorld(v(), aE + dir * spin * ea, ey, R + (outR - R) * f));
+    }
+    // exterior arc at the out-radius, from just past the entry to just before the target.
+    const arcStart = aE + dir * spin;
+    const arcEnd = aT - dir * spin;
+    for (let s = 1; s < ARC_POINTS; s++) {
+      const f = s / ARC_POINTS;
+      pts.push(cylToWorld(v(), arcStart + (arcEnd - arcStart) * f, ey + (ty - ey) * f, outR));
+    }
+    // DIVE spiral: settle onto the target. Angle eases aT−dir·spin → aT (slow at the wall,
+    // ea=f(2−f)) while the radius drops linearly outR → R, ending radial at the opening.
+    for (let s = 1; s <= SPIRAL_STEPS; s++) {
+      const f = s / SPIRAL_STEPS; const ea = f * (2 - f);
+      pts.push(cylToWorld(v(), aT - dir * spin * (1 - ea), ty, outR + (R - outR) * f));
+    }
+    pts.push(cylToWorld(v(), aT, ty, hidR)); // targetHidden — straight radial in (last point)
+
+    this.curve = new THREE.CatmullRomCurve3(pts, false, 'centripetal', 0.5);
+    this.curve.arcLengthDivisions = 400;
+    this.curve.updateArcLengths();
+    this.curveLen = Math.max(1e-3, this.curve.getLength());
+    this.curve.getTangentAt(1, this.endTangent).normalize();
+    denWorld(this.entryWall, entry, R);
+    denWorld(this.targetWall, target, R);
   }
 
-  // Advance to the next den-hop, or end the appearance (let the body drain into the den).
-  // Chaining does NOT teleport the head (that reshuffles the trail and jumps the body): it
-  // enters 'transit', steering the head — continuously, at hidden radius, below the wall — to
-  // the next entry den, then emerging there. The whole transit stretch is invisible.
-  private nextHopOrEnd(map: any, playerY: number) {
-    this.lastDen = this.targetDen;
-    this.hopCount += 1;
-    const hop = this.hopCount < this.params.maxHops
-      ? pickHop(map.getActiveDens(), playerY, this.params, this.lastDen)
-      : null;
-    if (hop) {
-      this.entryDen = hop.entry;
-      this.targetDen = hop.target;
-      this.phase = 'transit';
-      this.phaseTime = 0;
-      this.ampScale = 0;
-      this.desiredRadius = this.hiddenRadius;
-      this.trailVersion += 1;
-    } else {
-      this.chainEnding = true; // drain: head keeps slithering (hidden) until the body clears
+  // Place the head at the start of the curve (inside the entry den) and seed a straight hidden tail
+  // behind it along −tangent(0), so the body uncoils out of the den instead of snapping.
+  private startRide() {
+    const c = this.curve!;
+    this.headDist = 0;
+    this.lapDist = 0;
+    this.smYaw = 0;
+    this.smPit = 0;
+    this.phase = 'emerge';
+    c.getPointAt(0, this.P);
+    c.getTangentAt(0, this._fwd).normalize();
+    this.trail.length = 0;
+    const step = 0.4;
+    const n = Math.ceil((this.params.bodyLength + 4) / step);
+    for (let s = n; s >= 0; s--) {
+      this.trail.push(this.P.clone().addScaledVector(this._fwd, -s * step));
     }
   }
 
@@ -290,11 +329,10 @@ export default class GameEnemyDragon {
       return;
     }
 
-    this.steerHead(delta, playerPosition, map);
-    this.advancePhase(delta, playerPosition, map);
+    this.rideCurve(delta);
     this.updateBody();
 
-    // Hide completely once the final dive has drained the whole body into the den.
+    // Hide completely once the drain has pulled the whole body into the den.
     if (this.chainEnding && !this.bodyVisible) {
       this.trail.length = 0;
       this.setState('hidden');
@@ -307,107 +345,76 @@ export default class GameEnemyDragon {
     this.bodyLine.visible = true;
   }
 
-  // Steer the forward vector toward the current goal (rate-limited), add the serpenoid weave,
-  // advance the head, hold "altitude" (radius) toward the phase envelope, and grow the trail.
-  private steerHead(delta: number, playerPosition: any, map: any) {
+  // Ride the appearance curve, applying the den-damped serpenoid weave, then (once the lap is done)
+  // drain inward along the end tangent so the body funnels into the target hole. Grows the trail.
+  private rideCurve(delta: number) {
+    if (!this.curve) { return; }
     const p = this.params;
-    const g = gait(p);
+    const g = gait(p, this.D.length);
 
-    // desired forward = toward the phase goal (+ influence seam, off by default).
-    if (this.chainEnding || this.phase === 'dive') {
-      // Dive/drain: DON'T keep pursuing the den point (that overshoots and U-turns at full
-      // speed near the wall). Hold heading and let the radius envelope plunge it through the
-      // hole — it's already arrived above the den, so straight-down threads it cleanly.
-      this._des.copy(this.F);
-    } else if (this.phase === 'transit') {
-      this.denHiddenPoint(this._des, this.entryDen!).sub(this.P);   // under-wall to next den
+    if (this.chainEnding) {
+      // drain: continue radially inward into the target hole, no weave; the body follows.
+      this.P.addScaledVector(this.endTangent, g.speed * delta);
+      this.phase = 'dive';
     } else {
-      this.denOutPoint(this._des, this.targetDen!).sub(this.P);     // out-radius above target
+      // ease the advance through tight bends (uses last frame's smoothed curvature) so the head
+      // doesn't whip around the spiral corners.
+      const turnEase = 1 / (1 + TURN_EASE_K * Math.max(this.smYaw, this.smPit));
+      const move = g.speed * delta * turnEase;
+      this.headDist += move;
+      this.lapDist += move;
+      if (this.lapDist >= this.curveLen) {
+        this.lapDist = this.curveLen;
+        this.chainEnding = true;
+      }
+      const u = clamp(this.lapDist / this.curveLen, 0, 1);
+      this.curve.getPointAt(u, this._base);
+      this.curve.getTangentAt(u, this._t).normalize();
+      // frame: r2 = WUP × t (lateral, around the wall), r3 = t × r2 (normal, in/out of the wall).
+      this._r2.crossVectors(WUP, this._t);
+      if (this._r2.lengthSq() < 1e-6) { this._r2.set(1, 0, 0); }
+      this._r2.normalize();
+      this._r3.crossVectors(this._t, this._r2).normalize();
+      // damp the weave to ~0 within an opening so the curve threads the exact hole.
+      const dDen = Math.min(this._base.distanceTo(this.entryWall), this._base.distanceTo(this.targetWall));
+      const gain = smoothstep(dDen, DEN_OPENING_RADIUS * 1.15, p.denFade);
+
+      // curvature-driven amplitude: the weave swells in gentle turns and is suppressed (per
+      // cross-axis) in sharp ones. Curvature is sampled from the tangent, normalised by R
+      // (scale-invariant), clamped, slow-smoothed and capped so a bend can't blow it up.
+      let aH = p.ampH; let aV = p.ampV;
+      if (p.dynamicWeave) {
+        const eps = 0.01;
+        const u0 = Math.max(0, u - eps); const u1 = Math.min(1, u + eps);
+        this.curve.getTangentAt(u0, this._ct0).normalize();
+        this.curve.getTangentAt(u1, this._ct1).normalize();
+        const ds = Math.max(1e-3, (u1 - u0) * this.curveLen);
+        this._curv.subVectors(this._ct1, this._ct0).multiplyScalar(1 / ds); // κ = dT/ds (1/len)
+        const kH = Math.min(Math.abs(this._curv.dot(this._r2)) * GAME.CylinderRadius, CURV_CLAMP);
+        const kV = Math.min(Math.abs(this._curv.dot(this._r3)) * GAME.CylinderRadius, CURV_CLAMP);
+        const nearSeam = (u < 0.04 || u > 0.96); // hold across the curve ends (tangent kink)
+        const sm = 1 - Math.exp(-delta / 0.40);  // ~0.4 s time constant
+        if (!nearSeam) { this.smYaw += (kH - this.smYaw) * sm; this.smPit += (kV - this.smPit) * sm; }
+        const ramp2 = clamp(this.smYaw / CURV_WREF, 0, 1);
+        const ramp3 = clamp(this.smPit / CURV_WREF, 0, 1);
+        aH = (p.ampH + p.turnAmp * this.smYaw * WEAVE_SWELL_K) * (1 - p.suppress * ramp3);
+        aV = (p.ampV + p.turnAmp * this.smPit * WEAVE_SWELL_K) * (1 - p.suppress * ramp2);
+        aH = Math.min(aH, p.ampH + WEAVE_SWELL_CAP);
+        aV = Math.min(aV, p.ampV + WEAVE_SWELL_CAP);
+      }
+
+      const ph = (TWO_PI * this.headDist) / g.lambda;
+      this.P.copy(this._base)
+        .addScaledVector(this._r2, aH * gain * Math.sin(ph))
+        .addScaledVector(this._r3, aV * gain * Math.sin(ph + p.delta));
+      this.phase = u < 1 / 3 ? 'emerge' : (u > 2 / 3 ? 'dive' : 'travel');
     }
-    if (this._des.lengthSq() < 1e-8) { this._des.copy(this.F); } else { this._des.normalize(); }
-    this.applyInfluences(this._des, playerPosition, map); // seam — no-op by default
 
-    // turn F toward desired, rate-limited (banking/pitching).
-    const ang = this.F.angleTo(this._des);
-    if (ang > 1e-4) {
-      this._axis.crossVectors(this.F, this._des);
-      if (this._axis.lengthSq() < 1e-9) { this._axis.copy(this.Ug); } else { this._axis.normalize(); }
-      const step = Math.min(ang, Math.min(p.maxTurn, p.agility * ang) * delta);
-      this._q.setFromAxisAngle(this._axis, step);
-      this.F.applyQuaternion(this._q).normalize();
-    }
-    this.rebuildFrame();
-
-    // advance along the weaving tangent; pathSpeed compensates for wiggle so net speed holds.
-    const speed = pathSpeed(p, g);
-    this.headDist += speed * delta;
-    const ph = g.kw * this.headDist;
-    // Lateral serpenoid weave: yaw the heading about the radial "up" so the wave stays on the
-    // wall surface — that single axis already serpentines both around the cylinder and along
-    // its axis. (A second, radial axis would lift the body off / clip the wall and cusp.)
-    this._fwd.copy(this.F);
-    this._q.setFromAxisAngle(this.Ug, this.ampScale * g.psiH * Math.sin(ph));
-    this._fwd.applyQuaternion(this._q);
-    this._fwd.normalize();
-    this.P.addScaledVector(this._fwd, speed * delta);
-
-    // hold "altitude": set the head's cylinder radius to the phase envelope (emerge/dive).
-    // desiredRadius is already smoothstep-eased, so radial velocity → 0 at the top of the
-    // emerge / bottom of the dive — no radial→tangential corner where it flattens out.
-    const curR = worldRadius(this.P) || 1e-3;
-    const sc = this.desiredRadius / curR;
-    this.P.x *= sc; this.P.z *= sc;
-
-    // grow the trail.
+    // grow the trail (the body retraces it exactly).
     const last = this.trail[this.trail.length - 1];
     if (!last || last.distanceTo(this.P) > 1e-4) { this.trail.push(this.P.clone()); }
-    const need = Math.ceil(p.bodyLength / Math.max(0.05, p.bodyLength / this.D.length)) + 64;
-    const cap = this.D.length + need + 256;
+    const cap = this.D.length * 2 + 256;
     if (this.trail.length > cap) { this.trail.splice(0, this.trail.length - cap); }
-  }
-
-  // Influence seam: future map-property steering nudges sum into `dir` here. No-op by default.
-  // (The reference's obstacle-repulsion is the worked example of what plugs in.)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, class-methods-use-this
-  private applyInfluences(_dir: THREE.Vector3, _playerPosition: any, _map: any) { /* hooks */ }
-
-  // Drive the emerge→travel→dive envelopes (amplitude + radius) and the goal transitions.
-  private advancePhase(delta: number, playerPosition: any, map: any) {
-    const p = this.params;
-    this.phaseTime += delta;
-    if (this.chainEnding) { this.ampScale = 0; this.desiredRadius = this.hiddenRadius; return; }
-
-    switch (this.phase) {
-      case 'emerge': {
-        const t = clamp(this.phaseTime / Math.max(0.05, p.emergeTime), 0, 1);
-        this.ampScale = smoothstep(t, 0, 1);
-        this.desiredRadius = this.hiddenRadius + (this.outRadius - this.hiddenRadius) * smoothstep(t, 0, 1);
-        if (t >= 1) { this.phase = 'travel'; this.phaseTime = 0; }
-        break;
-      }
-      case 'travel': {
-        this.ampScale = 1;
-        this.desiredRadius = this.outRadius;
-        this.denOutPoint(this._tmp, this.targetDen!);
-        if (this.P.distanceTo(this._tmp) <= p.arrivalRadius) { this.phase = 'dive'; this.phaseTime = 0; }
-        break;
-      }
-      case 'dive': {
-        const t = clamp(this.phaseTime / Math.max(0.05, p.diveTime), 0, 1);
-        this.ampScale = smoothstep(1 - t, 0, 1);
-        this.desiredRadius = this.hiddenRadius + (this.outRadius - this.hiddenRadius) * smoothstep(1 - t, 0, 1);
-        if (t >= 1) { this.nextHopOrEnd(map, playerPosition.y); }
-        break;
-      }
-      case 'transit': {
-        // Hidden under-wall crawl to the next entry den; emerge once we reach it.
-        this.ampScale = 0;
-        this.desiredRadius = this.hiddenRadius;
-        this.denHiddenPoint(this._tmp, this.entryDen!);
-        if (this.P.distanceTo(this._tmp) <= p.arrivalRadius) { this.phase = 'emerge'; this.phaseTime = 0; }
-        break;
-      }
-    }
   }
 
   // Sphere radius along the body (debug taper: head → tail).
@@ -420,6 +427,20 @@ export default class GameEnemyDragon {
     const wall = GAME.CylinderRadius;
     const segLen = Math.max(0.02, this.params.bodyLength / N);
     resampleTrail(this.trail, N, segLen, this.D);
+
+    // Light Laplacian smoothing (2 passes) to relax any residual kink at the spiral crossings.
+    // Skip beads near a den so the threading through the openings stays exact.
+    if (this.state === 'active') {
+      const skipR = DEN_OPENING_RADIUS * 1.7;
+      for (let pass = 0; pass < 2; pass++) {
+        for (let i = 1; i < N - 1; i++) {
+          if (this.D[i].distanceTo(this.entryWall) < skipR
+            || this.D[i].distanceTo(this.targetWall) < skipR) { continue; }
+          this._smooth.copy(this.D[i - 1]).add(this.D[i + 1]).multiplyScalar(0.5);
+          this.D[i].lerp(this._smooth, 0.2);
+        }
+      }
+    }
 
     const linePos = this.bodyLine.geometry.attributes.position.array as Float32Array;
     const dummy = this._dummy;

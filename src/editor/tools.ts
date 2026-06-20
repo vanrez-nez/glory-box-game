@@ -6,10 +6,6 @@ import { StatsPanePluginBundle, type StatsPaneApi } from '@/editor/stats-blade';
 import { ITEM_TYPES, ITEM_CATALOG } from '@/editor/items';
 import type { EditorState, ItemType } from '@/editor/store';
 
-// Bump whenever the dev-pane structure changes (tabs/bindings added or removed)
-// so a stale persisted state is dropped instead of corrupting the new layout.
-const TOOLS_STATE_VERSION = 16;
-
 const DEN_DIRECTIONS = { input: 'input', output: 'output', both: 'both' };
 
 // Which tab each material (by registry key) is filed under. Only Player* and
@@ -177,57 +173,62 @@ export default class GameTools {
     this.ensureTabs();
   }
 
-  // Live-tune the dragon movement (binds to the dragon's mutable `params`). The dragon is a
-  // gait-first serpenoid now (enemy/dragon-serpentine.ts): a sine drives the head's heading,
-  // the body follows the head's trail. Tuning = gait shape + steering + den goals.
+  // Live-tune the dragon movement (binds to the dragon's mutable `params`). The dragon is now
+  // path-first (enemy-dragon.ts): the head rides a lap-curve through both den openings and the
+  // serpenoid weave is a positional offset damped flat at each hole. Tuning = gait shape + body.
   buildDragonScreen(obj: any) {
     this.ensureTabs();
     const f = this.pages.dragon;
     const p = obj.params;
-    f.addBinding(p, 'speed', { min: 5, max: 60, label: 'Speed' });
-    f.addBinding(p, 'amplitude', { min: 0, max: 12, label: 'Undulation Amp' });
-    f.addBinding(p, 'wavelength', { min: 4, max: 40, label: 'Wavelength' });
+    f.addBinding(p, 'ampH', { min: 0, max: 12, label: 'Weave Amp H' });
+    f.addBinding(p, 'ampV', { min: 0, max: 12, label: 'Weave Amp V' });
+    f.addBinding(p, 'delta', { min: 0, max: Math.PI, label: 'Weave Phase δ' });
+    f.addBinding(p, 'k', { min: 0.05, max: 1.4, label: 'Wave Lag k' });
+    f.addBinding(p, 'omega', { min: 0.4, max: 6, label: 'Omega (speed)' });
+    f.addBinding(p, 'denFade', { min: 4, max: 30, label: 'Den Weave Fade' });
+    f.addBinding(p, 'dynamicWeave', { label: 'Turn-Driven Weave' });
+    f.addBinding(p, 'turnAmp', { min: 0, max: 1.5, label: 'Turn → Amp' });
+    f.addBinding(p, 'suppress', { min: 0, max: 1, label: 'Turn Suppress' });
     f.addBinding(p, 'bodyLength', { min: 10, max: 80, label: 'Body Length' });
     f.addBinding(p, 'bodyRadius', { min: 0.1, max: 3, label: 'Body Radius' });
     f.addBinding(p, 'circleHeight', { min: 0, max: 15, label: 'Out Height' });
-    f.addBinding(p, 'agility', { min: 0.4, max: 4, label: 'Agility' });
-    f.addBinding(p, 'maxTurn', { min: 0.4, max: 6, label: 'Max Turn' });
-    f.addBinding(p, 'arrivalRadius', { min: 0.5, max: 8, label: 'Arrival Radius' });
-    f.addBinding(p, 'emergeTime', { min: 0.1, max: 3, label: 'Emerge Time' });
-    f.addBinding(p, 'diveTime', { min: 0.1, max: 3, label: 'Dive Time' });
     f.addBinding(p, 'hiddenDwell', { min: 0, max: 10, label: 'Hidden Dwell' });
     f.addBinding(p, 'playerYSigma', { min: 4, max: 64, label: 'Entry Y Bias' });
-    f.addBinding(p, 'maxHops', { min: 1, max: 10, step: 1, label: 'Max Hops' });
   }
 
   /*
     Persists the whole pane state to localStorage so dev tweaks survive reloads
     (a lightweight replacement for dat.gui's named-preset "remember" system).
-    Versioned: importing a saved state whose structure no longer matches the pane
-    (after bindings/tabs are added/removed) corrupts the layout — bindings shift,
-    pages bleed together — so a mismatched/stale blob is discarded instead.
-    BUMP TOOLS_STATE_VERSION whenever the pane structure changes.
+
+    tweakpane's importState matches bindings POSITIONALLY, so importing a blob whose
+    structure no longer matches the pane silently shifts every value into the wrong
+    binding (e.g. bodyLength ← ampH's value). A hand-maintained version int was the
+    old guard, but it doesn't actually reflect the structure and the autosave can
+    re-stamp a stale blob under the current int — so it failed. Instead we gate on a
+    `sig` DERIVED from the live pane structure: any added/removed/reordered binding
+    changes the sig and the old blob is dropped. A finite/type sanity check vs the
+    pristine default state is the backstop against any garbage value reaching a binding.
   */
   persist() {
     const key = 'glory-box:tools-state';
+    const sig = this.paneSignature();
+    const defaultState = this.pane.exportState(); // pristine, code-default values
+
     const saved = localStorage.getItem(key);
     if (saved) {
+      let restored = false;
       try {
         const parsed = JSON.parse(saved);
-        if (parsed && parsed.v === TOOLS_STATE_VERSION && parsed.state) {
+        if (parsed && parsed.sig === sig && parsed.state
+          && this.importIsSafe(parsed.state, defaultState)) {
           this.pane.importState(parsed.state);
-        } else {
-          localStorage.removeItem(key);
+          restored = true;
         }
-      } catch {
-        localStorage.removeItem(key);
-      }
+      } catch { /* fall through to drop */ }
+      if (!restored) { localStorage.removeItem(key); }
     }
     this.pane.on('change', () => {
-      localStorage.setItem(key, JSON.stringify({
-        v: TOOLS_STATE_VERSION,
-        state: this.pane.exportState(),
-      }));
+      localStorage.setItem(key, JSON.stringify({ sig, state: this.pane.exportState() }));
     });
     this.pane.addButton({ title: 'Reset Tweaks' }).on('click', () => {
       localStorage.removeItem(key);
@@ -236,6 +237,54 @@ export default class GameTools {
     // Build/importState leaves non-active tab pages mis-laid-out until they're
     // shown (the "click each tab to fix it" bug). Force it next frame.
     requestAnimationFrame(() => this.relayout());
+  }
+
+  // A fingerprint of the pane's structure (ordered binding keys + folder/tab titles),
+  // walked from exportState. Changes whenever a binding/folder/tab is added, removed, or
+  // reordered — so a structurally stale persisted blob is dropped instead of mis-imported.
+  private paneSignature(): string {
+    const tokens: string[] = [];
+    const walk = (n: any) => {
+      if (!n || typeof n !== 'object') { return; }
+      if (n.binding && typeof n.binding === 'object' && 'key' in n.binding) {
+        tokens.push(`b:${n.binding.key}`);
+      }
+      if (typeof n.title === 'string') { tokens.push(`t:${n.title}`); }
+      const kids = n.children || n.pages;
+      if (Array.isArray(kids)) { kids.forEach(walk); return; }
+      for (const k in n) { if (n[k] && typeof n[k] === 'object') { walk(n[k]); } }
+    };
+    walk(this.pane.exportState());
+    return tokens.join('|');
+  }
+
+  // Backstop validation: the persisted state's binding values (in order) must match the
+  // default state's in count and type, and every number must be finite. Rejects NaN/∞ or a
+  // type shift (e.g. a boolean landing where a number belongs) so nothing toxic reaches a binding.
+  // eslint-disable-next-line class-methods-use-this
+  private importIsSafe(state: any, def: any): boolean {
+    const values = (root: any): any[] => {
+      const out: any[] = [];
+      const walk = (n: any) => {
+        if (!n || typeof n !== 'object') { return; }
+        if (n.binding && typeof n.binding === 'object' && 'value' in n.binding) {
+          out.push(n.binding.value);
+        }
+        const kids = n.children || n.pages;
+        if (Array.isArray(kids)) { kids.forEach(walk); return; }
+        for (const k in n) { if (n[k] && typeof n[k] === 'object') { walk(n[k]); } }
+      };
+      walk(root);
+      return out;
+    };
+    const a = values(state);
+    const b = values(def);
+    if (a.length !== b.length) { return false; }
+    for (let i = 0; i < a.length; i++) {
+      if (typeof a[i] !== typeof b[i]) { return false; }
+      if (typeof a[i] === 'number' && !Number.isFinite(a[i])) { return false; }
+    }
+    return true;
   }
 
   // Show every tab page once (then return to the first) — programmatically does

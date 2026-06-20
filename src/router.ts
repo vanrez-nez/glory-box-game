@@ -23,5 +23,11 @@ export default createRouter({
       // which is lazy-loaded when the route is visited.
       component: () => import('./views/Game.vue'),
     },
+    // DEV-only dragon den-entry visualizer (tree-shaken from prod builds).
+    ...(import.meta.env.DEV ? [{
+      path: '/dragon-debug',
+      name: 'dragon-debug',
+      component: () => import('./views/DragonDebug.vue'),
+    }] : []),
   ],
 });
