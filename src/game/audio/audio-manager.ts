@@ -36,7 +36,21 @@ export class GameAudioManager {
     this.unlocked = false;
     this.queued = [];
     this.playQueue = [];
+    // Audio is muted by default; toggled via the dev pane (Engine > Audio).
+    // Gating at the listener's master gain keeps already-playing autoplay loops
+    // (wind/dragon) silenced without tearing down or re-queuing playback.
+    this.listener.setMasterVolume(0);
     this.resumeOnGesture();
+  }
+
+  // Master on/off used by the dev pane. Backed by the listener's master gain so
+  // every track/mix is affected uniformly.
+  get audioEnabled() {
+    return this.listener.getMasterVolume() > 0;
+  }
+
+  set audioEnabled(value: boolean) {
+    this.listener.setMasterVolume(value ? 1 : 0);
   }
 
   // Browsers block the AudioContext until a user gesture; resume it on the first

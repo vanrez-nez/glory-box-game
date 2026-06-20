@@ -63,9 +63,9 @@ export const DRAGON = {
   // --- body ---
   bodyLength: 40,      // world length the body spans behind the head (= beadCount·L)
   bodyRadius: 0.7,     // body sphere radius at the shoulders (tapers toward the tail)
-  circleHeight: 2,     // radial offset beyond the wall for the exterior arc (out radius = R + this)
-  // --- lifecycle / den selection (see enemy/dragon-serpentine.ts) ---
-  hiddenDwell: 2.5,    // seconds hidden between appearances (cadence)
+  separation: 1.5,     // clearance (world units) the weave's inner envelope keeps off the wall
+                       // (exterior-arc out-radius = R + weave reach + this; see enemy-dragon.outRadius)
+  // --- den selection (see enemy/dragon-serpentine.ts) ---
   playerYSigma: 32,    // entry-den weighting: Gaussian sigma (world-y) toward player
 };
 

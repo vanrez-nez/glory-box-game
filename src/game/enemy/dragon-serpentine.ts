@@ -16,13 +16,13 @@ import type GameDragonDen from '@/game/props/dragon-den';
   GAME.CylinderRadius; the dragon travels just beyond it and dives back through dens).
 */
 
-export const HIDDEN_DEPTH = 9;        // radial depth below the wall the dragon hides at
 // Den opening radius (world units): within DENR·1.15 of an opening the weave is damped flat so
 // the curve threads the exact hole. Sized to the hex den (frame outer ≈ 2.9, see dragon-den.ts).
 export const DEN_OPENING_RADIUS = 3.0;
-const PSI_MAX = 1.2;                  // no-fold cap on angular swing (rad)
-// Speed scale: speed = SPEED_K·ω / loss. The reference uses 1.8 at R=5; scaled ≈ ×7 to R=35 so
-// the dragon laps the wall at a comparable cadence. Tuned with ω in the pane.
+// Speed scale: speed = SPEED_K·ω. The reference uses 1.8 at R=5; scaled ≈ ×7 to R=35 so the dragon
+// laps the wall at a comparable cadence. Tuned with ω in the pane. Speed depends on ω ONLY — the
+// old gait-first amplitude→loss→speed coupling is gone (the weave is a perpendicular offset that
+// does not shorten forward progress along the curve, so amplitude must not bleed into speed).
 const SPEED_K = 8;
 
 export type DragonParams = typeof DRAGON;
@@ -106,24 +106,18 @@ export function pickHop(
 
 // --- gait math -------------------------------------------------------------
 
-export interface Gait { lambda: number; kw: number; psiH: number; psiV: number; speed: number; }
+export interface Gait { lambda: number; speed: number; }
 
-// Serpenoid gait quantities, ported from the reference demo. The weave is a positional offset
-// applied to the head as it rides the appearance curve (two axes: lateral r2, normal r3), so
-// these set its wavelength and the no-fold-capped amplitudes; `loss`/`speed` keep the net
-// traversal cadence steady as the weave gets wigglier (same compensation the reference uses).
-//   λ = 2π·L / k          (L = link length = bodyLength / beadCount, k = phase lag → wave count)
-//   ψ = min(a·kw, PSIMAX) (kw = 2π/λ; cap stops the weave from folding the path back)
-//   speed = SPEED_K·ω / loss,  loss = max(0.35, 1 − 0.25(ψH² + ψV²))
+// Serpenoid gait quantities for the path-first rider. The weave is a positional offset applied to
+// the head as it rides the lap curve (two axes: lateral r2, normal r3); `lambda` sets its
+// wavelength along the body, `speed` is the head's arc-length advance rate.
+//   λ = 2π·L / k     (L = link length = bodyLength / beadCount, k = phase lag → wave count)
+//   speed = SPEED_K·ω  (ω only — amplitude is decoupled from speed; see SPEED_K note above)
 export function gait(p: DragonParams, beadCount: number): Gait {
   const L = p.bodyLength / Math.max(1, beadCount);
   const lambda = (2 * Math.PI * L) / Math.max(0.05, p.k);
-  const kw = (2 * Math.PI) / lambda;
-  const psiH = Math.min(p.ampH * kw, PSI_MAX);
-  const psiV = Math.min(p.ampV * kw, PSI_MAX);
-  const loss = Math.max(0.35, 1 - 0.25 * (psiH * psiH + psiV * psiV));
-  const speed = (SPEED_K * p.omega) / loss;
-  return { lambda, kw, psiH, psiV, speed };
+  const speed = SPEED_K * p.omega;
+  return { lambda, speed };
 }
 
 // --- body = trail follower -------------------------------------------------

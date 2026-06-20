@@ -1,4 +1,5 @@
 import { MaterialFactoryInstance as MaterialFactory } from '@/game/materials/material-factory';
+import { AudioManagerInstance as AudioManager } from '@/game/audio/audio-manager';
 import { GameConfigInstance as GameConfig } from '@/game/config';
 import { COLLECTIBLE } from '@/game/const';
 import { Pane } from 'tweakpane';
@@ -191,8 +192,7 @@ export default class GameTools {
     f.addBinding(p, 'suppress', { min: 0, max: 1, label: 'Turn Suppress' });
     f.addBinding(p, 'bodyLength', { min: 10, max: 80, label: 'Body Length' });
     f.addBinding(p, 'bodyRadius', { min: 0.1, max: 3, label: 'Body Radius' });
-    f.addBinding(p, 'circleHeight', { min: 0, max: 15, label: 'Out Height' });
-    f.addBinding(p, 'hiddenDwell', { min: 0, max: 10, label: 'Hidden Dwell' });
+    f.addBinding(p, 'separation', { min: 0, max: 10, label: 'Wall Separation' });
     f.addBinding(p, 'playerYSigma', { min: 4, max: 64, label: 'Entry Y Bias' });
   }
 
@@ -345,6 +345,9 @@ export default class GameTools {
     const f3 = rootFolder.addFolder({ title: 'Ambient Light' });
     f3.addBinding(ambientLight, 'intensity', { min: 0, max: 2, label: 'Intensity' });
     this.addColorField(f3, ambientLight, 'color', 'Color');
+    // Audio — master on/off (muted by default).
+    const f4 = rootFolder.addFolder({ title: 'Audio' });
+    f4.addBinding(AudioManager, 'audioEnabled', { label: 'Audio Enabled' });
   }
 
   /*
